@@ -1,0 +1,88 @@
+window.FEATURE_CONFIG = { mode: "daily", count: 3 };
+
+window.allCasts = [
+  {
+    name: "月鈴",
+    image: "images/staff-01.png",
+    desc: "夢境裡的貓魅公關，語尾偶爾會悄悄落下一聲喵。適合想被溫柔陪伴，也想要一點可愛互動的客人。",
+    shortDesc: "溫柔陪聊、俏皮可愛、香檳 CALL。",
+    quote: "若您願意，我會把今晚的月光，輕輕留在您的杯中。",
+    tags: ["溫柔陪聊", "俏皮可愛", "香檳 CALL"],
+    filterTags: ["chat", "cute", "champagne"],
+    status: "available",
+    statusLabel: "接受指名",
+    workDays: [5, 6],
+    recommended: "陪酒聊天、香檳 CALL、輕 RP",
+    extraServices: ["拍照", "小遊戲", "按摩 RP"]
+  },
+  {
+    name: "星紗",
+    image: "images/staff-02.jpg",
+    desc: "擅長安靜聆聽，也能陪您玩一場輕鬆的小遊戲。適合第一次來店、想慢慢熟悉氣氛的客人。",
+    shortDesc: "小遊戲、陪酒、輕 RP 互動。",
+    quote: "願您推開門時，正好遇見一場不必醒來的美夢。",
+    tags: ["小遊戲", "陪酒", "輕 RP"],
+    filterTags: ["chat", "game"],
+    status: "available",
+    statusLabel: "接受指名",
+    workDays: [6],
+    recommended: "猜數字、射龍門、陪聊",
+    extraServices: ["真心話", "射龍門", "猜數字"]
+  },
+  {
+    name: "夜璃",
+    image: "images/staff-03.jpg",
+    desc: "日式會館風格，適合想要儀式感、高級感與沉浸式接待的客人。互動節奏偏穩重細膩。",
+    shortDesc: "日式會館、高級感、儀式感。",
+    quote: "燈火已候，酒盞已溫，只待您入席。",
+    tags: ["日式會館", "高級感", "指名推薦"],
+    filterTags: ["chat", "japanese", "champagne"],
+    status: "available",
+    statusLabel: "接受指名",
+    workDays: [5],
+    recommended: "日式陪席、香檳 CALL、儀式感 RP",
+    extraServices: ["日式迎賓", "儀式感陪席", "香檳祝詞"]
+  },
+  {
+    name: "花音",
+    image: "images/staff-04.jpg",
+    desc: "活潑明亮的新人公關，適合喜歡輕鬆聊天、拍照打卡或小遊戲互動的客人。",
+    shortDesc: "可愛系陪聊、拍照、小遊戲。",
+    quote: "今晚要不要把煩惱丟掉，跟我一起玩一場小小的夢？",
+    tags: ["新人公關", "小遊戲", "拍照"],
+    filterTags: ["game", "cute"],
+    status: "available",
+    statusLabel: "接受指名",
+    workDays: [6],
+    recommended: "拍照、小遊戲、可愛系陪聊",
+    extraServices: ["拍照", "打卡陪同", "服裝搭配"]
+  },
+  {
+    name: "雪乃",
+    image: "images/staff-05.jpg",
+    desc: "偏安靜、細膩、慢節奏的陪伴風格。適合想放鬆、談心或體驗茶席氣氛的客人。",
+    shortDesc: "安靜陪伴、日式茶席、談心。",
+    quote: "不必急著說話，今晚的燈會替您慢慢沉澱。",
+    tags: ["安靜陪伴", "日式茶席", "談心"],
+    filterTags: ["chat", "japanese"],
+    status: "pending",
+    statusLabel: "排班確認中",
+    workDays: [5, 6],
+    recommended: "茶席 RP、談心陪聊",
+    extraServices: ["茶席 RP", "談心", "靜態陪伴"]
+  },
+  {
+    name: "山茶花",
+    image: "images/staff-06.jpg",
+    desc: "服裝搭配:「深宵換裝，讓夜晚成為你的時裳」。",
+    shortDesc: "熱場、香檳 CALL、活動主持。",
+    quote: "你是我的月神嗎。",
+    tags: ["服裝店員", "服裝穿搭", "談心交流"],
+    filterTags: ["ootd", "game", "chat"],
+    status: "unbookable",
+    statusLabel: "不接受指名",
+    workDays: [5, 6],
+    recommended: "談心交流、服裝搭配",
+    extraServices: ["服裝搭配", "談心交流"]
+  }
+];

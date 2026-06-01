@@ -1,0 +1,17 @@
+/* Cast page today status color patch
+   讓公關介紹頁的「今日未出勤」也顯示為紅色系。
+   請放在 css/style.css 最下面。
+*/
+.cast-card-profile .today-line.rest,
+.today-line.rest {
+  color: var(--danger);
+  border-color: rgba(255, 154, 169, 0.28);
+  background: rgba(255, 154, 169, 0.08);
+}
+
+.cast-card-profile .today-line.pending,
+.today-line.pending {
+  color: var(--muted);
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+}
