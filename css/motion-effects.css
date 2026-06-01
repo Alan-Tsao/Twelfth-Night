@@ -219,3 +219,41 @@ textarea {
     transition: none !important;
   }
 }
+
+/* =========================================================
+   Cast page performance patch
+   公關頁效能修正：降低照片卡片滾動卡頓與色塊感
+   ========================================================= */
+
+/* 公關卡片很多時，先關掉重的毛玻璃效果 */
+.cast-card-profile {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  contain: layout paint;
+}
+
+/* 減少圖片滾動時的重繪壓力 */
+.cast-card-profile .cast-photo {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 公關頁的 reveal 不要位移太多，避免色塊感明顯 */
+.cast-card-profile.reveal-item {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.75s ease,
+    transform 0.75s ease;
+  transition-delay: 0ms !important;
+}
+
+.cast-card-profile.reveal-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* hover 也收斂一點 */
+.cast-card-profile:hover {
+  transform: translateY(-2px);
+}
