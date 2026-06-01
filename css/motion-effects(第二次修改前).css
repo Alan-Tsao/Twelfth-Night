@@ -1,0 +1,163 @@
+/* =========================================================
+   Dream Lounge Soft Motion Effects - Safe Version
+   淡入、卡片 hover、按鈕 hover、背景微光
+   修正版：移除 body::before 固定背景層，避免頁面底部出現大塊色塊。
+   ========================================================= */
+
+@keyframes softPageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dreamBackgroundShift {
+  from {
+    background-position:
+      0% 0%,
+      100% 0%,
+      50% 0%;
+  }
+  to {
+    background-position:
+      10% 4%,
+      92% 8%,
+      50% 0%;
+  }
+}
+
+@keyframes dreamGlow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.10);
+  }
+}
+
+/* 不再使用 body::before。
+   直接讓原本 body 背景做極輕微位移，避免與頁面高度、z-index 產生衝突。 */
+body {
+  overflow-x: hidden;
+  background-size:
+    140% 140%,
+    160% 160%,
+    100% 100%;
+  animation: dreamBackgroundShift 18s ease-in-out infinite alternate;
+}
+
+/* 區塊進場淡入 */
+.hero-card,
+.page-hero-panel,
+.booking-hero-panel,
+.panel,
+.card,
+.cast-card-profile,
+.staff-card,
+.booking-panel,
+.inquiry-panel,
+.side-panel,
+.booking-side-panel {
+  animation: softPageIn 0.72s ease both;
+}
+
+/* 卡片與小區塊 hover */
+.card,
+.panel,
+.cast-card-profile,
+.staff-card,
+.info-item,
+.flow-item,
+.rule,
+.booking-notice-card,
+.notice-card,
+.cast-card,
+.filter-btn,
+.step-pill {
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    color 0.22s ease,
+    filter 0.22s ease;
+}
+
+.card:hover,
+.cast-card-profile:hover,
+.staff-card:hover,
+.info-item:hover,
+.flow-item:hover,
+.booking-notice-card:hover,
+.notice-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(232, 201, 129, 0.38);
+  box-shadow: 0 26px 74px rgba(0, 0, 0, 0.50);
+  background: rgba(255, 255, 255, 0.095);
+}
+
+.cast-card:hover,
+.filter-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* 按鈕 hover 微光 */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.18s ease,
+    filter 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%) skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.20), transparent);
+  transition: transform 0.48s ease;
+  pointer-events: none;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  border-color: rgba(232, 201, 129, 0.45);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.26);
+}
+
+.btn:hover::after {
+  transform: translateX(120%) skewX(-18deg);
+}
+
+.visual {
+  animation: softPageIn 0.8s ease both, dreamGlow 5.4s ease-in-out infinite;
+}
+
+input,
+select,
+textarea {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+/* 尊重使用者／系統的減少動畫設定 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
