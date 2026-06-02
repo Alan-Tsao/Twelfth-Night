@@ -457,7 +457,7 @@ function valid(s){
 
 function summary(){
   const casts=selected();
-  const text=`【第十二夜【盛會】預約申請】\n\n遊戲 ID：${v("playerName")||"未填寫"}\n伺服器：${v("serverName")||"未填寫"}\nDiscord ID：${v("discordId")||"未填寫"}\n預約人數：${v("guestCount")||"未填寫"}\n\n希望安排公關：${casts.join("、")||"未填寫"}\n預約日期：${v("bookingDate")||"未填寫"}\n預約時段：${v("bookingTime")||"未填寫"}\n預約節數：${v("sessionCount")||"未填寫"}\n服務項目：${v("serviceType")||"未填寫"}\n\n其他需求：\n${v("notes")||"無"}\n\n※ 此預約申請送出後，仍需等待接待確認才算預約成立。`;
+  const text=`【第十二夜預約申請】\n\n遊戲 ID：${v("playerName")||"未填寫"}\n伺服器：${v("serverName")||"未填寫"}\nDiscord ID：${v("discordId")||"未填寫"}\n預約人數：${v("guestCount")||"未填寫"}\n\n希望安排公關：${casts.join("、")||"未填寫"}\n預約日期：${v("bookingDate")||"未填寫"}\n預約時段：${v("bookingTime")||"未填寫"}\n預約節數：${v("sessionCount")||"未填寫"}\n服務項目：${v("serviceType")||"未填寫"}\n\n其他需求：\n${v("notes")||"無"}\n\n※ 此預約申請送出後，仍需等待接待確認才算預約成立。`;
   document.getElementById("summaryBox").textContent=text;
   return text;
 }
@@ -536,7 +536,7 @@ function inquirySummary(){
   err("inquiryError",!ok);
   if(!ok)return"";
 
-  const text=`【第十二夜【盛會】會館排班詢問單】\n\nDiscord ID：${discord}\n詢問公關：${cast}\n希望日期：${date}\n希望時段：${time}\n\n詢問內容：\n${notes}\n\n※ 此為排班詢問，不代表正式預約成立。`;
+  const text=`【第十二夜會館排班詢問單】\n\nDiscord ID：${discord}\n詢問公關：${cast}\n希望日期：${date}\n希望時段：${time}\n\n詢問內容：\n${notes}\n\n※ 此為排班詢問，不代表正式預約成立。`;
   document.getElementById("inquirySummaryBox").textContent=text;
   return text;
 }
