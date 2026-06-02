@@ -283,3 +283,165 @@ section.hero {
 .booking-panel #timePreview {
   min-height: 0;
 }
+
+
+/* =========================================================
+   Cast personal service modal
+   公關個人服務懸浮視窗
+   ========================================================= */
+body.modal-open {
+  overflow: hidden;
+}
+
+.personal-menu-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(3, 3, 8, 0.72);
+  backdrop-filter: blur(14px);
+}
+
+.personal-menu-modal.show {
+  display: flex;
+}
+
+.personal-menu-dialog {
+  width: min(920px, 100%);
+  max-height: min(86vh, 860px);
+  display: grid;
+  grid-template-columns: minmax(240px, 330px) 1fr;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(232, 201, 129, 0.28);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(242, 167, 198, 0.15), transparent 28%),
+    linear-gradient(180deg, rgba(22, 18, 31, 0.98), rgba(9, 8, 15, 0.98));
+  box-shadow: 0 32px 100px rgba(0, 0, 0, 0.65);
+}
+
+.personal-menu-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.32);
+  color: var(--text);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.personal-menu-close:hover {
+  border-color: rgba(232, 201, 129, 0.55);
+  color: var(--gold);
+}
+
+.personal-menu-photo-wrap {
+  min-height: 100%;
+  background: linear-gradient(135deg, rgba(242, 167, 198, 0.18), rgba(155, 135, 245, 0.16)), #11101a;
+}
+
+.personal-menu-photo {
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  display: block;
+  object-fit: cover;
+  background: #11101a;
+}
+
+.personal-menu-content {
+  min-width: 0;
+  padding: clamp(26px, 4vw, 46px);
+  overflow-y: auto;
+}
+
+.personal-menu-content h2 {
+  font-size: clamp(28px, 3vw, 42px);
+  margin-bottom: 8px;
+}
+
+.personal-menu-subtitle {
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.personal-menu-desc {
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+
+.personal-menu-list {
+  display: grid;
+  gap: 14px;
+}
+
+.personal-service-card {
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.personal-service-card h3 {
+  margin: 0 0 8px;
+  color: var(--gold);
+  font-size: 20px;
+}
+
+.personal-service-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.personal-service-price {
+  margin-top: 12px;
+  color: var(--pink);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.personal-service-note {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.personal-menu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@media (max-width: 760px) {
+  .personal-menu-modal {
+    align-items: flex-end;
+    padding: 14px;
+  }
+
+  .personal-menu-dialog {
+    grid-template-columns: 1fr;
+    max-height: 90vh;
+    border-radius: 28px;
+  }
+
+  .personal-menu-photo {
+    min-height: 260px;
+    max-height: 320px;
+  }
+
+  .personal-menu-content {
+    padding: 24px;
+  }
+}
