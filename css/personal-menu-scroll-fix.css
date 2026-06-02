@@ -1,0 +1,72 @@
+/* =========================================================
+   Personal service modal scroll fix
+   讓個人服務右側內容可上下滾動，左側圖片固定不跟著滾
+   ========================================================= */
+
+.personal-menu-dialog {
+  height: min(86vh, 860px);
+  max-height: min(86vh, 860px);
+}
+
+.personal-menu-photo-wrap {
+  height: 100%;
+  overflow: hidden;
+  align-self: stretch;
+}
+
+.personal-menu-photo {
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+}
+
+.personal-menu-content {
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: clamp(22px, 4vw, 46px);
+}
+
+/* 讓右側滾動條不突兀 */
+.personal-menu-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.personal-menu-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+.personal-menu-content::-webkit-scrollbar-thumb {
+  background: rgba(232, 201, 129, 0.32);
+  border-radius: 999px;
+}
+
+.personal-menu-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 201, 129, 0.5);
+}
+
+@media (max-width: 760px) {
+  .personal-menu-dialog {
+    height: auto;
+    max-height: 90vh;
+  }
+
+  .personal-menu-photo-wrap {
+    height: auto;
+  }
+
+  .personal-menu-photo {
+    min-height: 220px;
+    max-height: 300px;
+    height: 30vh;
+  }
+
+  .personal-menu-content {
+    height: auto;
+    max-height: calc(90vh - 220px);
+    overflow-y: auto;
+    padding-right: 24px;
+  }
+}
