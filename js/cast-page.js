@@ -342,6 +342,139 @@
     return cast.extraServices.join("、");
   }
 
+  function hasPersonalMenu(cast) {
+    return Array.isArray(cast.personalMenu) && cast.personalMenu.length > 0;
+  }
+
+  function personalMenuButtonHtml(cast) {
+    if (!hasPersonalMenu(cast)) return "";
+    return `<button type="button" class="btn personal-menu-btn" data-personal-menu="${escapeHtml(cast.name)}">個人服務</button>`;
+  }
+
+  function menuItemHtml(item) {
+    const title = item?.title || "未命名服務";
+    const desc = item?.desc || "";
+    const price = item?.price || "";
+    const note = item?.note || "";
+
+    return `
+      <section class="personal-service-card">
+        <h3>${escapeHtml(title)}</h3>
+        ${desc ? `<p>${escapeHtml(desc)}</p>` : ""}
+        ${price ? `<div class="personal-service-price">💰 ${escapeHtml(price)}</div>` : ""}
+        ${note ? `<div class="personal-service-note">${escapeHtml(note)}</div>` : ""}
+      </section>
+    `;
+  }
+
+  function ensurePersonalMenuModal() {
+    let modal = document.getElementById("personalMenuModal");
+    if (modal) return modal;
+
+    document.body.insertAdjacentHTML("beforeend", `
+      <div class="personal-menu-modal" id="personalMenuModal" aria-hidden="true">
+        <div class="personal-menu-dialog" role="dialog" aria-modal="true" aria-labelledby="personalMenuTitle">
+          <button type="button" class="personal-menu-close" data-personal-menu-close aria-label="關閉個人服務視窗">×</button>
+
+          <div class="personal-menu-photo-wrap">
+            <img class="personal-menu-photo" id="personalMenuPhoto" alt="" />
+          </div>
+
+          <div class="personal-menu-content">
+            <div class="eyebrow">PERSONAL SERVICE</div>
+            <h2 id="personalMenuTitle">個人服務</h2>
+            <div class="personal-menu-subtitle" id="personalMenuSubtitle"></div>
+            <p class="personal-menu-desc" id="personalMenuDesc"></p>
+            <div class="personal-menu-list" id="personalMenuList"></div>
+            <div class="personal-menu-actions">
+              <a class="btn primary" id="personalMenuBookingLink" href="booking.html">前往預約</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+
+    modal = document.getElementById("personalMenuModal");
+    return modal;
+  }
+
+  function closePersonalMenu() {
+    const modal = document.getElementById("personalMenuModal");
+    if (!modal) return;
+
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+  }
+
+  function openPersonalMenu(castName) {
+    const baseCast = (window.allCasts || []).find((item) => String(item.name || "").trim() === String(castName || "").trim());
+    const cast = applyStaffStatus(baseCast);
+
+    if (!cast || !hasPersonalMenu(cast)) return;
+
+    const modal = ensurePersonalMenuModal();
+    const photo = modal.querySelector("#personalMenuPhoto");
+    const title = modal.querySelector("#personalMenuTitle");
+    const subtitle = modal.querySelector("#personalMenuSubtitle");
+    const desc = modal.querySelector("#personalMenuDesc");
+    const list = modal.querySelector("#personalMenuList");
+    const bookingLink = modal.querySelector("#personalMenuBookingLink");
+
+    const img = imagePath(cast);
+    photo.src = img;
+    photo.alt = `${cast.name} 的公關照片`;
+    photo.onerror = () => {
+      photo.removeAttribute("src");
+      photo.alt = `${cast.name} 的照片尚未載入`;
+    };
+
+    title.textContent = `${cast.name}｜個人服務`;
+    subtitle.textContent = [cast.statusLabel, cast.role].filter(Boolean).join("｜");
+    desc.textContent = cast.staffStatusNote || cast.shortDesc || cast.desc || "可於預約或詢問時與接待確認服務內容。";
+    list.innerHTML = cast.personalMenu.map(menuItemHtml).join("");
+
+    if (cast.status === "unbookable" || cast.status === "rest") {
+      bookingLink.textContent = "返回介紹";
+      bookingLink.href = "cast.html";
+      bookingLink.classList.remove("primary");
+    } else if (cast.status === "pending") {
+      bookingLink.textContent = "詢問排班";
+      bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
+      bookingLink.classList.add("primary");
+    } else {
+      bookingLink.textContent = "前往預約";
+      bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}`;
+      bookingLink.classList.add("primary");
+    }
+
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+  }
+
+  function setupPersonalMenuModal() {
+    ensurePersonalMenuModal();
+
+    document.addEventListener("click", (event) => {
+      const openButton = event.target.closest("[data-personal-menu]");
+      if (openButton) {
+        event.preventDefault();
+        openPersonalMenu(openButton.dataset.personalMenu);
+        return;
+      }
+
+      if (event.target.matches("[data-personal-menu-close]") || event.target.id === "personalMenuModal") {
+        event.preventDefault();
+        closePersonalMenu();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closePersonalMenu();
+    });
+  }
+
   function render() {
     const grid = document.getElementById("castGrid");
     if (!grid) return;
@@ -356,6 +489,7 @@
           (cast.tags || []).join(" "),
           cast.recommended,
           (cast.extraServices || []).join(" "),
+          (cast.personalMenu || []).map((item) => [item.title, item.desc, item.price, item.note].join(" ")).join(" "),
           cast.statusLabel,
           cast.role,
           cast.staffStatusNote,
@@ -407,7 +541,7 @@
                 ${extraServicesText(cast) ? `<div><strong>個人加購：</strong>${escapeHtml(extraServicesText(cast))}</div>` : ""}
               </div>
 
-              <div class="cta-row" data-cast-actions>${buttonHtml(cast)}</div>
+              <div class="cta-row" data-cast-actions>${buttonHtml(cast)}${personalMenuButtonHtml(cast)}</div>
             </div>
           </article>
         `;
@@ -450,7 +584,7 @@
       }
 
       if (actions && cast) {
-        actions.innerHTML = buttonHtml(cast);
+        actions.innerHTML = buttonHtml(cast) + personalMenuButtonHtml(cast);
       }
     });
   }
@@ -488,6 +622,7 @@
 
   document.getElementById("castSearch")?.addEventListener("input", filter);
 
+  setupPersonalMenuModal();
   render();
   filter();
 

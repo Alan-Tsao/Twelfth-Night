@@ -13,29 +13,7 @@ window.allCasts = [
     statusLabel: "接受指名",
     workDays: [5, 6],
     recommended: "陪酒聊天、香檳 CALL、輕 RP",
-    extraServices: ["拍照", "小遊戲", "按摩 RP"],
-    personalMenu: [
-      {
-        title: "👻 通靈",
-        desc: "幫你把〈海都麻醉師〉給通靈過來。通靈過後解鎖更多項目：陪酒、臭罵倒、聽故事。",
-        price: "一次 8千G"
-      },
-      {
-        title: "🤬 臭罵倒",
-        desc: "通靈後解鎖。讓你見識一下什麼叫做真男人！",
-        price: "一次 2萬G"
-      },
-      {
-        title: "🍻 陪酒",
-        desc: "通靈期時段內可體驗。麻醉師先生很喜歡喝酒，所以基本上不需要特別要求。",
-        price: "通靈期間免費"
-      },
-      {
-        title: "🌮 聽故事",
-        desc: "來聽聽海都麻醉師的冒險故事。想完整體驗歡愉，聽故事也是其中一環。",
-        price: "通靈期間隨意給小費"
-      }
-    ]
+    extraServices: ["拍照", "小遊戲", "按摩 RP"]
   },
   {
     name: "咕嚕小貓",
@@ -77,29 +55,7 @@ window.allCasts = [
     statusLabel: "接受指名",
     workDays: [6],
     recommended: "拍照、小遊戲、可愛系陪聊",
-    extraServices: ["拍照", "打卡陪同", "服裝搭配"],
-    personalMenu: [
-      {
-        title: "👻 通靈",
-        desc: "幫你把〈海都麻醉師〉給通靈過來。通靈過後解鎖更多項目：陪酒、臭罵倒、聽故事。",
-        price: "一次 8千G"
-      },
-      {
-        title: "🤬 臭罵倒",
-        desc: "通靈後解鎖。讓你見識一下什麼叫做真男人！",
-        price: "一次 2萬G"
-      },
-      {
-        title: "🍻 陪酒",
-        desc: "通靈期時段內可體驗。麻醉師先生很喜歡喝酒，所以基本上不需要特別要求。",
-        price: "通靈期間免費"
-      },
-      {
-        title: "🌮 聽故事",
-        desc: "來聽聽海都麻醉師的冒險故事。想完整體驗歡愉，聽故事也是其中一環。",
-        price: "通靈期間隨意給小費"
-      }
-    ]
+    extraServices: ["拍照", "打卡陪同", "服裝搭配"]
   },
   {
     name: "花形",
@@ -113,34 +69,7 @@ window.allCasts = [
     statusLabel: "排班確認中",
     workDays: [5, 6],
     recommended: "香檳CALL、小遊戲",
-    extraServices: ["香檳CALL", "小遊戲", "上車舞", "演奏"],
-    personalMenu: [
-      {
-        title: "🍾單人香檳CALL ",
-        desc: "每一位主人都有可能會有不同的香檳CALL，微醺登場，氣氛直接拉滿。",
-        price: "一次10萬"
-      },
-      {
-        title: "🪭 上車舞",
-        desc: "上車的不只是節奏，是今晚的浪漫。",
-        price: "一次10萬"
-      },
-      {
-        title: "🎻 演奏",
-        desc: "一段旋律，一場不願醒來的夜晚。(歌曲隨機暫時不開放點歌)",
-        price: "思考中"
-      },
-      {
-        title: "🌮 小故事",
-        desc: "在某次因緣際會之下聽到主訴說著故事，因而學到了該技能。",
-        price: "陪伴中無料"
-      },
-      {
-        title: "🕹️ 小遊戲",
-        desc: "有些相遇，從一場遊戲開始。",
-        price: "陪伴中無料"
-      }
-    ]
+    extraServices: ["香檳CALL", "小遊戲", "上車舞", "演奏"]
   },
   {
     name: "系塔",
@@ -252,24 +181,7 @@ window.allCasts = [
     statusLabel: "接受指名",
     workDays: [5, 6],
     recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "談心交流"],
-    personalMenu: [
-      {
-        title: "🎩青魔傳授",
-        desc: "看過一次，就變成我的技能。",
-        price: "一個技能10萬"
-      },
-      {
-        title: "💀迷宮討伐",
-        desc: "今晚的目標：登上第100層。✦ 深層100層過關：沒過不用錢!!!",
-        price: "死宮100萬、天宮150萬、優宮200萬"
-      },
-      {
-        title: "🎣釣魚教學/陪釣",
-        desc: "願者上鉤，陪伴是你的動力。",
-        price: "30萬/30分鐘"
-      }
-    ]
+    extraServices: ["服裝搭配", "談心交流"]
   },
   {
     name: "夏末微涼",
@@ -311,19 +223,7 @@ window.allCasts = [
     statusLabel: "不接受指名",
     workDays: [5, 6],
     recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "談心交流"],
-    personalMenu: [
-      {
-        title: "👗服裝搭配 ",
-        desc: "深宵換裝，讓夜晚成為你的時裳。配到滿意!",
-        price: "一套20萬"
-      },
-      {
-        title: "♥️談心交流",
-        desc: "夜色深處，安放未曾言說的情緒。一次30分鐘",
-        price: "免費"
-        }
-    ]
+    extraServices: ["服裝搭配", "談心交流"]
   },
   {
     name: "Mmaru",
@@ -365,27 +265,10 @@ window.allCasts = [
     statusLabel: "接受指名",
     workDays: [5, 6],
     recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "感情諮商"],
-    personalMenu: [
-      {
-        title: "♥️感情諮商 ",
-        desc: "在燈光與酒杯之間，聽見內心的答案。",
-        price: "10萬/10分鐘"
-      },
-      {
-        title: "👗服裝推薦",
-        desc: "每一套搭配，都是另一種靈魂。配到滿意!",
-        price: "一套 30萬"
-      },
-      {
-        title: "🎣釣魚教學/陪釣",
-        desc: "願者上鉤，陪伴是你的動力。",
-        price: "30萬/30分鐘"
-      }
-    ]
+    extraServices: ["服裝搭配", "感情諮商"]
   },
   {
-    name: "怜奈",
+    name: " 怜奈",
     image: "images/staff-20.jpg",
     desc: "服裝搭配:「深宵換裝，讓夜晚成為你的時裳」。",
     shortDesc: "熱場、香檳 CALL、活動主持。",
