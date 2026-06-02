@@ -4,26 +4,16 @@
 // 1. 公關照片改用 <img src="..."> 顯示。
 // 2. 公關固定資料仍讀取 cast-data.js 的 window.allCasts。
 // 3. 「今日出勤」小標籤改讀 Google Sheet 班表 CSV，只顯示今日狀態，不把公關介紹頁變成完整班表頁。
-// 4. 支援 Google Sheet staff_status 的 bookableStatus / statusLabel。
+// 4. 支援 cast-data.js 的 status: "unbookable" / statusLabel: "不接受指名"。
 
 (function () {
   // Google Sheet 班表 CSV
   // 欄位格式：date,cast,start,end,status,note
   const SCHEDULE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=0&single=true&output=csv";
 
-  // Google Sheet 人員狀態 CSV
-  // 欄位格式：cast,bookableStatus,statusLabel,role,note
-  // bookableStatus 給系統判斷；statusLabel 給網頁顯示。
-  const STAFF_STATUS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=1310958925&single=true&output=csv";
-
-
   let scheduleRows = [];
   let scheduleLoaded = false;
   let scheduleError = false;
-
-  let staffStatusMap = new Map();
-  let staffStatusLoaded = false;
-  let staffStatusError = false;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -102,94 +92,9 @@
     const note = String(row.note || "").trim();
 
     if (!date || !cast || !start || !end || !status) return null;
-    if (!["available", "pending", "unbookable", "rest"].includes(status)) return null;
+    if (!["available", "pending", "rest"].includes(status)) return null;
 
     return { date, cast, start, end, status, note };
-  }
-
-  function labelFromBookableStatus(status) {
-    if (status === "available") return "接受指名";
-    if (status === "pending") return "排班確認中";
-    if (status === "unbookable") return "不接受指名";
-    if (status === "rest") return "暫停服務";
-    return "接受指名";
-  }
-
-  function normalizeStaffStatusRow(row) {
-    const cast = String(row.cast || "").trim();
-    const bookableStatus = String(row.bookablestatus || row.bookableStatus || "").trim().toLowerCase();
-    const statusLabel = String(row.statuslabel || row.statusLabel || "").trim();
-    const role = String(row.role || "").trim();
-    const note = String(row.note || "").trim();
-
-    if (!cast || !bookableStatus) return null;
-    if (!["available", "pending", "unbookable", "rest"].includes(bookableStatus)) return null;
-
-    return {
-      cast,
-      bookableStatus,
-      statusLabel: statusLabel || labelFromBookableStatus(bookableStatus),
-      role,
-      note
-    };
-  }
-
-  function applyStaffStatus(cast) {
-    if (!cast) return cast;
-
-    const override = staffStatusMap.get(String(cast.name || "").trim());
-
-    if (!override) {
-      return {
-        ...cast,
-        status: cast.status || "available",
-        statusLabel: cast.statusLabel || labelFromBookableStatus(cast.status || "available")
-      };
-    }
-
-    return {
-      ...cast,
-      status: override.bookableStatus,
-      statusLabel: override.statusLabel || labelFromBookableStatus(override.bookableStatus),
-      role: override.role || cast.role || "",
-      staffStatusNote: override.note || ""
-    };
-  }
-
-  async function loadStaffStatus() {
-    if (!STAFF_STATUS_CSV_URL) {
-      staffStatusLoaded = true;
-      return;
-    }
-
-    try {
-      const response = await fetch(STAFF_STATUS_CSV_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const text = await response.text();
-      const table = parseCsv(text);
-
-      if (table.length < 2) throw new Error("CSV 沒有資料列");
-
-      const headers = table[0].map(normalizeKey);
-      const rawRows = table.slice(1).map((cols) => {
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = cols[index] || "";
-        });
-        return obj;
-      });
-
-      const rows = rawRows.map(normalizeStaffStatusRow).filter(Boolean);
-      staffStatusMap = new Map(rows.map((row) => [row.cast, row]));
-      staffStatusLoaded = true;
-      staffStatusError = false;
-    } catch (error) {
-      console.warn("Google Sheet 人員狀態讀取失敗，將暫時使用 cast-data.js 的 status / statusLabel。", error);
-      staffStatusMap = new Map();
-      staffStatusLoaded = true;
-      staffStatusError = true;
-    }
   }
 
   async function loadSchedule() {
@@ -261,10 +166,6 @@
       return `今日詢問制｜${row.start}–${row.end}`;
     }
 
-    if (row.status === "unbookable") {
-      return `今日出勤｜${row.start}–${row.end}`;
-    }
-
     return "今日未出勤";
   }
 
@@ -285,7 +186,6 @@
 
     if (!row || row.status === "rest") return "rest";
     if (row.status === "pending") return "pending";
-    if (row.status === "unbookable") return "";
     return "";
   }
 
@@ -307,7 +207,7 @@
     const inquiryUrl = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
 
     // unbookable 代表這位人員可展示、可顯示今日出勤，但不開放客人指名。
-    // 這個狀態優先讀取 Google Sheet staff_status。
+    // 例如：服裝店店員、接待、攝影師、樂師等。
     if (cast.status === "unbookable") {
       return `<span class="btn cast-link-disabled">不接受指名</span>`;
     }
@@ -347,8 +247,7 @@
     if (!grid) return;
 
     grid.innerHTML = (window.allCasts || [])
-      .map((rawCast) => {
-        const cast = applyStaffStatus(rawCast);
+      .map((cast) => {
         const keywordText = [
           cast.name,
           cast.quote,
@@ -357,8 +256,6 @@
           cast.recommended,
           (cast.extraServices || []).join(" "),
           cast.statusLabel,
-          cast.role,
-          cast.staffStatusNote,
           days(cast.workDays)
         ].join(" ");
 
@@ -402,7 +299,6 @@
 
               <div class="meta">
                 <div><strong>常駐時段：</strong>${escapeHtml(days(cast.workDays))}</div>
-                ${cast.role ? `<div><strong>身份：</strong>${escapeHtml(cast.role)}</div>` : ""}
                 <div><strong>推薦服務：</strong>${escapeHtml(cast.recommended || "未設定")}</div>
                 ${extraServicesText(cast) ? `<div><strong>個人加購：</strong>${escapeHtml(extraServicesText(cast))}</div>` : ""}
               </div>
@@ -426,27 +322,17 @@
   function updateTodayBadges() {
     document.querySelectorAll(".cast-card-profile").forEach((card) => {
       const castName = card.dataset.castName || "";
-      const baseCast = (window.allCasts || []).find((item) => item.name === castName);
-      const cast = applyStaffStatus(baseCast);
+      const cast = (window.allCasts || []).find((item) => item.name === castName);
       const line = card.querySelector("[data-today-line]");
       const actions = card.querySelector("[data-cast-actions]");
-      const statusEl = card.querySelector(".status");
 
       card.dataset.today = todayDatasetFromSchedule(castName);
-      if (cast) {
-        card.dataset.status = cast.status || "";
-      }
 
       if (line) {
         line.textContent = todayTextFromSchedule(castName);
         line.classList.remove("pending", "rest");
         const todayClass = todayLineClassFromSchedule(castName);
         if (todayClass) line.classList.add(todayClass);
-      }
-
-      if (statusEl && cast) {
-        statusEl.textContent = cast.statusLabel || labelFromBookableStatus(cast.status || "available");
-        statusEl.className = `status ${statusClass(cast)}`.trim();
       }
 
       if (actions && cast) {
@@ -490,10 +376,5 @@
 
   render();
   filter();
-
-  Promise.all([loadSchedule(), loadStaffStatus()]).then(() => {
-    render();
-    updateTodayBadges();
-    filter();
-  });
+  loadSchedule();
 })();

@@ -4,7 +4,7 @@
 // 1. 固定公關資料讀取 cast-data.js 的 window.allCasts。
 // 2. 今日出勤狀態讀取 Google Sheet 班表 CSV。
 // 3. 首頁仍維持「推薦展示」用途，不變成完整班表頁。
-// 4. 支援 cast-data.js 的 status: "unbookable" / statusLabel: "不接受指名"。
+// 4. 支援 Google Sheet staff_status 的 bookableStatus / statusLabel。
 
 (function () {
   const grid = document.getElementById("featuredCastGrid");
@@ -14,6 +14,12 @@
   // 欄位格式：date,cast,start,end,status,note
   const SCHEDULE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=0&single=true&output=csv";
 
+  // Google Sheet 人員狀態 CSV
+  // 欄位格式：cast,bookableStatus,statusLabel,role,note
+  // bookableStatus 給系統判斷；statusLabel 給網頁顯示。
+  const STAFF_STATUS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=1310958925&single=true&output=csv";
+
+
   const casts = Array.isArray(window.allCasts) ? window.allCasts : [];
   const config = window.FEATURE_CONFIG || { mode: "daily", count: 3 };
   const count = Number(config.count || 3);
@@ -21,6 +27,10 @@
   let scheduleRows = [];
   let scheduleLoaded = false;
   let scheduleError = false;
+
+  let staffStatusMap = new Map();
+  let staffStatusLoaded = false;
+  let staffStatusError = false;
 
   injectFeaturedStyle();
 
@@ -183,9 +193,94 @@
     const note = String(row.note || "").trim();
 
     if (!date || !cast || !start || !end || !status) return null;
-    if (!["available", "pending", "rest"].includes(status)) return null;
+    if (!["available", "pending", "unbookable", "rest"].includes(status)) return null;
 
     return { date, cast, start, end, status, note };
+  }
+
+  function labelFromBookableStatus(status) {
+    if (status === "available") return "接受指名";
+    if (status === "pending") return "排班確認中";
+    if (status === "unbookable") return "不接受指名";
+    if (status === "rest") return "暫停服務";
+    return "接受指名";
+  }
+
+  function normalizeStaffStatusRow(row) {
+    const cast = String(row.cast || "").trim();
+    const bookableStatus = String(row.bookablestatus || row.bookableStatus || "").trim().toLowerCase();
+    const statusLabel = String(row.statuslabel || row.statusLabel || "").trim();
+    const role = String(row.role || "").trim();
+    const note = String(row.note || "").trim();
+
+    if (!cast || !bookableStatus) return null;
+    if (!["available", "pending", "unbookable", "rest"].includes(bookableStatus)) return null;
+
+    return {
+      cast,
+      bookableStatus,
+      statusLabel: statusLabel || labelFromBookableStatus(bookableStatus),
+      role,
+      note
+    };
+  }
+
+  function applyStaffStatus(cast) {
+    if (!cast) return cast;
+
+    const override = staffStatusMap.get(String(cast.name || "").trim());
+
+    if (!override) {
+      return {
+        ...cast,
+        status: cast.status || "available",
+        statusLabel: cast.statusLabel || labelFromBookableStatus(cast.status || "available")
+      };
+    }
+
+    return {
+      ...cast,
+      status: override.bookableStatus,
+      statusLabel: override.statusLabel || labelFromBookableStatus(override.bookableStatus),
+      role: override.role || cast.role || "",
+      staffStatusNote: override.note || ""
+    };
+  }
+
+  async function loadStaffStatus() {
+    if (!STAFF_STATUS_CSV_URL) {
+      staffStatusLoaded = true;
+      return;
+    }
+
+    try {
+      const response = await fetch(STAFF_STATUS_CSV_URL, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const text = await response.text();
+      const table = parseCsv(text);
+
+      if (table.length < 2) throw new Error("CSV 沒有資料列");
+
+      const headers = table[0].map(normalizeKey);
+      const rawRows = table.slice(1).map((cols) => {
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = cols[index] || "";
+        });
+        return obj;
+      });
+
+      const rows = rawRows.map(normalizeStaffStatusRow).filter(Boolean);
+      staffStatusMap = new Map(rows.map((row) => [row.cast, row]));
+      staffStatusLoaded = true;
+      staffStatusError = false;
+    } catch (error) {
+      console.warn("Google Sheet 人員狀態讀取失敗，將暫時使用 cast-data.js 的 status / statusLabel。", error);
+      staffStatusMap = new Map();
+      staffStatusLoaded = true;
+      staffStatusError = true;
+    }
   }
 
   async function loadSchedule() {
@@ -249,6 +344,7 @@
     if (!row || row.status === "rest") return "今日未出勤";
     if (row.status === "available") return `今日出勤｜${row.start}–${row.end}`;
     if (row.status === "pending") return `今日詢問制｜${row.start}–${row.end}`;
+    if (row.status === "unbookable") return `今日出勤｜${row.start}–${row.end}`;
 
     return "今日未出勤";
   }
@@ -261,6 +357,7 @@
 
     if (!row || row.status === "rest") return "rest";
     if (row.status === "pending") return "pending";
+    if (row.status === "unbookable") return "";
     return "";
   }
 
@@ -294,8 +391,9 @@
   function pickFeaturedCasts() {
     // 首頁推薦預設只推薦可被指名或詢問制的人員。
     // unbookable 人員仍可出現在公關介紹頁，但不會自動進入首頁推薦。
-    const usable = casts.filter((cast) => cast.status !== "rest" && cast.status !== "unbookable");
-    const source = usable.length ? usable : casts;
+    const effectiveCasts = casts.map((cast) => applyStaffStatus(cast));
+    const usable = effectiveCasts.filter((cast) => cast.status !== "rest" && cast.status !== "unbookable");
+    const source = usable.length ? usable : effectiveCasts;
 
     if (!source.length) return [];
 
@@ -334,6 +432,7 @@
     const inquiryUrl = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
 
     // unbookable 代表可展示、可顯示今日出勤，但不開放指名。
+    // 這個狀態優先讀取 Google Sheet staff_status。
     if (cast.status === "unbookable") {
       return `
         <span class="btn cast-link-disabled">不接受指名</span>
@@ -426,5 +525,8 @@
 
   // 先渲染一次，讓頁面不會空白；再讀 Sheet 更新狀態。
   render();
-  loadSchedule();
+
+  Promise.all([loadSchedule(), loadStaffStatus()]).then(() => {
+    render();
+  });
 })();
