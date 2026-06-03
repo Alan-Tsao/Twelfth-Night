@@ -154,7 +154,14 @@ window.allCasts = [
     statusLabel: "接受指名",
     workDays: [5, 6],
     recommended: "談心交流、成熟陪聊",
-    extraServices: ["談心交流"]
+    extraServices: ["談心交流"],
+    personalMenu: [
+      {
+        title: "🎤｜親名語音",
+        desc: "60秒只屬於你的點歌機。",
+        price: "一首 100萬"
+      },
+    ]
   },
   {
     name: "月澄雪兔",
@@ -330,16 +337,16 @@ window.allCasts = [
   {
     name: "Mmaru",
     image: "images/staff-17.jpg",
-    desc: "服裝搭配:「深宵換裝，讓夜晚成為你的時裳」。",
-    shortDesc: "熱場、香檳 CALL、活動主持。",
-    quote: "你是我的月神嗎。",
-    tags: ["服裝店員", "服裝穿搭", "談心交流"],
-    filterTags: ["ootd", "game", "chat"],
-    status: "available",
-    statusLabel: "接受指名",
+    desc: "今晚的快樂，就由 Mmaru 來調製。以調酒師的身份守在吧檯後，為每位來客添上一點微醺、一點熱鬧，也添上一點屬於第十二夜的夢境味道。",
+    shortDesc: "調酒師、吧檯服務、歡樂氛圍。",
+    quote: "今晚的快樂就由我來調製吧。",
+    tags: ["調酒師", "吧檯服務", "歡樂氛圍"],
+    filterTags: ["bar"],
+    status: "unbookable",
+    statusLabel: "不接受指名",
     workDays: [5, 6],
-    recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "談心交流"]
+    recommended: "調酒、吧檯服務",
+    extraServices: ["調酒"]
   },
   {
     name: "酒館玲阿桃",
@@ -398,7 +405,29 @@ window.allCasts = [
     statusLabel: "接受指名",
     workDays: [5, 6],
     recommended: "談心交流、溫柔陪聊",
-    extraServices: ["談心交流"]
+    extraServices: ["談心交流"],
+    personalMenu: [
+      {
+        title: "🃏｜占卜 ",
+        desc: "你願意把你的心交給我， 我就可以幫你排憂解難。",
+        price: " 一條問題 15萬"
+      },
+      {
+        title: "🔲｜拍立得 ",
+        desc: "要跟可愛又帥氣的兔兔拍照嗎𖦹' ‐ '𖦹？",
+        price: " 簡單(單色) 3萬、複雜 8萬"
+      },
+      {
+        title: "🎤｜哄睡錄音",
+        desc: "睡不著嗎..? 那 我來哄哄你吧 ♥",
+        price: "15秒 30萬"
+      },
+      {
+        title: "🎙️｜清唱錄音",
+        desc: "咳咳.. 這是只為你而唱的歌喔..",
+        price: "15秒 30萬"
+      }
+    ]
   },
   {
     name: "參參",
