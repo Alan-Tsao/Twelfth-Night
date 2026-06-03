@@ -327,7 +327,7 @@ function renderCastOptionsFromSheet(date,box,pend,hint){
   if(!rowsForDate.length){
     box.innerHTML='<div class="empty-cast-box">此日期目前沒有班表資料。可以改選其他日期，或在備註中請接待協助安排。</div>';
     pend?.classList.remove("show");
-    if(hint) hint.textContent="此日期尚未在 Google Sheet 班表中設定公關。";
+    if(hint) hint.textContent="此日期尚未有報班的公關。";
     return;
   }
 
