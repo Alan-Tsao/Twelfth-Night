@@ -145,30 +145,37 @@ window.allCasts = [
   {
     name: "系塔",
     image: "images/staff-06.jpg",
-    desc: "服裝搭配:「深宵換裝，讓夜晚成為你的時裳」。",
-    shortDesc: "熱場、香檳 CALL、活動主持。",
-    quote: "你是我的月神嗎。",
-    tags: ["服裝店員", "服裝穿搭", "談心交流"],
-    filterTags: ["ootd", "game", "chat"],
-    status: "unbookable",
-    statusLabel: "不接受指名",
+    desc: "今晚醉人的不一定是酒，也可能是一段剛剛好的談話。系塔擅長用沉穩又帶點曖昧的節奏陪伴客人，適合想聊天、放鬆，或尋找夜色氛圍的人。",
+    shortDesc: "成熟陪聊、談心交流、微醺氛圍。",
+    quote: "不喝酒，因為今晚要醉的人是你。",
+    tags: ["談心交流", "成熟陪聊", "微醺氛圍"],
+    filterTags: ["chat"],
+    status: "available",
+    statusLabel: "接受指名",
     workDays: [5, 6],
-    recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "談心交流"]
+    recommended: "談心交流、成熟陪聊",
+    extraServices: ["談心交流"]
   },
   {
     name: "月澄雪兔",
     image: "images/staff-07.jpg",
-    desc: "服裝搭配:「深宵換裝，讓夜晚成為你的時裳」。",
-    shortDesc: "熱場、香檳 CALL、活動主持。",
-    quote: "你是我的月神嗎。",
-    tags: ["服裝店員", "服裝穿搭", "談心交流"],
-    filterTags: ["ootd", "game", "chat"],
-    status: "unbookable",
+    desc: "月澄雪兔像忘川邊的擺渡人，不替您決定去向，只在您遲遲無法前行時，遞上一支槳。適合情感諮商、談心交流，以及想從混亂關係中慢慢清醒的客人。",
+    shortDesc: "情感諮商、清醒談心、忘川擺渡。",
+    quote: "我也不是蒙娜麗莎，沒必要對誰都微笑。",
+    tags: ["情感諮商", "談心交流", "清醒系"],
+    filterTags: ["chat"],
+    status: "available",
     statusLabel: "不接受指名",
     workDays: [5, 6],
-    recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "談心交流"]
+    recommended: "談心交流",
+    extraServices: ["談心交流"],
+    personalMenu: [
+      {
+        title: "🛶｜忘川擺渡人  (情感諮商)",
+        desc: "關於此服務：1.您是否還在原地駐足？是否還在為情所困？是否還深陷泥沼無法自拔......？讓雪兔來拉您一把，送您一程。2.服務期間，所提供的看法、建議、方法僅供參考，唯有您自身能做出抉擇，最終結果，唯有渡河之人方能承擔。",
+        price: "30分鐘 30萬"
+      },
+    ]
   },
   {
     name: "賽伊",
@@ -382,6 +389,20 @@ window.allCasts = [
   {
     name: "怜奈",
     image: "images/staff-20.jpg",
+    desc: "願你有一個甜美的夢境。怜奈擅長用柔和的話語與安靜的陪伴，讓疲憊的心情慢慢放鬆，適合想談心、陪坐，或享受溫柔氛圍的客人。",
+    shortDesc: "溫柔陪聊、談心交流、夢境陪伴。",
+    quote: "願你有一個甜美的夢境。",
+    tags: ["談心交流", "溫柔陪聊", "夢境陪伴"],
+    filterTags: ["chat"],
+    status: "available",
+    statusLabel: "接受指名",
+    workDays: [5, 6],
+    recommended: "談心交流、溫柔陪聊",
+    extraServices: ["談心交流"]
+  },
+  {
+    name: "參參",
+    image: "images/staff-21.jpg",
     desc: "服裝搭配:「深宵換裝，讓夜晚成為你的時裳」。",
     shortDesc: "熱場、香檳 CALL、活動主持。",
     quote: "你是我的月神嗎。",
@@ -392,5 +413,19 @@ window.allCasts = [
     workDays: [5, 6],
     recommended: "談心交流、服裝搭配",
     extraServices: ["服裝搭配", "談心交流"]
+  },
+  {
+    name: "咪幾馬麻",
+    image: "images/staff-22.jpg",
+    desc: "她的陪伴像剛洗好的浴巾，柔軟、溫暖，還帶著一點讓人忍不住笑出來的香氣。適合談心交流、輕鬆陪聊，以及想在第十二夜找點安心感的客人。",
+    shortDesc: "談心交流、親切陪聊、搞笑療癒。",
+    quote: "鬱金香都沒我的浴巾香。",
+    tags: ["談心交流", "親切陪聊", "搞笑療癒"],
+    filterTags: ["chat"],
+    status: "available",
+    statusLabel: "接受指名",
+    workDays: [5, 6],
+    recommended: "談心交流、輕鬆陪聊",
+    extraServices: ["談心交流"]
   },
 ];
