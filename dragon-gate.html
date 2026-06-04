@@ -144,11 +144,21 @@
           <h3>玩家下注</h3>
           <div class="bet-grid">
             <label>下注類型
-              <select id="betType">
-                <option value="inside">進洞</option>
-                <option value="post">撞柱</option>
-                <option value="outside">出界</option>
-              </select>
+              <div class="bet-type-picker" id="betTypePicker" role="group" aria-label="下注類型">
+                <button type="button" class="bet-type-option active" data-bet-type="inside">
+                  <span class="bet-type-title">進洞</span>
+                  <span class="bet-type-desc">結果牌落在兩張門牌之間</span>
+                </button>
+                <button type="button" class="bet-type-option" data-bet-type="post">
+                  <span class="bet-type-title">撞柱</span>
+                  <span class="bet-type-desc">結果牌等於任一張門牌</span>
+                </button>
+                <button type="button" class="bet-type-option" data-bet-type="outside">
+                  <span class="bet-type-title">出界</span>
+                  <span class="bet-type-desc">結果牌落在門牌之外</span>
+                </button>
+                <input id="betType" type="hidden" value="inside" />
+              </div>
             </label>
             <label>下注分數
               <input id="betAmount" type="number" min="100" step="100" value="100" />

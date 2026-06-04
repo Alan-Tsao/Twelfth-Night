@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V8：修正下注完成後結算按鈕狀態
+// 第十二夜｜射龍門多人房間 V9：自製下注類型選擇器
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -524,6 +524,21 @@ function judgeBet(betType, amount, gateA, gateB, resultCard) {
   return { delta: 0, label: "未結算" };
 }
 
+function setBetType(value) {
+  const input = $("betType");
+  if (input) input.value = value;
+
+  document.querySelectorAll(".bet-type-option").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.betType === value);
+  });
+}
+
+function updateBetTypePickerDisabled(disabled) {
+  document.querySelectorAll(".bet-type-option").forEach((btn) => {
+    btn.disabled = disabled;
+  });
+}
+
 function getEligiblePlayers(players = state.players) {
   const minBet = Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
   return players.filter((p) => Number(p.score || 0) >= minBet);
@@ -573,6 +588,7 @@ function updateActionButtons() {
   if (submitBetBtn) submitBetBtn.disabled = !bettingOpen;
   if (clearBetBtn) clearBetBtn.disabled = !bettingOpen;
   if (allInBtn) allInBtn.disabled = !bettingOpen;
+  updateBetTypePickerDisabled(!bettingOpen);
 }
 
 function updateBetProgress() {
@@ -1177,6 +1193,13 @@ window.addEventListener("pagehide", () => {
   }
 });
 
+document.querySelectorAll(".bet-type-option").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    if (btn.disabled) return;
+    setBetType(btn.dataset.betType || "inside");
+  });
+});
+
 $("randomRoomBtn").addEventListener("click", () => {
   $("roomId").value = makeRoomCode();
   state.roomId = cleanRoomId($("roomId").value);
@@ -1209,6 +1232,7 @@ $("copyResultBtn").addEventListener("click", () => copyResult().catch((e) => set
 $("resetLocalBtn").addEventListener("click", () => resetLocal().catch((e) => setStatus(e.message, "err")));
 
 updateSoundButton();
+setBetType($("betType")?.value || "inside");
 syncRoomUrl();
 renderRoom();
 renderPlayers();
