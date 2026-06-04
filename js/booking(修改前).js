@@ -6,8 +6,9 @@ const F={discordId:"entry.1545709974",playerName:"entry.1718936699",serverName:"
 
 // Google Sheet 班表 CSV
 // 欄位格式：date,cast,start,end,status,note
-// 注意：Google Sheet 的 available 代表「有出勤」；是否可被指名仍以 cast-data.js 的 status 判斷。
+// 注意：Google Sheet schedule 的 available 代表「有出勤」；是否可被指名優先由 staff_status 判斷，讀取失敗才用 cast-data.js。
 const SCHEDULE_CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=0&single=true&output=csv";
+const STAFF_STATUS_CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=1310958925&single=true&output=csv";
 
 const params=new URLSearchParams(location.search);
 const mode=params.get("mode")==="inquiry"?"inquiry":"booking";
@@ -17,6 +18,9 @@ let step=1;
 let scheduleRows=[];
 let scheduleLoaded=false;
 let scheduleError=false;
+let staffStatusMap=new Map();
+let staffStatusLoaded=false;
+let staffStatusError=false;
 
 function v(id){return document.getElementById(id)?.value.trim()||""}
 function err(id,on){document.getElementById(id)?.classList.toggle("show",on)}
@@ -97,9 +101,87 @@ function normalizeScheduleRow(row){
   const note=String(row.note||"").trim();
 
   if(!date || !cast || !start || !end || !status) return null;
-  if(!["available","pending","rest"].includes(status)) return null;
+  if(!["available","pending","unbookable","rest"].includes(status)) return null;
 
   return {date,cast,start,end,status,note};
+}
+
+function labelFromBookableStatus(status){
+  if(status==="available")return"接受指名";
+  if(status==="pending")return"排班確認中";
+  if(status==="unbookable")return"不接受指名";
+  if(status==="rest")return"暫停服務";
+  return"接受指名";
+}
+
+function normalizeStaffStatusRow(row){
+  const cast=String(row.cast||"").trim();
+  const bookableStatus=String(row.bookablestatus||row.bookableStatus||"").trim().toLowerCase();
+  const statusLabel=String(row.statuslabel||row.statusLabel||"").trim();
+  const role=String(row.role||"").trim();
+  const note=String(row.note||"").trim();
+
+  if(!cast || !bookableStatus)return null;
+  if(!["available","pending","unbookable","rest"].includes(bookableStatus))return null;
+
+  return {cast,bookableStatus,statusLabel:statusLabel||labelFromBookableStatus(bookableStatus),role,note};
+}
+
+function applyStaffStatus(cast){
+  if(!cast)return cast;
+  const override=staffStatusMap.get(String(cast.name||"").trim());
+
+  if(!override){
+    return {
+      ...cast,
+      status:cast.status||"available",
+      statusLabel:cast.statusLabel||labelFromBookableStatus(cast.status||"available")
+    };
+  }
+
+  return {
+    ...cast,
+    status:override.bookableStatus,
+    statusLabel:override.statusLabel||labelFromBookableStatus(override.bookableStatus),
+    role:override.role||cast.role||"",
+    staffStatusNote:override.note||""
+  };
+}
+
+async function loadStaffStatus(){
+  if(!STAFF_STATUS_CSV_URL){
+    staffStatusLoaded=true;
+    return;
+  }
+
+  try{
+    const response=await fetch(STAFF_STATUS_CSV_URL,{cache:"no-store"});
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+
+    const text=await response.text();
+    const table=parseCsv(text);
+
+    if(table.length<2)throw new Error("CSV 沒有資料列");
+
+    const headers=table[0].map(normalizeKey);
+    const rawRows=table.slice(1).map(cols=>{
+      const obj={};
+      headers.forEach((h,i)=>obj[h]=cols[i]||"");
+      return obj;
+    });
+
+    const rows=rawRows.map(normalizeStaffStatusRow).filter(Boolean);
+    staffStatusMap=new Map(rows.map(row=>[row.cast,row]));
+    staffStatusLoaded=true;
+    staffStatusError=false;
+  }catch(error){
+    console.warn("Google Sheet 人員狀態讀取失敗，將暫時使用 cast-data.js 的 status / statusLabel。",error);
+    staffStatusMap=new Map();
+    staffStatusLoaded=true;
+    staffStatusError=true;
+  }
+
+  renderCastOptions();
 }
 
 async function loadSchedule(){
@@ -191,7 +273,8 @@ function scheduleTimeText(row){
 }
 
 function getCastInfo(name){
-  return (window.allCasts||[]).find(c=>c.name===name)||{name,shortDesc:"",desc:"",tags:[],status:"available"};
+  const found=(window.allCasts||[]).find(c=>c.name===name)||{name,shortDesc:"",desc:"",tags:[],status:"available"};
+  return applyStaffStatus(found);
 }
 
 function isDirectBookableCast(name){
@@ -238,13 +321,13 @@ function renderCastOptionsFromSheet(date,box,pend,hint){
   // pending     → 詢問制
   // unbookable  → 出勤但不接受指名，預約頁不列入可勾選名單
   const availableRows=rowsForDate.filter(r=>r.status==="available" && rowCoversRequestedTime(r) && isDirectBookableCast(r.cast));
-  const pendingRows=rowsForDate.filter(r=>rowCoversRequestedTime(r) && !isUnbookableCast(r.cast) && (r.status==="pending" || isInquiryCast(r.cast)));
-  const unbookableRows=rowsForDate.filter(r=>rowCoversRequestedTime(r) && isUnbookableCast(r.cast));
+  const pendingRows=rowsForDate.filter(r=>rowCoversRequestedTime(r) && r.status!=="unbookable" && !isUnbookableCast(r.cast) && (r.status==="pending" || isInquiryCast(r.cast)));
+  const unbookableRows=rowsForDate.filter(r=>rowCoversRequestedTime(r) && (r.status==="unbookable" || isUnbookableCast(r.cast)));
 
   if(!rowsForDate.length){
     box.innerHTML='<div class="empty-cast-box">此日期目前沒有班表資料。可以改選其他日期，或在備註中請接待協助安排。</div>';
     pend?.classList.remove("show");
-    if(hint) hint.textContent="此日期尚未在 Google Sheet 班表中設定公關。";
+    if(hint) hint.textContent="此日期尚未有報班的公關。";
     return;
   }
 
@@ -374,7 +457,7 @@ function valid(s){
 
 function summary(){
   const casts=selected();
-  const text=`【第十二夜【盛會】預約申請】\n\n遊戲 ID：${v("playerName")||"未填寫"}\n伺服器：${v("serverName")||"未填寫"}\nDiscord ID：${v("discordId")||"未填寫"}\n預約人數：${v("guestCount")||"未填寫"}\n\n希望安排公關：${casts.join("、")||"未填寫"}\n預約日期：${v("bookingDate")||"未填寫"}\n預約時段：${v("bookingTime")||"未填寫"}\n預約節數：${v("sessionCount")||"未填寫"}\n服務項目：${v("serviceType")||"未填寫"}\n\n其他需求：\n${v("notes")||"無"}\n\n※ 此預約申請送出後，仍需等待接待確認才算預約成立。`;
+  const text=`【第十二夜預約申請】\n\n遊戲 ID：${v("playerName")||"未填寫"}\n伺服器：${v("serverName")||"未填寫"}\nDiscord ID：${v("discordId")||"未填寫"}\n預約人數：${v("guestCount")||"未填寫"}\n\n希望安排公關：${casts.join("、")||"未填寫"}\n預約日期：${v("bookingDate")||"未填寫"}\n預約時段：${v("bookingTime")||"未填寫"}\n預約節數：${v("sessionCount")||"未填寫"}\n服務項目：${v("serviceType")||"未填寫"}\n\n其他需求：\n${v("notes")||"無"}\n\n※ 此預約申請送出後，仍需等待接待確認才算預約成立。`;
   document.getElementById("summaryBox").textContent=text;
   return text;
 }
@@ -444,6 +527,7 @@ function setupBooking(){
 
   renderCastOptions();
   loadSchedule();
+  loadStaffStatus();
 }
 
 function inquirySummary(){
@@ -452,7 +536,7 @@ function inquirySummary(){
   err("inquiryError",!ok);
   if(!ok)return"";
 
-  const text=`【第十二夜【盛會】會館排班詢問單】\n\nDiscord ID：${discord}\n詢問公關：${cast}\n希望日期：${date}\n希望時段：${time}\n\n詢問內容：\n${notes}\n\n※ 此為排班詢問，不代表正式預約成立。`;
+  const text=`【第十二夜會館排班詢問單】\n\nDiscord ID：${discord}\n詢問公關：${cast}\n希望日期：${date}\n希望時段：${time}\n\n詢問內容：\n${notes}\n\n※ 此為排班詢問，不代表正式預約成立。`;
   document.getElementById("inquirySummaryBox").textContent=text;
   return text;
 }

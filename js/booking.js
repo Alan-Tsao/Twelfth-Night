@@ -233,7 +233,7 @@ function timeToMinutes(timeText){
 
 function sessionMinutes(){
   const n=Number(v("sessionCount"));
-  return Number.isFinite(n) && n>0 ? n*30 : 0;
+  return Number.isFinite(n) && n>0 ? n*20 : 0;
 }
 
 function requestedRange(){

@@ -31,7 +31,7 @@
   function sessionLabel() {
     const count = Number(value("sessionCount"));
     if (!Number.isFinite(count) || count <= 0) return "";
-    return `${count} 節，${count * 20} 分鐘`;
+    return `${count} 節，${count * 30} 分鐘`;
   }
 
   function guestLabel() {
@@ -66,7 +66,7 @@
   function bookingTimeLabel() {
     const start = value("bookingTime");
     const count = Number(value("sessionCount"));
-    const minutes = Number.isFinite(count) ? count * 20 : 0;
+    const minutes = Number.isFinite(count) ? count * 30 : 0;
 
     if (!start) return "";
     if (start.includes("其他")) return start;
@@ -93,7 +93,7 @@
   function generateSummary() {
     const casts = selectedCasts();
 
-    const summary = `【第十二夜預約申請】
+    const summary = `【第十二夜【盛會】預約申請】
 
 遊戲 ID：${value("playerName") || "未填寫"}
 伺服器：${value("serverName") || "未填寫"}

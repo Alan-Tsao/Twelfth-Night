@@ -4,38 +4,16 @@ window.allCasts = [
   {
     name: "圖圖",
     image: "images/staff-01.jpg",
-    desc: "夢境裡的貓魅公關，語尾偶爾會悄悄落下一聲喵。適合想被溫柔陪伴，也想要一點可愛互動的客人。",
-    shortDesc: "溫柔陪聊、俏皮可愛、香檳 CALL。",
+    desc: "",
+    shortDesc: "",
     quote: "若您願意，我會把今晚的月光，輕輕留在您的杯中。",
     tags: ["店長", "俏皮可愛", "香檳 CALL"],
     filterTags: ["chat", "cute", "champagne"],
-    status: "available",
-    statusLabel: "接受指名",
+    status: "unbookable",
+    statusLabel: "不接受指名",
     workDays: [5, 6],
     recommended: "陪酒聊天、輕 RP",
     extraServices: [ "小遊戲", "按摩 RP"],
-    personalMenu: [
-      {
-        title: "👻 通靈",
-        desc: "幫你把〈海都麻醉師〉給通靈過來。通靈過後解鎖更多項目：陪酒、臭罵倒、聽故事。",
-        price: "一次 8千G"
-      },
-      {
-        title: "🤬 臭罵倒",
-        desc: "通靈後解鎖。讓你見識一下什麼叫做真男人！",
-        price: "一次 2萬G"
-      },
-      {
-        title: "🍻 陪酒",
-        desc: "通靈期時段內可體驗。麻醉師先生很喜歡喝酒，所以基本上不需要特別要求。",
-        price: "通靈期間免費"
-      },
-      {
-        title: "🌮 聽故事",
-        desc: "來聽聽海都麻醉師的冒險故事。想完整體驗歡愉，聽故事也是其中一環。",
-        price: "通靈期間隨意給小費"
-      }
-    ]
   },
   {
     name: "咕嚕小貓",
