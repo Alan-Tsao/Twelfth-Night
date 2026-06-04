@@ -548,3 +548,73 @@ button:disabled,
   background: var(--gold);
   box-shadow: 0 0 14px rgba(232,201,129,.7);
 }
+
+
+/* 自製下注類型選擇器 */
+.bet-type-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.bet-type-option {
+  appearance: none;
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,.14);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.035));
+  color: var(--text);
+  border-radius: 18px;
+  padding: 11px 14px;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+.bet-type-option:hover {
+  transform: translateY(-1px);
+  border-color: rgba(232,201,129,.36);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(232,201,129,.10), transparent 42%),
+    linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+}
+
+.bet-type-option.active {
+  border-color: rgba(232,201,129,.55);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(232,201,129,.18), transparent 46%),
+    linear-gradient(135deg, rgba(232,201,129,.16), rgba(242,167,198,.08));
+  box-shadow:
+    0 0 0 3px rgba(232,201,129,.08),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.bet-type-title {
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.bet-type-desc {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: .03em;
+  line-height: 1.45;
+}
+
+.bet-type-option.active .bet-type-desc {
+  color: rgba(247,237,248,.78);
+}
+
+.bet-type-option:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
