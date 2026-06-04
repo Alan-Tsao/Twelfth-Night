@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V6：presence 在線名單、無人自動清空
+// 第十二夜｜射龍門多人房間 V7：下注完成檢查、提示音、避免重複結算
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -75,6 +75,12 @@ let unsubPresence = null;
 let timerHandle = null;
 let presenceHandle = null;
 let cleanupInProgress = false;
+let settlingInProgress = false;
+let soundEnabled = localStorage.getItem("dgSoundEnabled") === "yes";
+let audioContext = null;
+let lastNeedBetKey = "";
+let lastAllBetsReadyKey = "";
+let lastSettledKey = "";
 
 if (!state.clientId) {
   state.clientId = makeId();
@@ -144,6 +150,82 @@ function saveLocal() {
   localStorage.setItem("dgPlayerId", state.playerId);
   localStorage.setItem("dgDisplayName", state.displayName);
   localStorage.setItem("dgClientId", state.clientId);
+}
+
+function updateSoundButton() {
+  const btn = $("soundToggleBtn");
+  if (!btn) return;
+  btn.textContent = soundEnabled ? "提示音：開" : "提示音：關";
+  btn.classList.toggle("enabled", soundEnabled);
+}
+
+async function ensureAudioContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  if (audioContext.state === "suspended") {
+    await audioContext.resume();
+  }
+
+  return audioContext;
+}
+
+function tone(freq = 660, duration = 0.12, delay = 0, type = "sine", gainValue = 0.045) {
+  if (!audioContext) return;
+
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  const start = audioContext.currentTime + delay;
+  const end = start + duration;
+
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(gainValue, start + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+  osc.connect(gain).connect(audioContext.destination);
+  osc.start(start);
+  osc.stop(end + 0.02);
+}
+
+async function playSound(kind = "notice") {
+  if (!soundEnabled) return;
+
+  try {
+    await ensureAudioContext();
+
+    if (kind === "needBet") {
+      tone(660, 0.10, 0, "sine", 0.05);
+      tone(880, 0.16, 0.12, "sine", 0.05);
+    } else if (kind === "allReady") {
+      tone(880, 0.09, 0, "triangle", 0.05);
+      tone(1100, 0.09, 0.11, "triangle", 0.05);
+      tone(1320, 0.16, 0.22, "triangle", 0.05);
+    } else if (kind === "settled") {
+      tone(520, 0.10, 0, "sine", 0.04);
+      tone(740, 0.18, 0.12, "sine", 0.045);
+    } else {
+      tone(760, 0.12, 0, "sine", 0.045);
+    }
+  } catch (error) {
+    console.warn("Sound failed:", error);
+  }
+}
+
+async function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem("dgSoundEnabled", soundEnabled ? "yes" : "no");
+  updateSoundButton();
+
+  if (soundEnabled) {
+    await ensureAudioContext();
+    await playSound("notice");
+    setStatus("提示音已開啟。", "ok");
+  } else {
+    setStatus("提示音已關閉。", "");
+  }
 }
 
 function getInviteUrl() {
@@ -442,6 +524,118 @@ function judgeBet(betType, amount, gateA, gateB, resultCard) {
   return { delta: 0, label: "未結算" };
 }
 
+function getEligiblePlayers(players = state.players) {
+  const minBet = Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
+  return players.filter((p) => Number(p.score || 0) >= minBet);
+}
+
+function getBetProgress(players = state.players) {
+  const eligible = getEligiblePlayers(players);
+  const betPlayers = eligible.filter((p) => Number(p.currentBet || 0) > 0 && Boolean(p.betType));
+  const missing = eligible.filter((p) => !(Number(p.currentBet || 0) > 0 && Boolean(p.betType)));
+
+  return {
+    eligibleCount: eligible.length,
+    betCount: betPlayers.length,
+    allReady: eligible.length > 0 && betPlayers.length === eligible.length,
+    missing
+  };
+}
+
+function canDrawResult() {
+  const room = state.room || {};
+  const progress = getBetProgress();
+
+  return Boolean(
+    room.status === "betting" &&
+    room.gateA &&
+    room.gateB &&
+    !room.resultCard &&
+    progress.allReady &&
+    !settlingInProgress &&
+    !isExpired()
+  );
+}
+
+function updateBetProgress() {
+  const el = $("betProgress");
+  if (!el) return;
+
+  const room = state.room || {};
+  const progress = getBetProgress();
+
+  el.classList.remove("ready", "waiting");
+
+  if (!room.gateA || !room.gateB) {
+    el.textContent = "下注進度：等待主持人開局";
+    return;
+  }
+
+  if (room.status === "settled" || room.resultCard) {
+    el.textContent = "下注進度：本局已結算，等待下一局";
+    return;
+  }
+
+  if (room.status !== "betting") {
+    el.textContent = "下注進度：等待新一局";
+    return;
+  }
+
+  if (progress.eligibleCount === 0) {
+    el.textContent = "下注進度：目前沒有可下注玩家";
+    el.classList.add("waiting");
+    return;
+  }
+
+  if (progress.allReady) {
+    el.textContent = `下注進度：${progress.betCount}/${progress.eligibleCount}，所有可下注玩家已完成`;
+    el.classList.add("ready");
+    return;
+  }
+
+  const names = progress.missing.map((p) => p.name).filter(Boolean).join("、");
+  el.textContent = `下注進度：${progress.betCount}/${progress.eligibleCount}，等待 ${names || "玩家"} 下注`;
+  el.classList.add("waiting");
+}
+
+function notifyRoundState() {
+  const room = state.room || {};
+  if (!room.round) return;
+
+  const progress = getBetProgress();
+
+  if (state.role === "player" && state.playerId && room.status === "betting" && room.gateA && room.gateB && !room.resultCard) {
+    const self = state.players.find((p) => p.id === state.playerId);
+    const minBet = Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
+
+    if (self && Number(self.score || 0) >= minBet && !(Number(self.currentBet || 0) > 0 && self.betType)) {
+      const key = `${state.roomId}-${room.round}-needBet-${state.playerId}`;
+      if (lastNeedBetKey !== key) {
+        lastNeedBetKey = key;
+        playSound("needBet");
+        setStatus("輪到你下注了。", "");
+      }
+    }
+  }
+
+  if (state.role === "host" && room.status === "betting" && progress.allReady) {
+    const key = `${state.roomId}-${room.round}-allReady-${progress.betCount}`;
+    if (lastAllBetsReadyKey !== key) {
+      lastAllBetsReadyKey = key;
+      playSound("allReady");
+      setStatus("所有可下注玩家都已下注，可以結算。", "ok");
+    }
+  }
+
+  if (room.status === "settled" && room.resultCard) {
+    const key = `${state.roomId}-${room.round}-settled-${room.resultCard.label}`;
+    if (lastSettledKey !== key) {
+      lastSettledKey = key;
+      playSound("settled");
+    }
+  }
+}
+
 function renderRoom() {
   const room = state.room || {};
   const expired = isExpired();
@@ -483,10 +677,15 @@ function renderRoom() {
   $("hostPanel").style.display = state.role === "host" ? "block" : "none";
   $("betPanel").style.display = state.role === "player" ? "block" : "none";
 
-  ["newRoundBtn", "drawResultBtn", "submitBetBtn", "clearBetBtn"].forEach((id) => {
-    const el = $(id);
-    if (el) el.disabled = expired;
-  });
+  updateBetProgress();
+
+  const bettingOpen = room.status === "betting" && room.gateA && room.gateB && !room.resultCard && !expired;
+
+  $("newRoundBtn").disabled = expired;
+  $("drawResultBtn").disabled = !canDrawResult();
+  $("submitBetBtn").disabled = !bettingOpen;
+  $("clearBetBtn").disabled = !bettingOpen;
+  $("allInBtn").disabled = !bettingOpen;
 }
 
 function renderPlayers() {
@@ -517,6 +716,8 @@ function renderPlayers() {
       </div>
     `).join("")
     : `<div class="empty">尚無玩家加入。</div>`;
+
+  updateBetProgress();
 }
 
 function escapeHtml(value) {
@@ -544,6 +745,7 @@ function connectRoom() {
     renderRoom();
     startTimer();
     setStatus(snap.exists() ? "已連線房間。" : "已連線，但房間尚未建立。", snap.exists() ? "ok" : "");
+    notifyRoundState();
   }, (err) => {
     console.error(err);
     setConnected(false);
@@ -553,6 +755,7 @@ function connectRoom() {
   unsubPlayers = onSnapshot(playersRef(), (snap) => {
     state.players = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
     renderPlayers();
+    notifyRoundState();
   }, (err) => {
     console.error(err);
     setStatus("玩家讀取失敗：" + err.message, "err");
@@ -662,7 +865,11 @@ async function newRound() {
   });
   await batch.commit();
 
-  setStatus("已開始新一局。", "ok");
+  lastNeedBetKey = "";
+  lastAllBetsReadyKey = "";
+  lastSettledKey = "";
+
+  setStatus("已開始新一局，等待玩家下注。", "ok");
 }
 
 async function submitBet() {
@@ -717,57 +924,88 @@ async function clearBet() {
 async function drawResult() {
   if (!ensureRoomActive()) return;
 
+  if (settlingInProgress) {
+    setStatus("正在結算中，請稍候。", "");
+    return;
+  }
+
   const room = state.room;
   if (!room?.gateA || !room?.gateB) {
     setStatus("請先開始新一局。", "err");
     return;
   }
 
-  const resultCard = getCard();
+  if (room.status !== "betting" || room.resultCard) {
+    setStatus("本局已結算或尚未開放下注，不能重複抽結果牌。", "err");
+    return;
+  }
+
   const snap = await getDocs(playersRef());
-  const batch = writeBatch(db);
-  const lines = [];
+  const currentPlayers = snap.docs.map((docSnap) => ({ id: docSnap.id, ref: docSnap.ref, ...docSnap.data() }));
+  const progress = getBetProgress(currentPlayers);
 
-  snap.forEach((docSnap) => {
-    const p = docSnap.data();
-    const amount = Math.max(0, Number(p.currentBet || 0));
+  if (!progress.allReady) {
+    const names = progress.missing.map((p) => p.name).filter(Boolean).join("、");
+    setStatus(`還不能結算：下注進度 ${progress.betCount}/${progress.eligibleCount}。等待 ${names || "玩家"} 下注。`, "err");
+    return;
+  }
 
-    if (!amount || !p.betType) {
-      batch.update(docSnap.ref, {
-        lastResult: "本局未下注",
-        updatedAt: serverTimestamp()
-      });
-      return;
-    }
+  settlingInProgress = true;
+  $("drawResultBtn").disabled = true;
 
-    const judged = judgeBet(p.betType, amount, room.gateA, room.gateB, resultCard);
-    batch.update(docSnap.ref, {
-      score: increment(judged.delta),
-      currentBet: 0,
-      betType: "",
-      lastResult: `${judged.label}（${judged.delta >= 0 ? "+" : ""}${judged.delta}）`,
+  try {
+    await updateDoc(roomRef(), {
+      status: "settling",
       updatedAt: serverTimestamp()
     });
 
-    lines.push(`${p.name}：${BET_LABELS[p.betType]} ${amount} 分 → ${judged.label}（${judged.delta >= 0 ? "+" : ""}${judged.delta}）`);
-  });
+    const resultCard = getCard();
+    const batch = writeBatch(db);
+    const lines = [];
 
-  const summary = [
-    `第 ${Number(room.round || 0)} 局結果`,
-    `門牌：${room.gateA.label}｜${room.gateB.label}`,
-    `結果牌：${resultCard.label}`,
-    lines.length ? lines.join(" / ") : "本局無玩家下注"
-  ].join("　");
+    currentPlayers.forEach((p) => {
+      const amount = Math.max(0, Number(p.currentBet || 0));
 
-  batch.update(roomRef(), {
-    status: "settled",
-    resultCard,
-    roundResult: summary,
-    updatedAt: serverTimestamp()
-  });
+      if (!amount || !p.betType) {
+        batch.update(p.ref, {
+          lastResult: "本局未下注",
+          updatedAt: serverTimestamp()
+        });
+        return;
+      }
 
-  await batch.commit();
-  setStatus("已抽結果牌並結算。", "ok");
+      const judged = judgeBet(p.betType, amount, room.gateA, room.gateB, resultCard);
+      batch.update(p.ref, {
+        score: increment(judged.delta),
+        currentBet: 0,
+        betType: "",
+        lastResult: `${judged.label}（${judged.delta >= 0 ? "+" : ""}${judged.delta}）`,
+        updatedAt: serverTimestamp()
+      });
+
+      lines.push(`${p.name}：${BET_LABELS[p.betType]} ${amount} 分 → ${judged.label}（${judged.delta >= 0 ? "+" : ""}${judged.delta}）`);
+    });
+
+    const summary = [
+      `第 ${Number(room.round || 0)} 局結果`,
+      `門牌：${room.gateA.label}｜${room.gateB.label}`,
+      `結果牌：${resultCard.label}`,
+      lines.length ? lines.join(" / ") : "本局無玩家下注"
+    ].join("　");
+
+    batch.update(roomRef(), {
+      status: "settled",
+      resultCard,
+      roundResult: summary,
+      updatedAt: serverTimestamp()
+    });
+
+    await batch.commit();
+    setStatus("已抽結果牌並結算。", "ok");
+  } finally {
+    settlingInProgress = false;
+    renderRoom();
+  }
 }
 
 async function clearRoom() {
@@ -935,6 +1173,7 @@ $("copyInviteBtn").addEventListener("click", async () => {
   setStatus("已複製邀請連結。", "ok");
 });
 
+$("soundToggleBtn").addEventListener("click", () => toggleSound().catch((e) => setStatus(e.message, "err")));
 $("leaveRoomBtn").addEventListener("click", () => leaveRoom().catch((e) => setStatus(e.message, "err")));
 
 $("hostCreateBtn").addEventListener("click", () => hostCreateRoom().catch((e) => setStatus(e.message, "err")));
@@ -948,6 +1187,7 @@ $("clearRoomBtn").addEventListener("click", () => clearRoom().catch((e) => setSt
 $("copyResultBtn").addEventListener("click", () => copyResult().catch((e) => setStatus(e.message, "err")));
 $("resetLocalBtn").addEventListener("click", () => resetLocal().catch((e) => setStatus(e.message, "err")));
 
+updateSoundButton();
 syncRoomUrl();
 renderRoom();
 renderPlayers();
