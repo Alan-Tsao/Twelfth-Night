@@ -68,8 +68,11 @@
             <label>最低下注
               <input id="minBet" type="number" min="1" step="100" value="100" />
             </label>
+            <label>下注倒數秒數
+              <input id="betSeconds" type="number" min="10" step="5" value="45" />
+            </label>
           </div>
-          <p class="hint">主持人建立房間時會套用此設定；玩家加入時會取得起始分數。最高下注不限，但不能超過目前持有分數。</p>
+          <p class="hint">主持人建立房間時會套用此設定；玩家加入時會取得起始分數。倒數結束後，未下注玩家會自動以最低注隨機下注。</p>
         </div>
 
         <div class="actions">
@@ -127,12 +130,14 @@
         </div>
 
         <div class="round-result" id="roundResult">等待主持人開局。</div>
+        <div class="bet-countdown" id="betCountdown">下注倒數：-- 秒</div>
         <div class="bet-progress" id="betProgress">下注進度：等待開局</div>
 
         <div class="host-panel" id="hostPanel">
           <h3>主持人操作</h3>
           <div class="actions">
             <button class="btn primary" id="newRoundBtn">開始新一局 / 重發門牌</button>
+            <button class="btn" id="autoFillBetsBtn">補齊未下注</button>
             <button class="btn" id="drawResultBtn">抽結果牌並結算</button>
             <button class="btn" id="copyResultBtn">複製結果文字</button>
             <button class="btn danger" id="clearRoomBtn">清空本場</button>

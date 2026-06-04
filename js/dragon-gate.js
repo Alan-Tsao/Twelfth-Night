@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V11：籌碼累加下注
+// 第十二夜｜射龍門多人房間 V12：下注倒數與逾時自動下注
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -82,6 +82,8 @@ let lastNeedBetKey = "";
 let lastAllBetsReadyKey = "";
 let lastSettledKey = "";
 let chipAccumulated = false;
+let betCountdownHandle = null;
+let autoFillingBets = false;
 
 if (!state.clientId) {
   state.clientId = makeId();
@@ -310,6 +312,11 @@ function disconnectRoom() {
     timerHandle = null;
   }
 
+  if (betCountdownHandle) {
+    clearInterval(betCountdownHandle);
+    betCountdownHandle = null;
+  }
+
   state.room = null;
   state.players = [];
   state.presence = [];
@@ -423,6 +430,9 @@ async function clearRoomBecauseEmpty() {
       hostName: "",
       startScore: Math.max(0, Math.floor(Number($("startScore").value || state.room?.startScore || 2500))),
       minBet: Math.max(1, Math.floor(Number($("minBet").value || state.room?.minBet || 100))),
+      betSeconds: Math.max(10, Math.floor(Number($("betSeconds").value || state.room?.betSeconds || 45))),
+      betDeadlineAt: null,
+      autoFilled: false,
       round: 0,
       gateA: null,
       gateB: null,
@@ -549,6 +559,19 @@ function getSelfScore() {
   return Math.max(0, Math.floor(Number(self?.score ?? state.room?.startScore ?? 0)));
 }
 
+function getBetSecondsValue() {
+  return Math.max(10, Math.floor(Number(state.room?.betSeconds ?? $("betSeconds").value ?? 45)));
+}
+
+function getBetDeadlineMillis() {
+  return timestampToMillis(state.room?.betDeadlineAt);
+}
+
+function getRandomBetType() {
+  const values = ["inside", "post", "outside"];
+  return values[Math.floor(Math.random() * values.length)];
+}
+
 function normalizeBetAmount(value, options = {}) {
   const minBet = getMinBetValue();
   const maxScore = getSelfScore();
@@ -654,14 +677,47 @@ function updateActionButtons() {
   const submitBetBtn = $("submitBetBtn");
   const clearBetBtn = $("clearBetBtn");
   const allInBtn = $("allInBtn");
+  const autoFillBetsBtn = $("autoFillBetsBtn");
 
   if (newRoundBtn) newRoundBtn.disabled = expired;
   if (drawResultBtn) drawResultBtn.disabled = !canDrawResult();
+  if (autoFillBetsBtn) autoFillBetsBtn.disabled = !(bettingOpen && state.role === "host" && getBetProgress().missing.length > 0);
   if (submitBetBtn) submitBetBtn.disabled = !bettingOpen;
   if (clearBetBtn) clearBetBtn.disabled = !bettingOpen;
   if (allInBtn) allInBtn.disabled = !bettingOpen;
   updateBetTypePickerDisabled(!bettingOpen);
   updateBetAmountDisabled(!bettingOpen);
+}
+
+function updateBetCountdown() {
+  const el = $("betCountdown");
+  if (!el) return;
+
+  const room = state.room || {};
+  el.classList.remove("urgent");
+
+  if (room.status !== "betting" || !room.betDeadlineAt || room.resultCard) {
+    el.textContent = "下注倒數：-- 秒";
+    return;
+  }
+
+  const leftMs = getBetDeadlineMillis() - Date.now();
+  const left = Math.max(0, Math.ceil(leftMs / 1000));
+  el.textContent = `下注倒數：${left} 秒`;
+
+  if (left <= 10) {
+    el.classList.add("urgent");
+  }
+
+  if (left <= 0 && state.role === "host" && !autoFillingBets) {
+    autoFillMissingBets("timeout").catch((error) => setStatus(error.message, "err"));
+  }
+}
+
+function startBetCountdown() {
+  if (betCountdownHandle) clearInterval(betCountdownHandle);
+  updateBetCountdown();
+  betCountdownHandle = setInterval(updateBetCountdown, 1000);
 }
 
 function updateBetProgress() {
@@ -768,6 +824,7 @@ function renderRoom() {
     $("minBet").value = room.minBet;
     if (Number(String($("betAmount").value || "0").replace(/[^\d]/g, "")) < Number(room.minBet || 1)) setBetAmount(room.minBet);
   }
+  if (room.betSeconds !== undefined) $("betSeconds").value = room.betSeconds;
   $("betHint").textContent = `目前倍率：進洞 +1 倍、出界 +1 倍、撞柱 +2 倍；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分，最高可押目前持有分數。`;
 
   $("gateA").textContent = room.gateA?.label || "?";
@@ -853,6 +910,7 @@ function connectRoom() {
     setConnected(true);
     renderRoom();
     startTimer();
+    startBetCountdown();
     setStatus(snap.exists() ? "已連線房間。" : "已連線，但房間尚未建立。", snap.exists() ? "ok" : "");
     notifyRoundState();
   }, (err) => {
@@ -894,6 +952,7 @@ async function hostCreateRoom() {
   const now = Date.now();
   const startScore = Math.max(0, Math.floor(Number($("startScore").value || 2500)));
   const minBet = Math.max(1, Math.floor(Number($("minBet").value || 100)));
+  const betSeconds = Math.max(10, Math.floor(Number($("betSeconds").value || 45)));
 
   await setDoc(roomRef(), {
     game: "dragonGate",
@@ -901,6 +960,9 @@ async function hostCreateRoom() {
     hostName: state.displayName,
     startScore,
     minBet,
+    betSeconds,
+    betDeadlineAt: null,
+    autoFilled: false,
     round: 0,
     gateA: null,
     gateB: null,
@@ -951,6 +1013,7 @@ async function newRound() {
 
   const gateA = getCard();
   const gateB = getCard();
+  const betSeconds = getBetSecondsValue();
 
   await updateDoc(roomRef(), {
     status: "betting",
@@ -958,7 +1021,10 @@ async function newRound() {
     gateA,
     gateB,
     resultCard: null,
-    roundResult: "新一局開始，等待玩家下注。",
+    roundResult: `新一局開始，下注倒數 ${betSeconds} 秒。`,
+    betSeconds,
+    betDeadlineAt: Timestamp.fromMillis(Date.now() + betSeconds * 1000),
+    autoFilled: false,
     updatedAt: serverTimestamp()
   });
 
@@ -1035,6 +1101,60 @@ async function clearBet() {
   setStatus("已取消下注。", "ok");
 }
 
+async function autoFillMissingBets(reason = "manual") {
+  if (!ensureRoomActive()) return;
+
+  const room = state.room;
+  if (!room?.gateA || !room?.gateB || room.status !== "betting" || room.resultCard) {
+    setStatus("目前不是下注階段，無法補齊下注。", "err");
+    return;
+  }
+
+  if (autoFillingBets) return;
+  autoFillingBets = true;
+
+  try {
+    const snap = await getDocs(playersRef());
+    const players = snap.docs.map((docSnap) => ({ id: docSnap.id, ref: docSnap.ref, ...docSnap.data() }));
+    const minBet = Math.max(1, Number(room.minBet ?? $("minBet").value ?? 100));
+    const missing = players.filter((p) => Number(p.score || 0) >= minBet && !(Number(p.currentBet || 0) > 0 && p.betType));
+
+    if (!missing.length) {
+      setStatus("沒有需要補齊下注的玩家。", "");
+      return;
+    }
+
+    const batch = writeBatch(db);
+    const lines = [];
+
+    missing.forEach((p) => {
+      const betType = getRandomBetType();
+      batch.update(p.ref, {
+        currentBet: minBet,
+        betType,
+        lastResult: `逾時自動押 ${BET_LABELS[betType]} ${minBet} 分`,
+        updatedAt: serverTimestamp()
+      });
+      lines.push(`${p.name} → ${BET_LABELS[betType]} ${minBet} 分`);
+    });
+
+    batch.update(roomRef(), {
+      autoFilled: true,
+      autoFilledAt: serverTimestamp(),
+      autoFillReason: reason,
+      updatedAt: serverTimestamp()
+    });
+
+    await batch.commit();
+
+    playSound("allReady");
+    setStatus(`已補齊未下注玩家：${lines.join("、")}`, "ok");
+  } finally {
+    autoFillingBets = false;
+    renderRoom();
+  }
+}
+
 async function drawResult() {
   if (!ensureRoomActive()) return;
 
@@ -1052,6 +1172,10 @@ async function drawResult() {
   if (room.status !== "betting" || room.resultCard) {
     setStatus("本局已結算或尚未開放下注，不能重複抽結果牌。", "err");
     return;
+  }
+
+  if (getBetDeadlineMillis() && Date.now() >= getBetDeadlineMillis()) {
+    await autoFillMissingBets("settle");
   }
 
   const snap = await getDocs(playersRef());
@@ -1138,6 +1262,9 @@ async function clearRoom() {
     hostName: state.displayName || "主持人",
     startScore: Math.max(0, Math.floor(Number($("startScore").value || state.room?.startScore || 2500))),
     minBet: Math.max(1, Math.floor(Number($("minBet").value || state.room?.minBet || 100))),
+    betSeconds: Math.max(10, Math.floor(Number($("betSeconds").value || state.room?.betSeconds || 45))),
+    betDeadlineAt: null,
+    autoFilled: false,
     round: 0,
     gateA: null,
     gateB: null,
@@ -1324,6 +1451,7 @@ $("newRoundBtn").addEventListener("click", () => newRound().catch((e) => setStat
 $("submitBetBtn").addEventListener("click", () => submitBet().catch((e) => setStatus(e.message, "err")));
 $("allInBtn").addEventListener("click", allIn);
 $("clearBetBtn").addEventListener("click", () => clearBet().catch((e) => setStatus(e.message, "err")));
+$("autoFillBetsBtn").addEventListener("click", () => autoFillMissingBets("manual").catch((e) => setStatus(e.message, "err")));
 $("drawResultBtn").addEventListener("click", () => drawResult().catch((e) => setStatus(e.message, "err")));
 $("clearRoomBtn").addEventListener("click", () => clearRoom().catch((e) => setStatus(e.message, "err")));
 $("copyResultBtn").addEventListener("click", () => copyResult().catch((e) => setStatus(e.message, "err")));
