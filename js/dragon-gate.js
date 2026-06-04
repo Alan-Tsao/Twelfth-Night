@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V9：自製下注類型選擇器
+// 第十二夜｜射龍門多人房間 V10：籌碼式下注分數輸入
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -539,6 +539,61 @@ function updateBetTypePickerDisabled(disabled) {
   });
 }
 
+function getMinBetValue() {
+  return Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
+}
+
+function getSelfScore() {
+  const self = state.players.find((p) => p.id === state.playerId);
+  return Math.max(0, Math.floor(Number(self?.score ?? state.room?.startScore ?? 0)));
+}
+
+function normalizeBetAmount(value, options = {}) {
+  const minBet = getMinBetValue();
+  const maxScore = getSelfScore();
+  const allowBelowMin = options.allowBelowMin === true;
+
+  let amount = Math.floor(Number(String(value || "").replace(/[^\d]/g, "")));
+  if (!Number.isFinite(amount) || amount <= 0) amount = minBet;
+
+  if (!allowBelowMin) amount = Math.max(minBet, amount);
+  if (maxScore > 0) amount = Math.min(maxScore, amount);
+
+  return amount;
+}
+
+function setBetAmount(value, options = {}) {
+  const amount = normalizeBetAmount(value, options);
+  $("betAmount").value = String(amount);
+  updateChipActiveState();
+  return amount;
+}
+
+function updateChipActiveState() {
+  const current = Number(String($("betAmount")?.value || "0").replace(/[^\d]/g, ""));
+  document.querySelectorAll(".chip-btn").forEach((btn) => {
+    btn.classList.toggle("active", Number(btn.dataset.chip) === current);
+  });
+}
+
+function updateBetAmountDisabled(disabled) {
+  const ids = ["betAmount", "betMinusBtn", "betPlusBtn"];
+  ids.forEach((id) => {
+    const el = $(id);
+    if (el) el.disabled = disabled;
+  });
+
+  document.querySelectorAll(".chip-btn").forEach((btn) => {
+    btn.disabled = disabled;
+  });
+}
+
+function adjustBetAmount(delta) {
+  const minBet = getMinBetValue();
+  const current = normalizeBetAmount($("betAmount").value);
+  setBetAmount(current + delta * minBet);
+}
+
 function getEligiblePlayers(players = state.players) {
   const minBet = Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
   return players.filter((p) => Number(p.score || 0) >= minBet);
@@ -589,6 +644,7 @@ function updateActionButtons() {
   if (clearBetBtn) clearBetBtn.disabled = !bettingOpen;
   if (allInBtn) allInBtn.disabled = !bettingOpen;
   updateBetTypePickerDisabled(!bettingOpen);
+  updateBetAmountDisabled(!bettingOpen);
 }
 
 function updateBetProgress() {
@@ -693,8 +749,7 @@ function renderRoom() {
   if (room.startScore !== undefined) $("startScore").value = room.startScore;
   if (room.minBet !== undefined) {
     $("minBet").value = room.minBet;
-    $("betAmount").min = room.minBet;
-    if (Number($("betAmount").value || 0) < Number(room.minBet || 1)) $("betAmount").value = room.minBet;
+    if (Number(String($("betAmount").value || "0").replace(/[^\d]/g, "")) < Number(room.minBet || 1)) setBetAmount(room.minBet);
   }
   $("betHint").textContent = `目前倍率：進洞 +1 倍、出界 +1 倍、撞柱 +2 倍；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分，最高可押目前持有分數。`;
 
@@ -917,8 +972,8 @@ async function submitBet() {
     return;
   }
 
-  const minBet = Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
-  const amount = Math.max(1, Math.floor(Number($("betAmount").value || 0)));
+  const minBet = getMinBetValue();
+  const amount = setBetAmount($("betAmount").value);
   const betType = $("betType").value;
   const self = state.players.find((p) => p.id === state.playerId);
   const score = Number(self?.score ?? state.room?.startScore ?? 0);
@@ -1102,7 +1157,7 @@ function allIn() {
     return;
   }
 
-  $("betAmount").value = score;
+  setBetAmount(score);
   setStatus(`已填入 All in：${score} 分。`, "ok");
 }
 
@@ -1200,6 +1255,25 @@ document.querySelectorAll(".bet-type-option").forEach((btn) => {
   });
 });
 
+$("betAmount").addEventListener("input", () => {
+  $("betAmount").value = String($("betAmount").value || "").replace(/[^\d]/g, "");
+  updateChipActiveState();
+});
+
+$("betAmount").addEventListener("blur", () => {
+  setBetAmount($("betAmount").value);
+});
+
+$("betMinusBtn").addEventListener("click", () => adjustBetAmount(-1));
+$("betPlusBtn").addEventListener("click", () => adjustBetAmount(1));
+
+document.querySelectorAll(".chip-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    if (btn.disabled) return;
+    setBetAmount(btn.dataset.chip);
+  });
+});
+
 $("randomRoomBtn").addEventListener("click", () => {
   $("roomId").value = makeRoomCode();
   state.roomId = cleanRoomId($("roomId").value);
@@ -1233,6 +1307,7 @@ $("resetLocalBtn").addEventListener("click", () => resetLocal().catch((e) => set
 
 updateSoundButton();
 setBetType($("betType")?.value || "inside");
+setBetAmount($("betAmount")?.value || 100);
 syncRoomUrl();
 renderRoom();
 renderPlayers();

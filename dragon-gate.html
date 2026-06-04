@@ -161,7 +161,20 @@
               </div>
             </label>
             <label>下注分數
-              <input id="betAmount" type="number" min="100" step="100" value="100" />
+              <div class="bet-amount-control">
+                <div class="amount-input-wrap">
+                  <span class="amount-prefix">籌碼</span>
+                  <input id="betAmount" class="amount-input" type="text" inputmode="numeric" value="100" />
+                  <button class="amount-step" type="button" id="betMinusBtn" aria-label="下注減少">−</button>
+                  <button class="amount-step" type="button" id="betPlusBtn" aria-label="下注增加">＋</button>
+                </div>
+                <div class="chip-row" aria-label="快速下注籌碼">
+                  <button type="button" class="chip-btn" data-chip="100">100</button>
+                  <button type="button" class="chip-btn" data-chip="500">500</button>
+                  <button type="button" class="chip-btn" data-chip="1000">1000</button>
+                  <button type="button" class="chip-btn" data-chip="2500">2500</button>
+                </div>
+              </div>
             </label>
           </div>
           <div class="actions">
