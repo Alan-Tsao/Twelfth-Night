@@ -1,0 +1,260 @@
+/* =========================================================
+   Hero Visual Effects
+   首頁主視覺：hover 微放大 + 點擊大圖懸浮視窗
+   用法：
+   1. 放到 css/hero-visual-effects.css
+   2. index.html 引入此 CSS
+   3. index.html 引入 js/hero-visual.js
+   ========================================================= */
+
+/* 讓原本 .visual 可以變成可點擊主視覺按鈕 */
+.visual.hero-visual-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  min-height: 520px;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  cursor: zoom-in;
+  text-align: left;
+  color: var(--text);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  border: 1px solid rgba(232, 201, 129, 0.22);
+  border-radius: 38px;
+  box-shadow:
+    0 24px 72px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* 改用偽元素承接圖片，才能做到圖片單獨 zoom */
+.visual.hero-visual-trigger::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 7, 13, 0.05), rgba(8, 7, 13, 0.22)),
+    url("../images/main-visual.jpg") center / cover no-repeat;
+  transform: scale(1);
+  filter: brightness(1) saturate(1);
+  transition:
+    transform 0.78s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.78s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, filter;
+}
+
+/* 移除原本「請將圖片放到...」提示 */
+.visual.hero-visual-trigger::after {
+  display: none;
+}
+
+/* 柔光邊框 */
+.visual.hero-visual-trigger .hero-visual-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(232, 201, 129, 0.12), transparent 38%),
+    radial-gradient(circle at 88% 92%, rgba(242, 167, 198, 0.12), transparent 42%);
+  opacity: 0.72;
+  transition: opacity 0.45s ease;
+}
+
+/* 底部提示條 */
+.hero-visual-caption {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 22px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(8, 7, 13, 0.48);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  transition:
+    transform 0.32s ease,
+    border-color 0.32s ease,
+    background 0.32s ease,
+    color 0.32s ease;
+}
+
+.hero-visual-caption::after {
+  content: "VIEW";
+  color: var(--gold);
+  letter-spacing: 0.16em;
+  font-size: 12px;
+}
+
+.visual.hero-visual-trigger:hover,
+.visual.hero-visual-trigger:focus-visible {
+  border-color: rgba(232, 201, 129, 0.46);
+  box-shadow:
+    0 28px 84px rgba(0, 0, 0, 0.46),
+    0 0 0 1px rgba(232, 201, 129, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.visual.hero-visual-trigger:hover::before,
+.visual.hero-visual-trigger:focus-visible::before {
+  transform: scale(1.045);
+  filter: brightness(1.08) saturate(1.05);
+}
+
+.visual.hero-visual-trigger:hover .hero-visual-glow,
+.visual.hero-visual-trigger:focus-visible .hero-visual-glow {
+  opacity: 1;
+}
+
+.visual.hero-visual-trigger:hover .hero-visual-caption,
+.visual.hero-visual-trigger:focus-visible .hero-visual-caption {
+  transform: translateY(-2px);
+  border-color: rgba(232, 201, 129, 0.34);
+  background: rgba(8, 7, 13, 0.58);
+  color: #fff8f2;
+}
+
+/* 懸浮大圖 */
+body.hero-visual-modal-open {
+  overflow: hidden;
+}
+
+.hero-visual-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(3, 3, 8, 0.76);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.hero-visual-modal.show {
+  display: flex;
+}
+
+.hero-visual-dialog {
+  position: relative;
+  width: min(1080px, 94vw);
+  max-height: 88vh;
+  overflow: hidden;
+  border: 1px solid rgba(232, 201, 129, 0.28);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(242, 167, 198, 0.15), transparent 28%),
+    linear-gradient(180deg, rgba(22, 18, 31, 0.98), rgba(9, 8, 15, 0.98));
+  box-shadow: 0 34px 110px rgba(0, 0, 0, 0.68);
+  animation: heroVisualModalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-visual-modal-img {
+  width: 100%;
+  max-height: 78vh;
+  display: block;
+  object-fit: contain;
+  background: rgba(8, 7, 13, 0.92);
+}
+
+.hero-visual-modal-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 22px 18px;
+  color: var(--muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-visual-modal-caption strong {
+  color: var(--gold);
+  letter-spacing: 0.08em;
+}
+
+.hero-visual-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.40);
+  color: var(--text);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hero-visual-close:hover {
+  border-color: rgba(232, 201, 129, 0.55);
+  color: var(--gold);
+}
+
+@keyframes heroVisualModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .visual.hero-visual-trigger {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 680px) {
+  .hero-visual-modal {
+    padding: 14px;
+  }
+
+  .hero-visual-dialog {
+    border-radius: 26px;
+  }
+
+  .hero-visual-caption {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    padding: 13px 15px;
+  }
+
+  .hero-visual-modal-caption {
+    display: block;
+    padding: 14px 18px 16px;
+  }
+
+  .hero-visual-modal-caption span {
+    display: block;
+    margin-top: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visual.hero-visual-trigger::before,
+  .hero-visual-caption,
+  .hero-visual-dialog {
+    transition: none !important;
+    animation: none !important;
+  }
+}
