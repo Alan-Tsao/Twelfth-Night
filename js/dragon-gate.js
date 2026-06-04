@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V7：下注完成檢查、提示音、避免重複結算
+// 第十二夜｜射龍門多人房間 V8：修正下注完成後結算按鈕狀態
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -557,9 +557,30 @@ function canDrawResult() {
   );
 }
 
+function updateActionButtons() {
+  const room = state.room || {};
+  const expired = isExpired();
+  const bettingOpen = room.status === "betting" && room.gateA && room.gateB && !room.resultCard && !expired;
+
+  const newRoundBtn = $("newRoundBtn");
+  const drawResultBtn = $("drawResultBtn");
+  const submitBetBtn = $("submitBetBtn");
+  const clearBetBtn = $("clearBetBtn");
+  const allInBtn = $("allInBtn");
+
+  if (newRoundBtn) newRoundBtn.disabled = expired;
+  if (drawResultBtn) drawResultBtn.disabled = !canDrawResult();
+  if (submitBetBtn) submitBetBtn.disabled = !bettingOpen;
+  if (clearBetBtn) clearBetBtn.disabled = !bettingOpen;
+  if (allInBtn) allInBtn.disabled = !bettingOpen;
+}
+
 function updateBetProgress() {
   const el = $("betProgress");
-  if (!el) return;
+  if (!el) {
+    updateActionButtons();
+    return;
+  }
 
   const room = state.room || {};
   const progress = getBetProgress();
@@ -568,34 +589,40 @@ function updateBetProgress() {
 
   if (!room.gateA || !room.gateB) {
     el.textContent = "下注進度：等待主持人開局";
+    updateActionButtons();
     return;
   }
 
   if (room.status === "settled" || room.resultCard) {
     el.textContent = "下注進度：本局已結算，等待下一局";
+    updateActionButtons();
     return;
   }
 
   if (room.status !== "betting") {
     el.textContent = "下注進度：等待新一局";
+    updateActionButtons();
     return;
   }
 
   if (progress.eligibleCount === 0) {
     el.textContent = "下注進度：目前沒有可下注玩家";
     el.classList.add("waiting");
+    updateActionButtons();
     return;
   }
 
   if (progress.allReady) {
     el.textContent = `下注進度：${progress.betCount}/${progress.eligibleCount}，所有可下注玩家已完成`;
     el.classList.add("ready");
+    updateActionButtons();
     return;
   }
 
   const names = progress.missing.map((p) => p.name).filter(Boolean).join("、");
   el.textContent = `下注進度：${progress.betCount}/${progress.eligibleCount}，等待 ${names || "玩家"} 下注`;
   el.classList.add("waiting");
+  updateActionButtons();
 }
 
 function notifyRoundState() {
@@ -678,14 +705,7 @@ function renderRoom() {
   $("betPanel").style.display = state.role === "player" ? "block" : "none";
 
   updateBetProgress();
-
-  const bettingOpen = room.status === "betting" && room.gateA && room.gateB && !room.resultCard && !expired;
-
-  $("newRoundBtn").disabled = expired;
-  $("drawResultBtn").disabled = !canDrawResult();
-  $("submitBetBtn").disabled = !bettingOpen;
-  $("clearBetBtn").disabled = !bettingOpen;
-  $("allInBtn").disabled = !bettingOpen;
+  updateActionButtons();
 }
 
 function renderPlayers() {
@@ -718,6 +738,7 @@ function renderPlayers() {
     : `<div class="empty">尚無玩家加入。</div>`;
 
   updateBetProgress();
+  updateActionButtons();
 }
 
 function escapeHtml(value) {
