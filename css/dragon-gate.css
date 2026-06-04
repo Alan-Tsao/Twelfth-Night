@@ -280,7 +280,7 @@ select:focus {
 }
 
 .field-grid.compact {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .actions {
@@ -755,4 +755,28 @@ button:disabled,
   font-size: 12px;
   line-height: 1.5;
   margin-top: -2px;
+}
+
+
+.bet-countdown {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(232,201,129,.20);
+  background: rgba(232,201,129,.07);
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.bet-countdown.urgent {
+  color: var(--danger);
+  border-color: rgba(255,154,169,.30);
+  background: rgba(255,154,169,.08);
+  animation: dgPulse 1s ease-in-out infinite;
+}
+
+@keyframes dgPulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(255,154,169,0); }
+  50% { box-shadow: 0 0 24px rgba(255,154,169,.18); }
 }
