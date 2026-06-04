@@ -90,7 +90,7 @@ p {
 /* Party bar */
 .party-bar {
   display: grid;
-  grid-template-columns: auto minmax(240px, 1fr) auto auto auto auto;
+  grid-template-columns: auto minmax(240px, 1fr) auto auto auto auto auto;
   gap: 12px;
   align-items: center;
   padding: 18px 20px;
@@ -125,6 +125,7 @@ p {
 
 .icon-btn,
 .link-btn,
+.sound-btn,
 .leave-btn,
 .mini-btn {
   appearance: none;
@@ -147,9 +148,24 @@ p {
   padding: 4px 10px;
 }
 
+.sound-btn,
 .leave-btn {
   min-height: 44px;
   padding: 8px 16px;
+}
+
+.sound-btn {
+  border-color: rgba(232,201,129,.30);
+  color: var(--gold);
+  background: rgba(232,201,129,.08);
+}
+
+.sound-btn.enabled {
+  color: #22131b;
+  background: linear-gradient(135deg, rgba(232,201,129,.96), rgba(242,167,198,.92));
+}
+
+.leave-btn {
   border-color: rgba(255,154,169,.32);
   color: var(--danger);
   background: rgba(255,154,169,.08);
@@ -301,6 +317,7 @@ select:focus {
 .btn:hover,
 .icon-btn:hover,
 .link-btn:hover,
+.sound-btn:hover,
 .leave-btn:hover,
 .mini-btn:hover {
   border-color: rgba(232,201,129,.45);
@@ -413,6 +430,27 @@ select:focus {
   background: rgba(0,0,0,.22);
   color: var(--text);
   min-height: 62px;
+}
+
+.bet-progress {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.045);
+  color: var(--muted);
+}
+
+.bet-progress.ready {
+  color: var(--ok);
+  border-color: rgba(183,239,197,.26);
+  background: rgba(183,239,197,.08);
+}
+
+.bet-progress.waiting {
+  color: var(--gold);
+  border-color: rgba(232,201,129,.24);
+  background: rgba(232,201,129,.07);
 }
 
 .host-panel,
