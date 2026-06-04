@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V10：籌碼式下注分數輸入
+// 第十二夜｜射龍門多人房間 V11：籌碼累加下注
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -81,6 +81,7 @@ let audioContext = null;
 let lastNeedBetKey = "";
 let lastAllBetsReadyKey = "";
 let lastSettledKey = "";
+let chipAccumulated = false;
 
 if (!state.clientId) {
   state.clientId = makeId();
@@ -592,6 +593,22 @@ function adjustBetAmount(delta) {
   const minBet = getMinBetValue();
   const current = normalizeBetAmount($("betAmount").value);
   setBetAmount(current + delta * minBet);
+  chipAccumulated = true;
+}
+
+function addChipAmount(chipValue) {
+  const chip = Math.max(1, Math.floor(Number(chipValue || 0)));
+  const minBet = getMinBetValue();
+  const currentRaw = Math.floor(Number(String($("betAmount").value || "").replace(/[^\d]/g, ""))) || 0;
+
+  // 初次點選高額籌碼時，避免從預設最低下注額開始累加。
+  // 例如預設 100，第一次點 +2500 → 2500；第二次點 +2500 → 5000。
+  const nextAmount = (!chipAccumulated && currentRaw <= minBet)
+    ? chip
+    : currentRaw + chip;
+
+  setBetAmount(nextAmount);
+  chipAccumulated = true;
 }
 
 function getEligiblePlayers(players = state.players) {
@@ -960,6 +977,8 @@ async function newRound() {
   lastNeedBetKey = "";
   lastAllBetsReadyKey = "";
   lastSettledKey = "";
+  chipAccumulated = false;
+  setBetAmount(state.room?.minBet || $("minBet").value || 100);
 
   setStatus("已開始新一局，等待玩家下注。", "ok");
 }
@@ -996,6 +1015,7 @@ async function submitBet() {
     updatedAt: serverTimestamp()
   }, { merge: true });
 
+  chipAccumulated = false;
   setStatus("下注已送出。", "ok");
 }
 
@@ -1010,6 +1030,8 @@ async function clearBet() {
     updatedAt: serverTimestamp()
   });
 
+  chipAccumulated = false;
+  setBetAmount(state.room?.minBet || $("minBet").value || 100);
   setStatus("已取消下注。", "ok");
 }
 
@@ -1158,6 +1180,7 @@ function allIn() {
   }
 
   setBetAmount(score);
+  chipAccumulated = true;
   setStatus(`已填入 All in：${score} 分。`, "ok");
 }
 
@@ -1257,6 +1280,7 @@ document.querySelectorAll(".bet-type-option").forEach((btn) => {
 
 $("betAmount").addEventListener("input", () => {
   $("betAmount").value = String($("betAmount").value || "").replace(/[^\d]/g, "");
+  chipAccumulated = true;
   updateChipActiveState();
 });
 
@@ -1270,7 +1294,7 @@ $("betPlusBtn").addEventListener("click", () => adjustBetAmount(1));
 document.querySelectorAll(".chip-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     if (btn.disabled) return;
-    setBetAmount(btn.dataset.chip);
+    addChipAmount(btn.dataset.chip);
   });
 });
 
