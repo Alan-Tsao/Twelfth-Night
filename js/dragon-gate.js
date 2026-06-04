@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V12：下注倒數與逾時自動下注
+// 第十二夜｜射龍門多人房間 V13：浮動倍率
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -504,35 +504,84 @@ function getGateInfo(a, b) {
   };
 }
 
+function getInsideMultiplierByWidth(width) {
+  if (width <= 0) return 0;
+  if (width === 1) return 8;
+  if (width === 2) return 5;
+  if (width === 3) return 3;
+  if (width <= 5) return 2;
+  return 1;
+}
+
+function getRoundMultipliers(gateA, gateB) {
+  const gate = getGateInfo(gateA, gateB);
+  const width = gate?.width ?? 0;
+  return {
+    width,
+    inside: getInsideMultiplierByWidth(width),
+    post: 3,
+    outside: 1
+  };
+}
+
+function multiplierText(value) {
+  return value > 0 ? `${value} 倍` : "不可";
+}
+
+function updateMultiplierPanel() {
+  const room = state.room || {};
+  const gate = getGateInfo(room.gateA, room.gateB);
+  const multipliers = getRoundMultipliers(room.gateA, room.gateB);
+
+  const widthText = $("gateWidthText");
+  const insideText = $("insideMultiplierText");
+  const postText = $("postMultiplierText");
+  const outsideText = $("outsideMultiplierText");
+
+  if (!room.gateA || !room.gateB) {
+    widthText.textContent = "--";
+    insideText.textContent = "--";
+    postText.textContent = "3 倍";
+    outsideText.textContent = "1 倍";
+    return;
+  }
+
+  widthText.textContent = gate.same ? "同點" : `${multipliers.width} 格`;
+  insideText.textContent = multiplierText(multipliers.inside);
+  postText.textContent = multiplierText(multipliers.post);
+  outsideText.textContent = multiplierText(multipliers.outside);
+}
+
 function judgeBet(betType, amount, gateA, gateB, resultCard) {
   const gate = getGateInfo(gateA, gateB);
   if (!gate || !resultCard || !amount) {
-    return { delta: 0, label: "未結算" };
+    return { delta: 0, label: "未結算", multiplier: 0 };
   }
 
+  const multipliers = getRoundMultipliers(gateA, gateB);
   const hitPost = resultCard.rank === gate.low || resultCard.rank === gate.high;
   const inside = resultCard.rank > gate.low && resultCard.rank < gate.high;
   const outside = !inside && !hitPost;
 
   if (betType === "inside") {
     return inside
-      ? { delta: amount, label: "進洞成功" }
-      : { delta: -amount, label: hitPost ? "撞柱失敗" : "出界失敗" };
+      ? { delta: amount * multipliers.inside, label: `進洞成功 ×${multipliers.inside}`, multiplier: multipliers.inside }
+      : { delta: -amount, label: hitPost ? "撞柱失敗" : "出界失敗", multiplier: multipliers.inside };
   }
 
   if (betType === "post") {
     return hitPost
-      ? { delta: amount * 2, label: "撞柱成功" }
-      : { delta: -amount, label: inside ? "進洞未中" : "出界未中" };
+      ? { delta: amount * multipliers.post, label: `撞柱成功 ×${multipliers.post}`, multiplier: multipliers.post }
+      : { delta: -amount, label: inside ? "進洞未中" : "出界未中", multiplier: multipliers.post };
   }
 
   if (betType === "outside") {
     return outside
-      ? { delta: amount, label: "出界成功" }
-      : { delta: -amount, label: hitPost ? "撞柱未中" : "進洞未中" };
+      ? { delta: amount * multipliers.outside, label: `出界成功 ×${multipliers.outside}`, multiplier: multipliers.outside }
+      : { delta: -amount, label: hitPost ? "撞柱未中" : "進洞未中", multiplier: multipliers.outside };
   }
 
-  return { delta: 0, label: "未結算" };
+  return { delta: 0, label: "未結算", multiplier: 0 };
 }
 
 function setBetType(value) {
@@ -825,11 +874,12 @@ function renderRoom() {
     if (Number(String($("betAmount").value || "0").replace(/[^\d]/g, "")) < Number(room.minBet || 1)) setBetAmount(room.minBet);
   }
   if (room.betSeconds !== undefined) $("betSeconds").value = room.betSeconds;
-  $("betHint").textContent = `目前倍率：進洞 +1 倍、出界 +1 倍、撞柱 +2 倍；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分，最高可押目前持有分數。`;
+  $("betHint").textContent = `浮動倍率：進洞依門寬 1/2/3/4～5/6+ 格為 8/5/3/2/1 倍，撞柱 3 倍，出界 1 倍；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`;
 
   $("gateA").textContent = room.gateA?.label || "?";
   $("gateB").textContent = room.gateB?.label || "?";
   $("resultCard").textContent = room.resultCard?.label || "?";
+  updateMultiplierPanel();
 
   const gate = getGateInfo(room.gateA, room.gateB);
   if (expired) {
@@ -1021,7 +1071,7 @@ async function newRound() {
     gateA,
     gateB,
     resultCard: null,
-    roundResult: `新一局開始，下注倒數 ${betSeconds} 秒。`,
+    roundResult: `新一局開始，下注倒數 ${betSeconds} 秒。進洞倍率會依門寬浮動。`,
     betSeconds,
     betDeadlineAt: Timestamp.fromMillis(Date.now() + betSeconds * 1000),
     autoFilled: false,
