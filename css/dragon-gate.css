@@ -748,3 +748,11 @@ button:disabled,
     text-align: left;
   }
 }
+
+
+.chip-hint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: -2px;
+}
