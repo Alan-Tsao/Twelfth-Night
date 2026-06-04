@@ -435,4 +435,18 @@ window.allCasts = [
     recommended: "談心交流、輕鬆陪聊",
     extraServices: ["談心交流"]
   },
+  {
+    name: "打喵帕尼尼堡",
+    image: "images/staff-23.jpg",
+    desc: "暫無",
+    shortDesc: "暫無",
+    quote: "暫無。",
+    tags: ["談心交流"],
+    filterTags: ["chat"],
+    status: "unbookable",
+    statusLabel: "不接受指名",
+    workDays: [5, 6],
+    recommended: "談心交流",
+    extraServices: ["談心交流"]
+  },
 ];
