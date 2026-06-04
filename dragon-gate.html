@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>射龍門｜第十二夜小遊戲</title>
+  <link rel="stylesheet" href="css/dragon-gate.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="eyebrow">TWELFTH NIGHT GAME</div>
+      <h1>射龍門</h1>
+      <p>主持人建立房間，客人輸入暱稱加入；所有玩家會即時同步分數、下注與本場排名。</p>
+      <div class="notice">目前是測試版：房間支援邀請碼與邀請連結，預設 11 小時軟過期；若所有人正常離開，會自動清空本場資料。</div>
+    </section>
+
+    <section class="party-bar" aria-label="房間狀態列">
+      <div class="party-title">隊伍模式</div>
+
+      <div class="code-panel">
+        <span class="muted">代碼：</span>
+        <strong id="roomCodeText">尚未連線</strong>
+        <button class="icon-btn" id="copyCodeBtn" type="button" title="複製代碼">⧉</button>
+        <button class="link-btn" id="copyInviteBtn" type="button">⌁ 邀請</button>
+      </div>
+
+      <div class="connection-chip" id="connectionChip">
+        <span class="dot"></span>
+        <span id="connectionText">未連線</span>
+      </div>
+
+      <div class="timer-chip">
+        <span class="muted">在線：</span>
+        <strong id="onlineCount">0</strong>
+      </div>
+
+      <div class="timer-chip">
+        <span class="muted">剩餘時間：</span>
+        <strong id="remainingTime">--:--:--</strong>
+      </div>
+
+      <button class="leave-btn" id="leaveRoomBtn" type="button">離開房間</button>
+    </section>
+
+    <section class="grid setup-grid">
+      <div class="panel">
+        <h2>房間設定</h2>
+        <div class="field-grid">
+          <label>房間代碼
+            <div class="input-with-button">
+              <input id="roomId" value="TESTROOM" maxlength="24" />
+              <button class="mini-btn" id="randomRoomBtn" type="button">隨機</button>
+            </div>
+          </label>
+          <label>你的暱稱
+            <input id="displayName" placeholder="例：花、兔紙、客人A" />
+          </label>
+        </div>
+
+        <div class="game-settings">
+          <div class="settings-title">本場設定</div>
+          <div class="field-grid compact">
+            <label>起始分數
+              <input id="startScore" type="number" min="0" step="100" value="2500" />
+            </label>
+            <label>最低下注
+              <input id="minBet" type="number" min="1" step="100" value="100" />
+            </label>
+          </div>
+          <p class="hint">主持人建立房間時會套用此設定；玩家加入時會取得起始分數。最高下注不限，但不能超過目前持有分數。</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="hostCreateBtn">我是主持人：建立 / 連線房間</button>
+          <button class="btn" id="playerJoinBtn">我是玩家：加入房間</button>
+          <button class="btn danger" id="resetLocalBtn">清除本機資料</button>
+        </div>
+
+        <div class="status" id="statusBox">尚未連線。</div>
+      </div>
+
+      <div class="panel">
+        <h2>目前房間</h2>
+        <div class="room-card">
+          <div>
+            <span class="muted">房間</span>
+            <strong id="roomLabel">尚未連線</strong>
+          </div>
+          <div>
+            <span class="muted">狀態</span>
+            <strong id="roomStatus">-</strong>
+          </div>
+          <div>
+            <span class="muted">回合</span>
+            <strong id="roundLabel">0</strong>
+          </div>
+          <div>
+            <span class="muted">主持</span>
+            <strong id="hostLabel">-</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid game-grid">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>牌局</h2>
+          <div class="badge" id="roleBadge">未加入</div>
+        </div>
+
+        <div class="cards-row">
+          <div class="card-slot">
+            <span>門牌一</span>
+            <div class="playing-card" id="gateA">?</div>
+          </div>
+          <div class="card-slot result-slot">
+            <span>結果牌</span>
+            <div class="playing-card result" id="resultCard">?</div>
+          </div>
+          <div class="card-slot">
+            <span>門牌二</span>
+            <div class="playing-card" id="gateB">?</div>
+          </div>
+        </div>
+
+        <div class="round-result" id="roundResult">等待主持人開局。</div>
+
+        <div class="host-panel" id="hostPanel">
+          <h3>主持人操作</h3>
+          <div class="actions">
+            <button class="btn primary" id="newRoundBtn">開始新一局 / 重發門牌</button>
+            <button class="btn" id="drawResultBtn">抽結果牌並結算</button>
+            <button class="btn" id="copyResultBtn">複製結果文字</button>
+            <button class="btn danger" id="clearRoomBtn">清空本場</button>
+          </div>
+          <p class="hint">建議：門牌相同或相鄰時，可按「重發門牌」。</p>
+        </div>
+
+        <div class="bet-panel" id="betPanel">
+          <h3>玩家下注</h3>
+          <div class="bet-grid">
+            <label>下注類型
+              <select id="betType">
+                <option value="inside">進洞</option>
+                <option value="post">撞柱</option>
+                <option value="outside">出界</option>
+              </select>
+            </label>
+            <label>下注分數
+              <input id="betAmount" type="number" min="100" step="100" value="100" />
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="submitBetBtn">送出下注</button>
+            <button class="btn" id="allInBtn">All in</button>
+            <button class="btn" id="clearBetBtn">取消下注</button>
+          </div>
+          <p class="hint" id="betHint">目前倍率：進洞 +1 倍、出界 +1 倍、撞柱 +2 倍；輸則扣下注分數。</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>本場排名</h2>
+        <div class="ranking" id="rankingList"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>本局玩家</h2>
+      <div class="player-list" id="playerList"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/dragon-gate.js"></script>
+</body>
+</html>

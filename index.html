@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/motion-effects.css">
     <link rel="stylesheet" href="css/announcement-shadow-fix.css">
+    <link rel="stylesheet" href="css/hero-visual-effects.css">
 </head>
 
 <body>
@@ -27,7 +28,12 @@
                 <div class="cta-row"><a class="btn primary" href="booking.html">立即預約</a><a class="btn"
                         href="cast.html">查看公關介紹</a><a class="btn" href="service.html">查看服務項目</a></div>
             </div>
-            <div class="visual"></div>
+            <button class="visual hero-visual-trigger" type="button"
+                data-hero-images="images/main-visual.jpg, images/main-visual-02.jpg, images/main-visual-03.jpg, images/main-visual-04.jpg"
+                data-hero-alt="第十二夜店內照片">
+                <span class="hero-visual-glow" aria-hidden="true"></span>
+                <span class="hero-visual-caption">點擊查看店內大圖</span>
+            </button>
         </div>
     </header>
     <section id="announcements" class="announcement-section">
@@ -52,7 +58,7 @@
         <div class="about-grid">
             <div class="panel info-list">
                 <div class="info-item"><strong>店鋪地址</strong>迦樓羅／海都／1區／2號</div>
-                <div class="info-item"><strong>營業時間</strong>每週五、六 21:00–24:00</div>
+                <div class="info-item"><strong>營業時間</strong>每週五、六 22:00–24:00</div>
                 <div class="info-item"><strong>聯絡方式</strong>Discord／Threads／線上預約</div>
             </div>
             <div class="panel">
@@ -129,8 +135,8 @@
                     <div class="flow-item"><strong>03</strong>送出表單預約申請</div>
                     <div class="flow-item"><strong>04</strong>等待接待於 Discord 回覆確認</div>
                 </div>
-                <div class="cta-row"><a class="btn" href="https://discord.gg/你的邀請碼" target="_blank" rel="noopener">加入
-                        Discord</a><a class="btn" href="https://www.threads.com/你的帳號" target="_blank" rel="noopener">查看
+                <div class="cta-row"><a class="btn" href="https://discord.gg/invite/vMp8d3zMV8" target="_blank" rel="noopener">加入
+                        Discord</a><a class="btn" href="https://www.threads.com/@maotu.tutu" target="_blank" rel="noopener">查看
                         Threads</a></div>
             </div>
         </div>
@@ -143,6 +149,7 @@
     <script src="js/featured-cast.js"></script>
     <script src="js/announcements.js"></script>
     <script src="js/scroll-reveal.js"></script>
+    <script src="js/hero-visual.js"></script>
 </body>
 
 </html>
