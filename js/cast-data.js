@@ -83,7 +83,7 @@ window.allCasts = [
     name: "花形",
     image: "images/staff-05.jpg",
     desc: "夢境裡的貓魅公關，語尾偶爾會悄悄落下一聲喵。適合想被溫柔陪伴，也想要一點可愛互動的客人。",
-    shortDesc: "安靜陪伴、日式茶席、談心。",
+    shortDesc: "安靜陪伴、小遊戲、聊天談心。",
     quote: "不必急著說話，今晚的燈會替您慢慢沉澱。",
     tags: ["輕RP","安靜陪伴", "香檳CALL", "聊天談心", "小遊戲", "演奏", "上車舞"],
     filterTags: ["rp","chat", "champagne","game","music"],
