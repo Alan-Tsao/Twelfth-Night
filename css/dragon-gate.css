@@ -2120,3 +2120,88 @@ body.pair-gate .pair-suit-bet .bet-type-desc {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* V42：離房保留籌碼 / 荷官結清 */
+.player-row.left-player,
+.rank-row.left-player {
+  opacity: .68;
+}
+
+.player-status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--muted);
+  background: rgba(255,255,255,.045);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.player-status-pill.active {
+  color: #b7efc5;
+  border-color: rgba(183,239,197,.24);
+  background: rgba(183,239,197,.07);
+}
+
+.player-status-pill.left {
+  color: var(--gold);
+  border-color: rgba(232,201,129,.25);
+  background: rgba(232,201,129,.075);
+}
+
+.settle-btn {
+  appearance: none;
+  min-height: 30px;
+  border: 1px solid rgba(255,154,169,.28);
+  background: rgba(255,154,169,.07);
+  color: var(--danger);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.settle-btn:hover {
+  border-color: rgba(255,154,169,.48);
+  background: rgba(255,154,169,.13);
+}
+
+
+/* V43：正規射龍門模式 */
+.mode-picker {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.classic-bet .bet-type-title {
+  color: var(--gold);
+}
+
+body.classic-mode .normal-bet,
+body.classic-mode .pair-suit-bet {
+  display: none !important;
+}
+
+body.classic-mode .classic-bet:not([hidden]) {
+  min-height: 82px;
+  border-color: rgba(232,201,129,.42);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(232,201,129,.16), transparent 44%),
+    linear-gradient(135deg, rgba(232,201,129,.10), rgba(255,255,255,.035));
+}
+
+body.classic-mode .bet-type-picker {
+  gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .mode-picker {
+    grid-template-columns: 1fr;
+  }
+}
