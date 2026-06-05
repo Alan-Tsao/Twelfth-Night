@@ -153,6 +153,9 @@
             <label>特殊池比例
               <input id="jackpotRate" type="number" min="0" max="100" step="5" value="20" />
             </label>
+            <label>獎金池風險比例
+              <input id="potRiskRate" type="number" min="5" max="100" step="5" value="20" />
+            </label>
             <label>補籌碼額度
               <input id="rebuyAmount" type="number" min="100" step="100" value="2500" />
             </label>
@@ -160,7 +163,7 @@
               <input id="pairPostPenalty" type="number" min="1" step="1" value="3" />
             </label>
             <label>說明
-              <input value="開房會先放入初始獎金池" disabled />
+              <input value="風險比例會限制單注上限" disabled />
             </label>
           </div>
 
@@ -337,6 +340,7 @@
                   <button type="button" class="chip-btn" data-chip="2500">＋2500</button>
                 </div>
                 <div class="chip-hint">點擊籌碼會累加；第一次點高額籌碼會直接以該籌碼作為下注額。</div>
+                <div class="bet-limit-hint" id="betLimitHint" hidden></div>
                 <div class="actions bet-side-actions">
                   <button class="btn primary" id="submitBetBtn">送出下注</button>
                   <button class="btn" id="allInBtn">All in</button>

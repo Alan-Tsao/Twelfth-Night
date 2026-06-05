@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V36：開局前加購籌碼
+// 第十二夜｜射龍門多人房間 V40：資訊精簡與下注區優化
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -121,6 +121,10 @@ let betCountdownHandle = null;
 let autoFillingBets = false;
 let pendingRebuyPlayerId = "";
 let rebuyInProgress = false;
+let resultRevealInProgress = false;
+let currentResultRevealKey = "";
+let lastResultRevealKey = "";
+let resultRevealTimers = [];
 
 if (!state.clientId) {
   state.clientId = makeId();
@@ -531,6 +535,11 @@ function getJackpotRateValue(room = state.room) {
   return clampNumber(raw > 1 ? raw / 100 : raw, 0, 1);
 }
 
+function getPotRiskRateValue(room = state.room) {
+  const raw = Number(room?.potRiskRate ?? (($("potRiskRate")?.value ?? 20) / 100));
+  return clampNumber(raw > 1 ? raw / 100 : raw, 0.05, 1);
+}
+
 function getRebuyAmountValue(room = state.room) {
   return Math.max(100, Math.floor(Number(room?.rebuyAmount ?? $("rebuyAmount")?.value ?? 2500)));
 }
@@ -605,7 +614,7 @@ function updateCasinoPanel() {
   if ($("jackpotText")) $("jackpotText").textContent = String(Math.floor(Number(room.jackpot || 0)));
   if ($("anteText")) $("anteText").textContent = String(getAnteValue(room));
   if ($("rebuyText")) $("rebuyText").textContent = String(getRebuyAmountValue(room));
-  if ($("pairPostPenaltyText")) $("pairPostPenaltyText").textContent = `${getPairPostPenaltyValue(room)} 倍`;
+  if ($("pairPostPenaltyText")) $("pairPostPenaltyText").textContent = `賠 ${getPairPostPenaltyValue(room)} 倍`;
 }
 
 function getCasinoRoomPatchFromInputs() {
@@ -615,6 +624,7 @@ function getCasinoRoomPatchFromInputs() {
     initialPot: getInitialPotValue({ initialPot: Number($("initialPot")?.value || 5000) }),
     ante: Math.max(0, Math.floor(Number($("ante")?.value || 100))),
     jackpotRate: getJackpotRateValue({ jackpotRate: Number($("jackpotRate")?.value || 20) / 100 }),
+    potRiskRate: getPotRiskRateValue({ potRiskRate: Number($("potRiskRate")?.value || 20) / 100 }),
     rebuyAmount: getRebuyAmountValue({ rebuyAmount: Number($("rebuyAmount")?.value || 2500) }),
     pairPostPenalty: Math.max(1, Math.floor(Number($("pairPostPenalty")?.value || 3))),
     pot: gameMode === "casino" ? getInitialPotValue({ initialPot: Number($("initialPot")?.value || 5000) }) : 0,
@@ -676,6 +686,11 @@ async function playSound(kind = "notice") {
     } else if (kind === "settled") {
       tone(520, 0.10, 0, "sine", 0.04);
       tone(740, 0.18, 0.12, "sine", 0.045);
+    } else if (kind === "reveal") {
+      tone(620, 0.055, 0, "triangle", 0.035);
+      tone(720, 0.055, 0.09, "triangle", 0.038);
+      tone(840, 0.07, 0.19, "triangle", 0.04);
+      tone(980, 0.09, 0.32, "triangle", 0.042);
     } else if (kind === "pair") {
       tone(740, 0.10, 0, "triangle", 0.045);
       tone(980, 0.12, 0.12, "triangle", 0.05);
@@ -911,6 +926,7 @@ async function clearRoomBecauseEmpty() {
       initialPot: getInitialPotValue(),
       ante: getAnteValue(),
       jackpotRate: getJackpotRateValue(),
+      potRiskRate: getPotRiskRateValue(),
       rebuyAmount: getRebuyAmountValue(),
       pairPostPenalty: getPairPostPenaltyValue(),
       pot: getGameModeValue() === "casino" ? getInitialPotValue() : 0,
@@ -1215,7 +1231,7 @@ function updateMultiplierPanel() {
   if (!room.gateA || !room.gateB) {
     gateLabel.textContent = "門寬";
     insideLabel.textContent = "進洞";
-    postLabel.textContent = "撞柱";
+    postLabel.textContent = "押撞柱";
     outsideLabel.textContent = "出界";
     widthText.textContent = "--";
     insideText.textContent = "--";
@@ -1250,7 +1266,7 @@ function updateMultiplierPanel() {
 
   gateLabel.textContent = mode === "invalid" ? "門牌" : "門寬";
   insideLabel.textContent = "進洞";
-  postLabel.textContent = "撞柱";
+  postLabel.textContent = "押撞柱";
   outsideLabel.textContent = "出界";
   widthText.textContent = mode === "invalid" ? "順子門" : `${multipliers.width} 格`;
   insideText.textContent = mode === "invalid" ? "不可" : multiplierText(multipliers.inside);
@@ -1391,6 +1407,8 @@ function setBetType(value) {
   document.querySelectorAll(".bet-type-option").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.betType === value);
   });
+
+  updateBetLimitHint();
 }
 
 function updateBetTypePickerDisabled(disabled) {
@@ -1404,6 +1422,95 @@ function updateBetTypePickerDisabled(disabled) {
 
 function getMinBetValue() {
   return Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
+}
+
+function getPotentialWinMultiplier(betType = $("betType")?.value, room = state.room || {}) {
+  if (!room?.gateA || !room?.gateB) return 0;
+
+  const mode = getGateMode(room.gateA, room.gateB);
+  const multipliers = getRoundMultipliers(room.gateA, room.gateB);
+
+  if (mode === "pair") {
+    if (betType === "higher") return Number(multipliers.higher || 0);
+    if (betType === "lower") return Number(multipliers.lower || 0);
+    if (isSuitBetType(betType)) return Number(getSuitGuessMultiplier(room) || 0);
+    return 0;
+  }
+
+  if (mode === "normal") {
+    return Number(multipliers[betType] || 0);
+  }
+
+  return 0;
+}
+
+function getCasinoRiskLimitInfo(betType = $("betType")?.value, room = state.room || {}) {
+  if (!isCasinoMode(room)) {
+    return {
+      enabled: false,
+      maxBet: Infinity,
+      maxPayout: Infinity,
+      multiplier: getPotentialWinMultiplier(betType, room),
+      rate: 1,
+      pot: Math.floor(Number(room?.pot || 0))
+    };
+  }
+
+  const pot = Math.max(0, Math.floor(Number(room?.pot || 0)));
+  const rate = getPotRiskRateValue(room);
+  const maxPayout = Math.floor(pot * rate);
+  const multiplier = getPotentialWinMultiplier(betType, room);
+  const maxBet = multiplier > 0 ? Math.floor(maxPayout / multiplier) : 0;
+
+  return {
+    enabled: true,
+    maxBet,
+    maxPayout,
+    multiplier,
+    rate,
+    pot
+  };
+}
+
+function getCurrentBetCap(betType = $("betType")?.value) {
+  const score = getSelfScore();
+  const info = getCasinoRiskLimitInfo(betType);
+
+  if (!info.enabled) return score;
+  return Math.max(0, Math.min(score, info.maxBet));
+}
+
+function updateBetLimitHint() {
+  const el = $("betLimitHint");
+  if (!el) return;
+
+  const room = state.room || {};
+  const betType = $("betType")?.value || "";
+  const info = getCasinoRiskLimitInfo(betType, room);
+  const minBet = getMinBetValue();
+
+  el.classList.remove("warning");
+
+  if (!info.enabled || state.role !== "player" || room.status !== "betting" || !room.gateA || !room.gateB || room.resultCard || !getAvailableBetTypes().includes(betType)) {
+    el.hidden = true;
+    el.textContent = "";
+    return;
+  }
+
+  el.hidden = false;
+
+  if (info.maxBet < minBet) {
+    el.classList.add("warning");
+    el.textContent = `賭場限注：目前獎金池承擔上限 ${info.maxPayout} 分，低於最低下注需求。請荷官補池或調高風險比例。`;
+    return;
+  }
+
+  const score = getSelfScore();
+  const cap = Math.min(score, info.maxBet);
+  const riskPct = Math.round(info.rate * 100);
+  const typeLabel = BET_LABELS[betType] || betType;
+
+  el.textContent = `賭場限注：${typeLabel} 最高可下注 ${cap} 分（獎金池單局承擔 ${riskPct}%＝${info.maxPayout} 分，倍率 ${info.multiplier} 倍）。`;
 }
 
 function getSelfScore() {
@@ -1581,6 +1688,7 @@ function updateActionButtons() {
   const expired = isExpired();
   const mode = getGateMode(room.gateA, room.gateB);
   const bettingOpen = room.status === "betting" && room.gateA && room.gateB && mode !== "invalid" && !room.resultCard && !expired && !isBetDeadlinePassed();
+  const revealing = isResultRevealActiveForRoom(room);
   const playerBetLocked = isPlayerBetLocked();
   const playerCanEditBet = bettingOpen && !playerBetLocked;
 
@@ -1592,11 +1700,11 @@ function updateActionButtons() {
   const autoFillBetsBtn = $("autoFillBetsBtn");
 
   if (newRoundBtn) {
-    newRoundBtn.disabled = !canStartNewRoundOrRedeal();
+    newRoundBtn.disabled = revealing || !canStartNewRoundOrRedeal();
     newRoundBtn.textContent = mode === "invalid" && room.status === "betting" ? "重新發牌" : "開始下一局";
   }
-  if (drawResultBtn) drawResultBtn.disabled = !canDrawResult();
-  if (autoFillBetsBtn) autoFillBetsBtn.disabled = !(bettingOpen && canHostControl() && getBetProgress().missing.length > 0);
+  if (drawResultBtn) drawResultBtn.disabled = revealing || !canDrawResult();
+  if (autoFillBetsBtn) autoFillBetsBtn.disabled = revealing || !(bettingOpen && canHostControl() && getBetProgress().missing.length > 0);
   if (submitBetBtn) submitBetBtn.disabled = !playerCanEditBet || getAvailableBetTypes().length === 0;
   if (clearBetBtn) clearBetBtn.disabled = !playerCanEditBet;
   if (allInBtn) allInBtn.disabled = !playerCanEditBet;
@@ -1608,6 +1716,7 @@ function updateActionButtons() {
   const amountControl = document.querySelector(".bet-amount-control");
   if (picker) picker.classList.toggle("locked", playerBetLocked || !bettingOpen);
   if (amountControl) amountControl.classList.toggle("locked", playerBetLocked || !bettingOpen);
+  updateBetLimitHint();
 }
 function updateBetCountdown() {
   const el = $("betCountdown");
@@ -1745,12 +1854,108 @@ function notifyRoundState() {
   }
 
   if (room.status === "settled" && room.resultCard) {
+    const revealKey = getResultRevealKey(room);
     const key = `${state.roomId}-${room.round}-settled-${room.resultCard.label}`;
-    if (lastSettledKey !== key) {
+    if (lastSettledKey !== key && lastResultRevealKey === revealKey && !isResultRevealActiveForRoom(room)) {
       lastSettledKey = key;
       playSound("settled");
     }
   }
+}
+
+function getResultRevealKey(room = state.room || {}) {
+  if (!room?.resultCard) return "";
+  return `${state.roomId || ""}:${room.round || 0}:${getCardId(room.resultCard) || room.resultCard.label || ""}`;
+}
+
+function clearResultRevealTimers() {
+  resultRevealTimers.forEach((timerId) => clearTimeout(timerId));
+  resultRevealTimers = [];
+}
+
+function setResultRevealClasses(active = false, final = false) {
+  const panel = document.querySelector(".main-game-panel");
+  const resultEl = $("resultCard");
+
+  if (panel) panel.classList.toggle("result-reveal-active", active);
+  if (resultEl) {
+    resultEl.classList.toggle("reveal-spinning", active);
+    resultEl.classList.toggle("reveal-final", final);
+  }
+}
+
+function isResultRevealActiveForRoom(room = state.room || {}) {
+  return Boolean(resultRevealInProgress && currentResultRevealKey && currentResultRevealKey === getResultRevealKey(room));
+}
+
+function getRandomVisualCard() {
+  const deck = createDeck();
+  return deck[Math.floor(Math.random() * deck.length)];
+}
+
+function startResultReveal(room = state.room || {}) {
+  if (!room?.resultCard) return;
+
+  const key = getResultRevealKey(room);
+  if (!key || key === lastResultRevealKey || currentResultRevealKey === key) return;
+
+  clearResultRevealTimers();
+
+  resultRevealInProgress = true;
+  currentResultRevealKey = key;
+  setResultRevealClasses(true, false);
+
+  const resultEl = $("resultCard");
+  if (resultEl) resultEl.textContent = "?";
+
+  const roundResult = $("roundResult");
+  if (roundResult) roundResult.textContent = "結果牌開獎中……";
+
+  playSound("reveal");
+
+  const steps = 16;
+  const finalCard = room.resultCard;
+
+  for (let i = 0; i < steps; i += 1) {
+    const delay = 45 + i * 72 + Math.max(0, i - 9) * 24;
+    resultRevealTimers.push(setTimeout(() => {
+      setCardView("resultCard", getRandomVisualCard());
+      if (soundEnabled && (i === 4 || i === 9 || i === 13)) {
+        tone(720 + i * 28, 0.035, 0, "triangle", 0.025);
+      }
+    }, delay));
+  }
+
+  const finalDelay = 45 + steps * 72 + 360;
+  resultRevealTimers.push(setTimeout(() => {
+    setCardView("resultCard", finalCard);
+    resultRevealInProgress = false;
+    lastResultRevealKey = key;
+    currentResultRevealKey = "";
+    setResultRevealClasses(false, true);
+
+    if ($("roundResult")) $("roundResult").textContent = room.roundResult || "本局已結算。";
+    playSound("settled");
+
+    // V38：開獎動畫結束後，立即刷新主持人按鈕狀態。
+    // V37 在動畫結束後沒有重新呼叫 updateActionButtons，
+    // 因此「開始下一局」可能會維持 disabled，直到下一次 Firebase 更新或重新整理。
+    updateActionButtons();
+
+    resultRevealTimers.push(setTimeout(() => {
+      const resultCard = $("resultCard");
+      if (resultCard) resultCard.classList.remove("reveal-final");
+      updateActionButtons();
+    }, 1300));
+  }, finalDelay));
+}
+
+function resetResultRevealIfNoResult(room = state.room || {}) {
+  if (room?.resultCard) return;
+  clearResultRevealTimers();
+  resultRevealInProgress = false;
+  currentResultRevealKey = "";
+  setResultRevealClasses(false, false);
 }
 
 function updatePairVisualState(room = state.room || {}) {
@@ -1826,14 +2031,24 @@ function renderRoom() {
   if (room.initialPot !== undefined && $("initialPot")) $("initialPot").value = room.initialPot;
   if (room.ante !== undefined && $("ante")) $("ante").value = room.ante;
   if (room.jackpotRate !== undefined && $("jackpotRate")) $("jackpotRate").value = Math.round(Number(room.jackpotRate || 0) * 100);
+  if (room.potRiskRate !== undefined && $("potRiskRate")) $("potRiskRate").value = Math.round(Number(room.potRiskRate || 0.2) * 100);
   if (room.rebuyAmount !== undefined && $("rebuyAmount")) $("rebuyAmount").value = room.rebuyAmount;
   if (room.pairPostPenalty !== undefined && $("pairPostPenalty")) $("pairPostPenalty").value = room.pairPostPenalty;
   updateCasinoPanel();
-  $("betHint").textContent = `${isCasinoMode(room) ? `賭場模式：輸分進獎金池，贏分從獎金池支付；對子撞柱賠 ${getPairPostPenaltyValue(room)} 倍，對子局可猜花色 3 倍。 ` : ""}普通局：進洞依門寬浮動，撞柱 3 倍，出界 1 倍。對子局：改猜大 / 猜小，抽到同點視為撞柱；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`;
+  $("betHint").textContent = `${isCasinoMode(room) ? `賭場模式：輸分進獎金池，贏分從獎金池支付；單局承擔 ${Math.round(getPotRiskRateValue(room) * 100)}%，對子撞柱賠 ${getPairPostPenaltyValue(room)} 倍，對子局可猜花色 3 倍。 ` : ""}普通局：進洞依門寬浮動，撞柱 3 倍，出界 1 倍。對子局：改猜大 / 猜小，抽到同點視為撞柱；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`;
 
   setCardView("gateA", room.gateA);
   setCardView("gateB", room.gateB);
-  setCardView("resultCard", room.resultCard);
+  resetResultRevealIfNoResult(room);
+  if (room.resultCard) {
+    if (lastResultRevealKey !== getResultRevealKey(room) && !isResultRevealActiveForRoom(room)) {
+      startResultReveal(room);
+    } else if (!isResultRevealActiveForRoom(room)) {
+      setCardView("resultCard", room.resultCard);
+    }
+  } else {
+    setCardView("resultCard", null);
+  }
   updateMultiplierPanel();
   triggerPairEffect(room);
 
@@ -1843,7 +2058,9 @@ function renderRoom() {
   } else if (!room.gateA || !room.gateB) {
     $("roundResult").textContent = `等待主持人開局。牌堆剩餘 ${getRemainingDeckCount(room.usedCards || [])} 張。`;
   } else if (room.resultCard) {
-    $("roundResult").textContent = room.roundResult || "本局已結算。";
+    $("roundResult").textContent = isResultRevealActiveForRoom(room)
+      ? "結果牌開獎中……"
+      : (room.roundResult || "本局已結算。");
   } else if (gate?.same) {
     $("roundResult").textContent = isCasinoMode(room)
       ? `對子局：門柱 ${cardRankName(room.gateA.rank)}，可猜大 / 猜小 / 猜花色；大小同點撞柱賠 ${getPairPostPenaltyValue(room)} 倍，猜花色只看花色。`
@@ -2141,6 +2358,11 @@ async function newRound() {
   lastAllBetsReadyKey = "";
   lastSettledKey = "";
   lastPairEffectKey = "";
+  lastResultRevealKey = "";
+  currentResultRevealKey = "";
+  resultRevealInProgress = false;
+  clearResultRevealTimers();
+  setResultRevealClasses(false, false);
   chipAccumulated = false;
   setBetAmount(state.room?.minBet || $("minBet").value || 100);
 
@@ -2177,6 +2399,22 @@ async function submitBet() {
   if (amount > score) {
     setStatus(`你的目前分數是 ${score}，不能下注超過持有分數。`, "err");
     return;
+  }
+
+  const riskInfo = getCasinoRiskLimitInfo(betType);
+  if (riskInfo.enabled) {
+    if (riskInfo.maxBet < minBet) {
+      setStatus(`賭場限注：目前獎金池承擔上限 ${riskInfo.maxPayout} 分，低於最低下注需求。請荷官補池或調高風險比例。`, "err");
+      updateBetLimitHint();
+      return;
+    }
+
+    if (amount > riskInfo.maxBet) {
+      setStatus(`賭場限注：${BET_LABELS[betType] || betType} 最高可下注 ${riskInfo.maxBet} 分。`, "err");
+      setBetAmount(riskInfo.maxBet);
+      updateBetLimitHint();
+      return;
+    }
   }
 
   await setDoc(playerRef(), {
@@ -2237,8 +2475,22 @@ async function autoFillMissingBets(reason = "manual") {
     const lines = [];
 
     missing.forEach((p) => {
-      const betType = getRandomBetType();
-      if (!betType) return;
+      const available = getAvailableBetTypes().filter((type) => {
+        const info = getCasinoRiskLimitInfo(type, room);
+        return !info.enabled || info.maxBet >= minBet;
+      });
+      const betType = available[Math.floor(Math.random() * available.length)] || "";
+
+      if (!betType) {
+        batch.update(p.ref, {
+          currentBet: 0,
+          betType: "",
+          lastResult: "逾時未下注：賭場限注低於最低下注",
+          updatedAt: serverTimestamp()
+        });
+        return;
+      }
+
       batch.update(p.ref, {
         currentBet: minBet,
         betType,
@@ -2556,6 +2808,7 @@ async function clearRoom() {
     initialPot: getInitialPotValue(),
     ante: getAnteValue(),
     jackpotRate: getJackpotRateValue(),
+    potRiskRate: getPotRiskRateValue(),
     rebuyAmount: getRebuyAmountValue(),
     pairPostPenalty: getPairPostPenaltyValue(),
     pot: getGameModeValue() === "casino" ? getInitialPotValue() : 0,
@@ -2627,9 +2880,18 @@ function allIn() {
     return;
   }
 
-  setBetAmount(score);
+  const cap = getCurrentBetCap($("betType")?.value);
+  const amount = Math.max(0, Math.min(score, cap));
+
+  if (amount < minBet) {
+    setStatus(`目前賭場限注 ${amount} 分，低於最低下注 ${minBet}。請荷官補池或調高風險比例。`, "err");
+    updateBetLimitHint();
+    return;
+  }
+
+  setBetAmount(amount);
   chipAccumulated = true;
-  setStatus(`已填入 All in：${score} 分。`, "ok");
+  setStatus(amount < score ? `已依賭場限注填入：${amount} 分。` : `已填入 All in：${score} 分。`, "ok");
 }
 
 async function resetLocal() {
