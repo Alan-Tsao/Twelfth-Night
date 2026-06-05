@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V40：資訊精簡與下注區優化
+// 第十二夜｜射龍門多人房間 V41：特殊池公平分配
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -2577,6 +2577,24 @@ async function drawResult() {
     let potAfter = Math.max(0, Math.floor(Number(room.pot || 0)));
     let jackpotAfter = Math.max(0, Math.floor(Number(room.jackpot || 0)));
 
+    // V41：同一局多人觸發特殊池時，先統計所有符合資格者，再平均分配。
+    // 避免舊版出現第一位拿一半、第二位拿剩下一半的結算順序差異。
+    const jackpotEligibleIds = new Set();
+    if (casino && pairMode && jackpotAfter > 0) {
+      currentPlayers.forEach((p) => {
+        const amount = Math.max(0, Number(p.currentBet || 0));
+        if (!amount || !(p.betType === "higher" || p.betType === "lower")) return;
+
+        const judged = judgeBet(p.betType, amount, room.gateA, room.gateB, resultCard);
+        if (judged.delta > 0) jackpotEligibleIds.add(p.id);
+      });
+    }
+
+    const jackpotRelease = jackpotEligibleIds.size > 0 ? Math.floor(jackpotAfter * 0.5) : 0;
+    const jackpotShare = jackpotEligibleIds.size > 0 ? Math.floor(jackpotRelease / jackpotEligibleIds.size) : 0;
+    const jackpotTotalPaid = jackpotShare * jackpotEligibleIds.size;
+    jackpotAfter = Math.max(0, jackpotAfter - jackpotTotalPaid);
+
     currentPlayers.forEach((p) => {
       const amount = Math.max(0, Number(p.currentBet || 0));
 
@@ -2604,9 +2622,8 @@ async function drawResult() {
           potAfter -= payout;
           playerDelta = payout;
 
-          if (pairMode && (p.betType === "higher" || p.betType === "lower") && jackpotAfter > 0) {
-            jackpotBonus = Math.floor(jackpotAfter * 0.5);
-            jackpotAfter -= jackpotBonus;
+          if (pairMode && jackpotEligibleIds.has(p.id) && jackpotShare > 0) {
+            jackpotBonus = jackpotShare;
             playerDelta += jackpotBonus;
           }
 
@@ -2646,7 +2663,7 @@ async function drawResult() {
 
     const summary = [
       `第 ${Number(room.round || 0)} 局結果`,
-      casino ? `賭場模式｜獎金池 ${potAfter}｜特殊池 ${jackpotAfter}` : "",
+      casino ? `賭場模式｜獎金池 ${potAfter}｜特殊池 ${jackpotAfter}${jackpotEligibleIds.size ? `｜特殊池本局 ${jackpotEligibleIds.size} 人平分，每人 +${jackpotShare}` : ""}` : "",
       `門牌：${room.gateA.label}｜${room.gateB.label}`,
       `結果牌：${resultCard.label}`,
       `牌堆剩餘：${remainingAfterResult} 張`,
