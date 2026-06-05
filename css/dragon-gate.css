@@ -1789,3 +1789,145 @@ body.pair-gate .pair-suit-bet .bet-type-desc {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* V35：對子局特效 */
+.main-game-panel.pair-round {
+  border-color: rgba(232,201,129,.28);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.28),
+    inset 0 0 0 1px rgba(232,201,129,.045),
+    0 0 44px rgba(232,201,129,.055);
+}
+
+.main-game-panel.pair-effect-active {
+  animation: pairPanelPulse 1.8s ease-out 1;
+}
+
+.pair-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(232,201,129,.34);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(232,201,129,.20), transparent 42%),
+    linear-gradient(135deg, rgba(232,201,129,.12), rgba(242,167,198,.07));
+  color: var(--text);
+  box-shadow: 0 12px 36px rgba(232,201,129,.08);
+}
+
+.pair-alert[hidden] {
+  display: none !important;
+}
+
+.pair-alert strong {
+  color: var(--gold);
+  font-size: 20px;
+  letter-spacing: .08em;
+}
+
+.pair-alert span:last-child {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pair-alert-mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 54px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(232,201,129,.34);
+  background: rgba(232,201,129,.10);
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.pair-alert.flash {
+  animation: pairAlertIn 1.8s ease-out 1;
+}
+
+.playing-card.pair-card-glow {
+  animation: pairCardGlow 1.8s ease-out 1;
+}
+
+@keyframes pairPanelPulse {
+  0% {
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.28),
+      0 0 0 rgba(232,201,129,0);
+    transform: translateY(0);
+  }
+  18% {
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.28),
+      0 0 60px rgba(232,201,129,.20),
+      inset 0 0 0 1px rgba(232,201,129,.16);
+    transform: translateY(-1px);
+  }
+  100% {
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.28),
+      0 0 44px rgba(232,201,129,.055);
+    transform: translateY(0);
+  }
+}
+
+@keyframes pairAlertIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(.98);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pairCardGlow {
+  0% {
+    border-color: rgba(232,201,129,.18);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+  }
+  20% {
+    border-color: rgba(232,201,129,.72);
+    box-shadow:
+      inset 0 0 0 1px rgba(232,201,129,.18),
+      0 0 34px rgba(232,201,129,.18);
+  }
+  100% {
+    border-color: rgba(232,201,129,.22);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+  }
+}
+
+@media (max-width: 720px) {
+  .pair-alert {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+
+/* V36：開局前加購籌碼 */
+.rebuy-btn.prebuy {
+  border-color: rgba(183,239,197,.30);
+  background: rgba(183,239,197,.08);
+  color: #b7efc5;
+}
+
+.rebuy-btn.prebuy:hover {
+  border-color: rgba(183,239,197,.54);
+  background: rgba(183,239,197,.14);
+}
