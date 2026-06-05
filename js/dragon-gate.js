@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V33：下注排版與賭場資金池
+// 第十二夜｜射龍門多人房間 V36：開局前加購籌碼
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -115,6 +115,7 @@ let audioContext = null;
 let lastNeedBetKey = "";
 let lastAllBetsReadyKey = "";
 let lastSettledKey = "";
+let lastPairEffectKey = "";
 let chipAccumulated = false;
 let betCountdownHandle = null;
 let autoFillingBets = false;
@@ -534,6 +535,21 @@ function getRebuyAmountValue(room = state.room) {
   return Math.max(100, Math.floor(Number(room?.rebuyAmount ?? $("rebuyAmount")?.value ?? 2500)));
 }
 
+function isPreStartBuyInAvailable(room = state.room) {
+  return Boolean(
+    isCasinoMode(room) &&
+    Number(room?.round || 0) === 0 &&
+    !room?.gateA &&
+    !room?.gateB &&
+    !room?.resultCard &&
+    (room?.status || "waiting") === "waiting"
+  );
+}
+
+function getRebuyActionLabel(room = state.room) {
+  return isPreStartBuyInAvailable(room) ? "開局前加購" : "補籌碼";
+}
+
 function getPairPostPenaltyValue(room = state.room) {
   if (!isCasinoMode(room)) return 1;
   return Math.max(1, Math.floor(Number(room?.pairPostPenalty ?? $("pairPostPenalty")?.value ?? 3)));
@@ -554,10 +570,12 @@ function getPlayerStatsText(player) {
   const win = Math.floor(Number(player?.totalWin || 0));
   const loss = Math.floor(Number(player?.totalLoss || 0));
   const rebuy = Math.floor(Number(player?.rebuyCount || 0));
+  const extraBuyIn = Math.floor(Number(player?.extraBuyIn || 0));
   const net = getPlayerNet(player);
 
   const parts = [`戰績 ${formatSignedNumber(net)}`];
   if (win || loss) parts.push(`贏 ${win}｜輸 ${loss}`);
+  if (extraBuyIn) parts.push(`開局加購 ${extraBuyIn}`);
   if (rebuy) parts.push(`補籌碼 ${rebuy} 次`);
 
   return parts.join("｜");
@@ -584,7 +602,6 @@ function updateCasinoPanel() {
 
   if ($("casinoModeText")) $("casinoModeText").textContent = GAME_MODE_LABELS[getGameModeValue(room)] || "一般模式";
   if ($("potText")) $("potText").textContent = String(Math.floor(Number(room.pot || 0)));
-  if ($("initialPotText")) $("initialPotText").textContent = String(getInitialPotValue(room));
   if ($("jackpotText")) $("jackpotText").textContent = String(Math.floor(Number(room.jackpot || 0)));
   if ($("anteText")) $("anteText").textContent = String(getAnteValue(room));
   if ($("rebuyText")) $("rebuyText").textContent = String(getRebuyAmountValue(room));
@@ -659,6 +676,10 @@ async function playSound(kind = "notice") {
     } else if (kind === "settled") {
       tone(520, 0.10, 0, "sine", 0.04);
       tone(740, 0.18, 0.12, "sine", 0.045);
+    } else if (kind === "pair") {
+      tone(740, 0.10, 0, "triangle", 0.045);
+      tone(980, 0.12, 0.12, "triangle", 0.05);
+      tone(1240, 0.22, 0.26, "sine", 0.04);
     } else {
       tone(760, 0.12, 0, "sine", 0.045);
     }
@@ -1732,6 +1753,58 @@ function notifyRoundState() {
   }
 }
 
+function updatePairVisualState(room = state.room || {}) {
+  const mode = getGateMode(room.gateA, room.gateB);
+  const isPair = mode === "pair" && room.gateA && room.gateB;
+  const panel = document.querySelector(".main-game-panel");
+  const alert = $("pairAlert");
+
+  if (panel) panel.classList.toggle("pair-round", Boolean(isPair));
+  if (alert) alert.hidden = !isPair;
+}
+
+function triggerPairEffect(room = state.room || {}) {
+  const mode = getGateMode(room.gateA, room.gateB);
+  const isPair = mode === "pair" && room.gateA && room.gateB && !room.resultCard;
+
+  updatePairVisualState(room);
+
+  if (!isPair) return;
+
+  const key = `${state.roomId || ""}:${room.round || 0}:${getCardId(room.gateA)}:${getCardId(room.gateB)}`;
+  if (!key || key === lastPairEffectKey) return;
+
+  lastPairEffectKey = key;
+
+  const panel = document.querySelector(".main-game-panel");
+  const alert = $("pairAlert");
+  const gateA = $("gateA");
+  const gateB = $("gateB");
+
+  [panel, alert, gateA, gateB].forEach((el) => {
+    if (!el) return;
+    el.classList.remove("pair-effect-active", "flash", "pair-card-glow");
+    void el.offsetWidth;
+  });
+
+  if (panel) panel.classList.add("pair-effect-active");
+  if (alert) {
+    alert.hidden = false;
+    alert.classList.add("flash");
+  }
+  if (gateA) gateA.classList.add("pair-card-glow");
+  if (gateB) gateB.classList.add("pair-card-glow");
+
+  playSound("pair");
+
+  setTimeout(() => {
+    if (panel) panel.classList.remove("pair-effect-active");
+    if (alert) alert.classList.remove("flash");
+    if (gateA) gateA.classList.remove("pair-card-glow");
+    if (gateB) gateB.classList.remove("pair-card-glow");
+  }, 2100);
+}
+
 function renderRoom() {
   const room = state.room || {};
   const expired = isExpired();
@@ -1762,6 +1835,7 @@ function renderRoom() {
   setCardView("gateB", room.gateB);
   setCardView("resultCard", room.resultCard);
   updateMultiplierPanel();
+  triggerPairEffect(room);
 
   const gate = getGateInfo(room.gateA, room.gateB);
   if (expired) {
@@ -1829,7 +1903,7 @@ function renderPlayers() {
             </div>
             <div class="player-actions">
               <div class="score">${p.score || 0}</div>
-              ${canHostControl() && isCasinoMode() ? `<button class="rebuy-btn" type="button" data-rebuy-player="${p.id}">補籌碼</button>` : ""}
+              ${canHostControl() && isCasinoMode() ? `<button class="rebuy-btn ${isPreStartBuyInAvailable() ? "prebuy" : ""}" type="button" data-rebuy-player="${p.id}">${getRebuyActionLabel()}</button>` : ""}
             </div>
           </div>
         `;
@@ -1992,6 +2066,8 @@ async function playerJoinRoom() {
     totalLoss: Number(existing.totalLoss || 0),
     rebuyCount: Number(existing.rebuyCount || 0),
     totalRebuy: Number(existing.totalRebuy || 0),
+    extraBuyIn: Number(existing.extraBuyIn || 0),
+    initialBuyInCount: Number(existing.initialBuyInCount || 0),
     joinedAt: existing.joinedAt || serverTimestamp(),
     updatedAt: serverTimestamp()
   }, { merge: true });
@@ -2064,6 +2140,7 @@ async function newRound() {
   lastNeedBetKey = "";
   lastAllBetsReadyKey = "";
   lastSettledKey = "";
+  lastPairEffectKey = "";
   chipAccumulated = false;
   setBetAmount(state.room?.minBet || $("minBet").value || 100);
 
@@ -2353,14 +2430,22 @@ function openRebuyModal(playerId) {
   }
 
   const amount = getRebuyAmountValue();
+  const preStart = isPreStartBuyInAvailable();
+  const actionLabel = getRebuyActionLabel();
   const ante = getAnteValue();
-  const antePaid = Math.min(ante, amount);
-  const netAmount = Math.max(0, amount - antePaid);
+  const antePaid = preStart ? 0 : Math.min(ante, amount);
+  const netAmount = preStart ? amount : Math.max(0, amount - antePaid);
 
   pendingRebuyPlayerId = playerId;
-  $("rebuyModalText").textContent =
-    `要幫「${player.name}」補籌碼 ${amount} 分嗎？\n` +
-    `賭場模式會收底注 ${antePaid} 分進獎金池，玩家實拿 ${netAmount} 分。`;
+
+  const title = $("rebuyModalTitle");
+  const confirmBtn = $("rebuyConfirmBtn");
+  if (title) title.textContent = `${actionLabel}確認`;
+  if (confirmBtn) confirmBtn.textContent = `確認${actionLabel}`;
+
+  $("rebuyModalText").textContent = preStart
+    ? `要幫「${player.name}」開局前加購 ${amount} 分嗎？\n這次不會再收第二次入場底注，玩家實拿 ${netAmount} 分。`
+    : `要幫「${player.name}」補籌碼 ${amount} 分嗎？\n賭場模式會收底注 ${antePaid} 分進獎金池，玩家實拿 ${netAmount} 分。`;
   $("rebuyModal").hidden = false;
 }
 
@@ -2406,30 +2491,47 @@ async function rebuyPlayer(playerId) {
   }
 
   const amount = getRebuyAmountValue();
+  const preStart = isPreStartBuyInAvailable();
   const ante = getAnteValue();
-  const antePaid = Math.min(ante, amount);
-  const netAmount = Math.max(0, amount - antePaid);
+  const antePaid = preStart ? 0 : Math.min(ante, amount);
+  const netAmount = preStart ? amount : Math.max(0, amount - antePaid);
 
   const batch = writeBatch(db);
 
-  batch.update(playerRef(playerId), {
-    score: increment(netAmount),
-    rebuyCount: increment(1),
-    totalRebuy: increment(amount),
-    contributedToPot: increment(antePaid),
-    lastResult: `主持人補籌碼 ${amount} 分（底注 ${antePaid} 入池，實拿 ${netAmount}）`,
-    updatedAt: serverTimestamp()
-  });
-
-  if (antePaid > 0) {
-    batch.update(roomRef(), {
-      pot: increment(antePaid),
+  if (preStart) {
+    batch.update(playerRef(playerId), {
+      score: increment(netAmount),
+      extraBuyIn: increment(amount),
+      initialBuyInCount: increment(1),
+      lastResult: `開局前加購 ${amount} 分（免第二次底注）`,
       updatedAt: serverTimestamp()
     });
+  } else {
+    batch.update(playerRef(playerId), {
+      score: increment(netAmount),
+      rebuyCount: increment(1),
+      totalRebuy: increment(amount),
+      contributedToPot: increment(antePaid),
+      lastResult: `主持人補籌碼 ${amount} 分（底注 ${antePaid} 入池，實拿 ${netAmount}）`,
+      updatedAt: serverTimestamp()
+    });
+
+    if (antePaid > 0) {
+      batch.update(roomRef(), {
+        pot: increment(antePaid),
+        updatedAt: serverTimestamp()
+      });
+    }
   }
 
   await batch.commit();
-  setStatus(`已幫 ${player.name} 補籌碼 ${amount} 分，實拿 ${netAmount} 分。`, "ok");
+
+  setStatus(
+    preStart
+      ? `已幫 ${player.name} 開局前加購 ${amount} 分，不收第二次底注。`
+      : `已幫 ${player.name} 補籌碼 ${amount} 分，實拿 ${netAmount} 分。`,
+    "ok"
+  );
 }
 
 async function clearRoom() {
