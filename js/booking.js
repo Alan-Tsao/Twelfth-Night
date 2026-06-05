@@ -4,6 +4,31 @@ function escapeHtml(v){return String(v ?? "").replaceAll("&","&amp;").replaceAll
 const GOOGLE_FORM_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSeBaSem6rf9xXVzHfusmdccy8ih2CWNUovdMfuCNaMS2og9mQ/formResponse";
 const F={discordId:"entry.1545709974",playerName:"entry.1718936699",serverName:"entry.750062138",guestCount:"entry.999763483",bookingDate:"entry.975020306",bookingTime:"entry.361264469",sessionCount:"entry.1283018425",castNames:"entry.1254505299",serviceType:"entry.356715083",notes:"entry.467701533"};
 
+const SERVER_OPTIONS=[
+  "Bahamut",
+  "Chocobo",
+  "Tonberry",
+  "Typhon",
+  "Carbuncle",
+  "Aegis",
+  "Atomos",
+  "Garuda",
+  "Gungnir",
+  "Kujata",
+  "其他，請於備註說明"
+];
+
+const SERVICE_OPTIONS=[
+  {label:"不指定，由接待協助安排",value:""},
+  {label:"一般陪席",value:"一般陪席"},
+  {label:"陪酒聊天",value:"陪酒聊天"},
+  {label:"小遊戲",value:"小遊戲"},
+  {label:"香檳 CALL",value:"香檳 CALL"},
+  {label:"演奏／舞蹈",value:"演奏／舞蹈"},
+  {label:"按摩 RP",value:"按摩 RP"},
+  {label:"其他，請於備註說明",value:"其他，請於備註說明"}
+];
+
 // Google Sheet 班表 CSV
 // 欄位格式：date,cast,start,end,status,note
 // 注意：Google Sheet schedule 的 available 代表「有出勤」；是否可被指名優先由 staff_status 判斷，讀取失敗才用 cast-data.js。
@@ -146,6 +171,67 @@ function applyStaffStatus(cast){
     role:override.role||cast.role||"",
     staffStatusNote:override.note||""
   };
+}
+
+
+function setupCustomSelect(selectId, targetId, options, placeholder){
+  const root=document.getElementById(selectId);
+  const target=document.getElementById(targetId);
+  if(!root || !target)return;
+
+  const normalized=options.map(opt=>typeof opt==="string"?{label:opt,value:opt}:opt);
+  root.innerHTML=`<button type="button" class="tn-select-value" aria-expanded="false"><span class="tn-select-placeholder">${escapeHtml(placeholder)}</span></button><div class="tn-select-menu" role="listbox"></div>`;
+
+  const valueBtn=root.querySelector(".tn-select-value");
+  const valueText=valueBtn.querySelector("span");
+  const menu=root.querySelector(".tn-select-menu");
+
+  function render(){
+    const current=target.value;
+    menu.innerHTML=normalized.map(opt=>`<button type="button" class="tn-select-option ${opt.value===current?"active":""}" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.label)}</button>`).join("");
+
+    const found=normalized.find(opt=>opt.value===current);
+    if(found && found.value){
+      valueText.classList.remove("tn-select-placeholder");
+      valueText.textContent=found.label;
+    }else if(found && found.label && current===""){
+      valueText.classList.remove("tn-select-placeholder");
+      valueText.textContent=found.label;
+    }else{
+      valueText.classList.add("tn-select-placeholder");
+      valueText.textContent=placeholder;
+    }
+  }
+
+  valueBtn.addEventListener("click",()=>{
+    const open=!root.classList.contains("open");
+    document.querySelectorAll(".tn-select.open").forEach(el=>{
+      el.classList.remove("open");
+      el.querySelector(".tn-select-value")?.setAttribute("aria-expanded","false");
+    });
+    root.classList.toggle("open",open);
+    valueBtn.setAttribute("aria-expanded",String(open));
+  });
+
+  menu.addEventListener("click",event=>{
+    const btn=event.target.closest(".tn-select-option");
+    if(!btn)return;
+    target.value=btn.dataset.value||"";
+    target.dispatchEvent(new Event("change",{bubbles:true}));
+    root.classList.remove("open");
+    valueBtn.setAttribute("aria-expanded","false");
+    render();
+  });
+
+  render();
+}
+
+function closeCustomSelectsOnOutsideClick(event){
+  if(event.target.closest(".tn-select"))return;
+  document.querySelectorAll(".tn-select.open").forEach(el=>{
+    el.classList.remove("open");
+    el.querySelector(".tn-select-value")?.setAttribute("aria-expanded","false");
+  });
 }
 
 async function loadStaffStatus(){
@@ -363,9 +449,9 @@ function renderCastOptionsFromSheet(date,box,pend,hint){
     if(miss.length){
       hint.textContent=`你從公關頁帶入的「${miss.join("、")}」在此日期或時段未開放直接預約。可改選日期／時段，或在備註中請接待協助確認。`;
     }else if(requestedRange()){
-      hint.textContent="已依班表與你選擇的開始時間、節數篩選可接待公關。";
+      hint.textContent="已依班表與你選擇的開始時間、節數篩選可接待公關。若未選節數，將先顯示該時段可預約名單。";
     }else{
-      hint.textContent="已依班表顯示該日期可直接預約的公關。選擇開始時間與節數後，名單會再依時段篩選。";
+      hint.textContent="已依班表顯示該日期可直接預約的公關。若有指名需求，可再選擇節數協助篩選時段。";
     }
 
     if(pendingNames.length){
@@ -413,7 +499,7 @@ function renderCastOptions(){
   if(!date){
     box.innerHTML='<div class="empty-cast-box">請先選擇預約日期，系統會顯示當日可指名公關。</div>';
     pend?.classList.remove("show");
-    if(hint)hint.textContent="系統會自動顯示該日期「有出勤且接受指名」的所有公關。";
+    if(hint)hint.textContent="可不指定公關；若想指定，請先選擇日期查看當日可直接預約名單。";
     return;
   }
 
@@ -447,7 +533,8 @@ function valid(s){
   }
 
   if(s===3){
-    const ok=selected().length>0&&["bookingDate","bookingTime","serviceType","sessionCount"].every(id=>v(id));
+    const hasCast=selected().length>0;
+    const ok=["bookingDate","bookingTime"].every(id=>v(id)) && (!hasCast || Boolean(v("sessionCount")));
     err("step3Error",!ok);
     return ok;
   }
@@ -457,7 +544,10 @@ function valid(s){
 
 function summary(){
   const casts=selected();
-  const text=`【第十二夜預約申請】\n\n遊戲 ID：${v("playerName")||"未填寫"}\n伺服器：${v("serverName")||"未填寫"}\nDiscord ID：${v("discordId")||"未填寫"}\n預約人數：${v("guestCount")||"未填寫"}\n\n希望安排公關：${casts.join("、")||"未填寫"}\n預約日期：${v("bookingDate")||"未填寫"}\n預約時段：${v("bookingTime")||"未填寫"}\n預約節數：${v("sessionCount")||"未填寫"}\n服務項目：${v("serviceType")||"未填寫"}\n\n其他需求：\n${v("notes")||"無"}\n\n※ 此預約申請送出後，仍需等待接待確認才算預約成立。`;
+  const castText=casts.join("、")||"不指定，由接待協助安排";
+  const serviceText=v("serviceType")||"不指定，由接待協助安排";
+  const sessionText=v("sessionCount")||"不指定，由接待協助安排";
+  const text=`【第十二夜預約申請】\n\n遊戲 ID：${v("playerName")||"未填寫"}\n伺服器：${v("serverName")||"未填寫"}\nDiscord ID：${v("discordId")||"未填寫"}\n預約人數：${v("guestCount")||"未填寫"}\n\n希望安排公關：${castText}\n預約日期：${v("bookingDate")||"未填寫"}\n預約時段：${v("bookingTime")||"未填寫"}\n預約節數：${sessionText}\n服務項目：${serviceText}\n\n其他需求：\n${v("notes")||"無"}\n\n※ 此預約申請送出後，仍需等待接待確認才算預約成立。`;
   document.getElementById("summaryBox").textContent=text;
   return text;
 }
@@ -478,9 +568,9 @@ function submitGoogle(){
     [F.guestCount]:v("guestCount"),
     [F.bookingDate]:v("bookingDate"),
     [F.bookingTime]:v("bookingTime"),
-    [F.sessionCount]:v("sessionCount"),
-    [F.castNames]:selected().join("、"),
-    [F.serviceType]:v("serviceType"),
+    [F.sessionCount]:v("sessionCount")||"不指定，由接待協助安排",
+    [F.castNames]:selected().join("、")||"不指定，由接待協助安排",
+    [F.serviceType]:v("serviceType")||"不指定，由接待協助安排",
     [F.notes]:v("notes")||"無"
   };
 
@@ -499,6 +589,10 @@ function submitGoogle(){
 }
 
 function setupBooking(){
+  setupCustomSelect("serverNameSelect","serverName",SERVER_OPTIONS,"請選擇伺服器");
+  setupCustomSelect("serviceTypeSelect","serviceType",SERVICE_OPTIONS,"可不選，由接待協助安排");
+  document.addEventListener("click",closeCustomSelectsOnOutsideClick);
+
   document.getElementById("bookingDate")?.addEventListener("change",renderCastOptions);
   document.getElementById("bookingTime")?.addEventListener("change",renderCastOptions);
   document.getElementById("sessionCount")?.addEventListener("change",renderCastOptions);
