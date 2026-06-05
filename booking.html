@@ -65,8 +65,11 @@
                     <div class="form-grid">
                         <div class="field"><label for="playerName">遊戲 ID</label><input id="playerName"
                                 placeholder="例：Tsuki Rin" required /></div>
-                        <div class="field"><label for="serverName">伺服器</label><input id="serverName"
-                                placeholder="例：Bahamut / Chocobo" required /></div>
+                        <div class="field"><label for="serverNameSelect">伺服器</label>
+                            <input id="serverName" type="hidden" required />
+                            <div class="tn-select" id="serverNameSelect" data-target="serverName"></div>
+                            <div class="tn-select-note">請選擇角色所在伺服器。</div>
+                        </div>
                         <div class="field"><label for="discordId">Discord ID</label><input id="discordId"
                                 placeholder="例：dreamcat_0123" required /></div>
                         <div class="field"><label for="guestCount">預約人數</label><input id="guestCount" type="number"
@@ -78,7 +81,7 @@
                 </div>
                 <div class="form-step" data-step="3">
                     <h2>預約內容</h2>
-                    <p class="lead">請先選擇日期。系統會自動顯示該日期「有出勤且接受指名」的所有公關。</p>
+                    <p class="lead">請先選擇日期。公關與服務皆可不指定，接待會依當日狀況協助安排。</p>
                     <div class="form-grid">
                         <div class="field"><label for="bookingDate">預約日期</label><input id="bookingDate" type="date"
                                 required /></div>
@@ -92,18 +95,13 @@
                                 <option value="23:40">23:40 開始</option>
                                 <option value="其他時段，請於備註說明">其他時段，請於備註說明</option>
                             </select></div>
-                        <div class="field"><label for="serviceType">想體驗的服務</label><select id="serviceType" required>
-                                <option value="">請選擇</option>
-                                <option>一般陪席</option>
-                                <option>陪酒聊天</option>
-                                <option>小遊戲</option>
-                                <option>香檳 CALL</option>
-                                <option>演奏／舞蹈</option>
-                                <option>按摩 RP</option>
-                                <option>其他，請於備註說明</option>
-                            </select></div>
-                        <div class="field"><label for="sessionCount">預約節數</label><select id="sessionCount" required>
-                                <option value="">請選擇</option>
+                        <div class="field"><label for="serviceTypeSelect">想體驗的服務，可不選</label>
+                            <input id="serviceType" type="hidden" />
+                            <div class="tn-select" id="serviceTypeSelect" data-target="serviceType"></div>
+                            <div class="tn-select-note">不確定時可留空，由接待依當日狀況協助安排。</div>
+                        </div>
+                        <div class="field"><label for="sessionCount">預約節數，有指名時必選</label><select id="sessionCount">
+                                <option value="">不指定，由接待協助安排</option>
                                 <option value="1">1 節，20 分鐘</option>
                                 <option value="2">2 節，40 分鐘</option>
                                 <option value="3">3 節，60 分鐘</option>
@@ -111,17 +109,17 @@
                                 <option value="5">5 節，100 分鐘</option>
                                 <option value="6">6 節，120 分鐘</option>
                             </select>
-                            <div class="hint" id="timePreview">選擇開始時間與節數後，系統會自動顯示預計時段。</div>
+                            <div class="hint" id="timePreview">有指名公關時，建議選擇節數，系統會依時段協助篩選可接待名單。</div>
                         </div>
                     </div>
-                    <div class="field full" style="margin-top:20px"><label>希望安排公關，可複選</label>
+                    <div class="field full" style="margin-top:20px"><label>希望安排公關，可複選／可不選</label>
                         <div class="cast-options" id="castOptions"></div>
                         <div class="pending-box" id="pendingCastBox"></div>
                         <div class="hint" id="castHint">系統會自動顯示該日期「有出勤且接受指名」的所有公關。</div>
                     </div>
                     <div class="field full" style="margin-top:20px"><label for="notes">其他需求</label><textarea id="notes"
                             placeholder="例：希望偏聊天、想要慶生香檳 CALL、希望多位公關輪流陪席。"></textarea></div>
-                    <div class="error" id="step3Error">請至少選擇 1 位公關，並完整填寫日期、開始時間、節數與服務內容。</div>
+                    <div class="error" id="step3Error">請完整填寫日期與開始時間；若有指名公關，請一併選擇預約節數。</div>
                     <div class="button-row"><button type="button" class="btn" data-prev>上一步</button><button
                             type="button" class="btn primary" data-next>確認預約內容</button></div>
                 </div>
@@ -177,6 +175,108 @@
     <script src="js/cast-data.js"></script>
     <script src="js/booking.js"></script>
     <script src="js/booking-time-patch.js"></script>
+
+    <script>
+        (() => {
+            function escapeHtml(value) {
+                return String(value ?? "")
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll('"', "&quot;")
+                    .replaceAll("'", "&#039;");
+            }
+
+            function closeOtherSelects(current) {
+                document.querySelectorAll(".tn-select.open").forEach((el) => {
+                    if (el === current) return;
+                    el.classList.remove("open");
+                    el.querySelector(".tn-select-value")?.setAttribute("aria-expanded", "false");
+                });
+            }
+
+            function upgradeNativeSelect(selectId, placeholder) {
+                const select = document.getElementById(selectId);
+                if (!select || select.dataset.customUpgraded === "true") return;
+
+                const options = Array.from(select.options).map((option) => ({
+                    value: option.value,
+                    label: option.textContent.trim()
+                }));
+
+                const root = document.createElement("div");
+                root.className = "tn-select native-upgrade";
+                root.dataset.target = selectId;
+
+                root.innerHTML = `
+                    <button type="button" class="tn-select-value" aria-expanded="false">
+                        <span class="tn-select-placeholder">${escapeHtml(placeholder)}</span>
+                    </button>
+                    <div class="tn-select-menu" role="listbox"></div>
+                `;
+
+                select.classList.add("native-select-upgraded");
+                select.dataset.customUpgraded = "true";
+                select.insertAdjacentElement("afterend", root);
+
+                const valueBtn = root.querySelector(".tn-select-value");
+                const valueText = valueBtn.querySelector("span");
+                const menu = root.querySelector(".tn-select-menu");
+
+                function render() {
+                    const current = select.value;
+                    menu.innerHTML = options.map((option) => `
+                        <button type="button"
+                            class="tn-select-option ${option.value === current ? "active" : ""}"
+                            data-value="${escapeHtml(option.value)}">
+                            ${escapeHtml(option.label)}
+                        </button>
+                    `).join("");
+
+                    const found = options.find((option) => option.value === current);
+
+                    if (found && found.value) {
+                        valueText.classList.remove("tn-select-placeholder");
+                        valueText.textContent = found.label;
+                    } else {
+                        valueText.classList.add("tn-select-placeholder");
+                        valueText.textContent = placeholder;
+                    }
+                }
+
+                valueBtn.addEventListener("click", () => {
+                    const willOpen = !root.classList.contains("open");
+                    closeOtherSelects(root);
+                    root.classList.toggle("open", willOpen);
+                    valueBtn.setAttribute("aria-expanded", String(willOpen));
+                });
+
+                menu.addEventListener("click", (event) => {
+                    const optionBtn = event.target.closest(".tn-select-option");
+                    if (!optionBtn) return;
+
+                    select.value = optionBtn.dataset.value || "";
+                    select.dispatchEvent(new Event("change", { bubbles: true }));
+
+                    root.classList.remove("open");
+                    valueBtn.setAttribute("aria-expanded", "false");
+                    render();
+                });
+
+                select.addEventListener("change", render);
+                render();
+            }
+
+            upgradeNativeSelect("bookingTime", "請選擇開始時間");
+            upgradeNativeSelect("sessionCount", "可不選，由接待協助安排");
+
+            document.addEventListener("click", (event) => {
+                if (event.target.closest(".tn-select")) return;
+                closeOtherSelects(null);
+            });
+        })();
+    </script>
+
 </body>
 
 </html>
