@@ -108,7 +108,7 @@ window.allCasts = [
       {
         title: "🍾單人香檳CALL ",
         desc: "每一位主人都有可能會有不同的香檳CALL，微醺登場，氣氛直接拉滿。",
-        price: "一次10萬"
+        price: "依店家報價"
       },
       {
         title: "🪭 上車舞",
