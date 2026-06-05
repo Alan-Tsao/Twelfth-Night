@@ -2205,3 +2205,40 @@ body.classic-mode .bet-type-picker {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* V45：輪流射門制 */
+.current-turn-player {
+  border-color: rgba(232,201,129,.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(232,201,129,.10),
+    0 0 28px rgba(232,201,129,.08);
+}
+
+.turn-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(232,201,129,.30);
+  background: rgba(232,201,129,.08);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+#passTurnBtn {
+  border-color: rgba(232,201,129,.26);
+  color: var(--gold);
+}
+
+#passTurnBtn:disabled {
+  opacity: .45;
+}
+
+body:not(.classic-mode) .classic-only-info {
+  display: none !important;
+}
