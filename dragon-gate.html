@@ -163,6 +163,9 @@
             <label>補籌碼額度
               <input id="rebuyAmount" type="number" min="100" step="100" value="2500" />
             </label>
+            <label>PASS 費
+              <input id="passFee" type="number" min="0" step="50" value="100" />
+            </label>
             <label>對子撞柱賠率
               <input id="pairPostPenalty" type="number" min="1" step="1" value="3" />
             </label>
@@ -233,6 +236,10 @@
           <div class="casino-item">
             <span>補籌碼</span>
             <strong id="rebuyText">2500</strong>
+          </div>
+          <div class="casino-item classic-only-info">
+            <span>PASS費</span>
+            <strong id="passFeeText">100</strong>
           </div>
           <div class="casino-item">
             <span>對子撞柱</span>
@@ -352,6 +359,7 @@
                 <div class="actions bet-side-actions">
                   <button class="btn primary" id="submitBetBtn">送出下注</button>
                   <button class="btn" id="allInBtn">All in</button>
+                  <button class="btn" id="passTurnBtn" type="button">PASS</button>
                   <button class="btn" id="clearBetBtn">取消下注</button>
                 </div>
               </div>

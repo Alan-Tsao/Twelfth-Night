@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V43：正規射龍門模式
+// 第十二夜｜射龍門多人房間 V47：修正離房重進籌碼保留
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -211,6 +211,14 @@ function getPlayerRoundState(player, room = state.room || {}) {
   if (room.status === "settled") return { label: "本局已結算", className: "ready" };
   if (room.status !== "betting") return { label: "等待新一局", className: "waiting" };
   if (score < minBet) return { label: "分數不足", className: "out" };
+
+  if (isClassicMode(room)) {
+    if (isCurrentTurnPlayer(player, room)) {
+      return hasBet ? { label: "已射門", className: "ready" } : { label: "輪到此玩家", className: "waiting" };
+    }
+    return { label: "等待輪到", className: "waiting" };
+  }
+
   return hasBet ? { label: "已下注", className: "ready" } : { label: "等待下注", className: "waiting" };
 }
 
@@ -555,6 +563,10 @@ function getRebuyAmountValue(room = state.room) {
   return Math.max(100, Math.floor(Number(room?.rebuyAmount ?? $("rebuyAmount")?.value ?? 2500)));
 }
 
+function getPassFeeValue(room = state.room) {
+  return Math.max(0, Math.floor(Number(room?.passFee ?? $("passFee")?.value ?? 100)));
+}
+
 function isPreStartBuyInAvailable(room = state.room) {
   return Boolean(
     isCasinoMode(room) &&
@@ -599,6 +611,59 @@ function getPlayerStatsText(player) {
   if (rebuy) parts.push(`補籌碼 ${rebuy} 次`);
 
   return parts.join("｜");
+}
+
+function sortPlayersForTurn(players = state.players) {
+  return players.slice().sort((a, b) => {
+    const aj = timestampToMillis(a.joinedAt) || 0;
+    const bj = timestampToMillis(b.joinedAt) || 0;
+    if (aj !== bj) return aj - bj;
+    return String(a.name || "").localeCompare(String(b.name || ""), "zh-Hant") || String(a.id || "").localeCompare(String(b.id || ""));
+  });
+}
+
+function getClassicTurnPlayers(players = state.players, room = state.room || {}) {
+  const minBet = Math.max(1, Number(room?.minBet ?? $("minBet").value ?? 100));
+  return sortPlayersForTurn(players).filter((p) => !isPlayerLeft(p) && Number(p.score || 0) >= minBet);
+}
+
+function getCurrentTurnPlayer(room = state.room || {}) {
+  if (!isClassicMode(room) || !room.turnPlayerId) return null;
+  return state.players.find((p) => p.id === room.turnPlayerId) || null;
+}
+
+function isCurrentTurnPlayer(playerOrId, room = state.room || {}) {
+  const id = typeof playerOrId === "string" ? playerOrId : playerOrId?.id;
+  return Boolean(isClassicMode(room) && id && room.turnPlayerId === id);
+}
+
+function getNextClassicTurnPlayer(room = state.room || {}, players = state.players) {
+  const list = getClassicTurnPlayers(players, room);
+  if (!list.length) return null;
+
+  const currentId = room.turnPlayerId || "";
+  const currentIndex = list.findIndex((p) => p.id === currentId);
+  const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % list.length : 0;
+  return {
+    player: list[nextIndex],
+    index: nextIndex,
+    total: list.length
+  };
+}
+
+function canPlayerActThisTurn() {
+  return Boolean(
+    state.role === "player" &&
+    state.playerId &&
+    isClassicMode() &&
+    isCurrentTurnPlayer(state.playerId) &&
+    state.room?.status === "betting" &&
+    state.room?.gateA &&
+    state.room?.gateB &&
+    !state.room?.resultCard &&
+    !isBetDeadlinePassed() &&
+    !isPlayerBetLocked()
+  );
 }
 
 function getPlayerStatus(player) {
@@ -650,6 +715,7 @@ function updateCasinoPanel() {
   if ($("jackpotText")) $("jackpotText").textContent = String(Math.floor(Number(room.jackpot || 0)));
   if ($("anteText")) $("anteText").textContent = String(getAnteValue(room));
   if ($("rebuyText")) $("rebuyText").textContent = String(getRebuyAmountValue(room));
+  if ($("passFeeText")) $("passFeeText").textContent = String(getPassFeeValue(room));
   if ($("pairPostPenaltyText")) $("pairPostPenaltyText").textContent = `賠 ${getPairPostPenaltyValue(room)} 倍`;
 }
 
@@ -662,8 +728,9 @@ function getCasinoRoomPatchFromInputs() {
     jackpotRate: getJackpotRateValue({ jackpotRate: Number($("jackpotRate")?.value || 20) / 100 }),
     potRiskRate: getPotRiskRateValue({ potRiskRate: Number($("potRiskRate")?.value || 20) / 100 }),
     rebuyAmount: getRebuyAmountValue({ rebuyAmount: Number($("rebuyAmount")?.value || 2500) }),
+    passFee: getPassFeeValue({ passFee: Number($("passFee")?.value || 100) }),
     pairPostPenalty: Math.max(1, Math.floor(Number($("pairPostPenalty")?.value || 3))),
-    pot: gameMode === "casino" ? getInitialPotValue({ initialPot: Number($("initialPot")?.value || 5000) }) : 0,
+    pot: (gameMode === "casino" || gameMode === "classic") ? getInitialPotValue({ initialPot: Number($("initialPot")?.value || 5000) }) : 0,
     jackpot: 0
   };
 }
@@ -964,8 +1031,9 @@ async function clearRoomBecauseEmpty() {
       jackpotRate: getJackpotRateValue(),
       potRiskRate: getPotRiskRateValue(),
       rebuyAmount: getRebuyAmountValue(),
+      passFee: getPassFeeValue(),
       pairPostPenalty: getPairPostPenaltyValue(),
-      pot: getGameModeValue() === "casino" ? getInitialPotValue() : 0,
+      pot: isCasinoMode({ gameMode: getGameModeValue() }) ? getInitialPotValue() : 0,
       jackpot: 0,
       betDeadlineAt: null,
       autoFilled: false,
@@ -973,6 +1041,10 @@ async function clearRoomBecauseEmpty() {
       gateA: null,
       gateB: null,
       resultCard: null,
+      turnPlayerId: "",
+      turnPlayerName: "",
+      turnIndex: -1,
+      lastPassedPlayerId: "",
       usedCards: [],
       deckResetCount: 0,
       roundResult: "房間已無人，自動清空本場資料。",
@@ -1725,6 +1797,10 @@ function addChipAmount(chipValue) {
 
 function getEligiblePlayers(players = state.players) {
   const minBet = Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
+  if (isClassicMode()) {
+    return players.filter((p) => Number(p.score || 0) >= minBet && isPlayerEligibleForBet(p) && isCurrentTurnPlayer(p));
+  }
+
   return players.filter((p) => Number(p.score || 0) >= minBet && isPlayerEligibleForBet(p));
 }
 
@@ -1774,24 +1850,30 @@ function updateActionButtons() {
   const bettingOpen = room.status === "betting" && room.gateA && room.gateB && mode !== "invalid" && !room.resultCard && !expired && !isBetDeadlinePassed();
   const revealing = isResultRevealActiveForRoom(room);
   const playerBetLocked = isPlayerBetLocked();
-  const playerCanEditBet = bettingOpen && !playerBetLocked;
+  const playerCanEditBet = bettingOpen && !playerBetLocked && (!isClassicMode(room) || isCurrentTurnPlayer(state.playerId, room));
 
   const newRoundBtn = $("newRoundBtn");
   const drawResultBtn = $("drawResultBtn");
   const submitBetBtn = $("submitBetBtn");
   const clearBetBtn = $("clearBetBtn");
   const allInBtn = $("allInBtn");
+  const passTurnBtn = $("passTurnBtn");
   const autoFillBetsBtn = $("autoFillBetsBtn");
 
   if (newRoundBtn) {
     newRoundBtn.disabled = revealing || !canStartNewRoundOrRedeal();
-    newRoundBtn.textContent = mode === "invalid" && room.status === "betting" ? "重新發牌" : "開始下一局";
+    newRoundBtn.textContent = mode === "invalid" && room.status === "betting" ? "重新發牌" : isClassicMode(room) ? "開始下一位" : "開始下一局";
   }
   if (drawResultBtn) drawResultBtn.disabled = revealing || !canDrawResult();
   if (autoFillBetsBtn) autoFillBetsBtn.disabled = revealing || !(bettingOpen && canHostControl() && getBetProgress().missing.length > 0);
   if (submitBetBtn) submitBetBtn.disabled = !playerCanEditBet || getAvailableBetTypes().length === 0;
   if (clearBetBtn) clearBetBtn.disabled = !playerCanEditBet;
   if (allInBtn) allInBtn.disabled = !playerCanEditBet;
+  if (passTurnBtn) {
+    passTurnBtn.disabled = !canPlayerActThisTurn();
+    passTurnBtn.hidden = !isClassicMode(room);
+    passTurnBtn.textContent = `PASS${isClassicMode(room) ? `（${getPassFeeValue(room)}）` : ""}`;
+  }
   updateBetTypeOptions();
   updateBetTypePickerDisabled(!playerCanEditBet);
   updateBetAmountDisabled(!playerCanEditBet);
@@ -1826,7 +1908,7 @@ function updateBetCountdown() {
     el.textContent = "下注倒數：0 秒｜下注已截止";
   }
 
-  if (left <= 0 && state.role === "host" && !autoFillingBets) {
+  if (left <= 0 && state.role === "host" && !autoFillingBets && !room.autoFilled) {
     autoFillMissingBets("timeout").catch((error) => setStatus(error.message, "err"));
   }
 
@@ -1892,18 +1974,24 @@ function updateBetProgress() {
   }
 
   if (progress.allReady) {
-    el.textContent = isBetDeadlinePassed()
-      ? `下注進度：${progress.betCount}/${progress.eligibleCount}，下注已截止，可以結算`
-      : `下注進度：${progress.betCount}/${progress.eligibleCount}，所有可下注玩家已完成`;
+    el.textContent = isClassicMode(room)
+      ? `下注進度：${room.turnPlayerName || "目前玩家"} 已射門，可以結算`
+      : (isBetDeadlinePassed()
+        ? `下注進度：${progress.betCount}/${progress.eligibleCount}，下注已截止，可以結算`
+        : `下注進度：${progress.betCount}/${progress.eligibleCount}，所有可下注玩家已完成`);
     el.classList.add("ready");
     updateActionButtons();
     return;
   }
 
   const names = progress.missing.map((p) => p.name).filter(Boolean).join("、");
-  el.textContent = isBetDeadlinePassed()
-    ? `下注進度：${progress.betCount}/${progress.eligibleCount}，下注已截止，等待系統補齊`
-    : `下注進度：${progress.betCount}/${progress.eligibleCount}，等待 ${names || "玩家"} 下注`;
+  el.textContent = isClassicMode(room)
+    ? (isBetDeadlinePassed()
+      ? `下注進度：${room.turnPlayerName || "目前玩家"} 逾時，等待自動 PASS`
+      : `下注進度：輪到 ${room.turnPlayerName || names || "玩家"}，等待射門或 PASS`)
+    : (isBetDeadlinePassed()
+      ? `下注進度：${progress.betCount}/${progress.eligibleCount}，下注已截止，等待系統補齊`
+      : `下注進度：${progress.betCount}/${progress.eligibleCount}，等待 ${names || "玩家"} 下注`);
   el.classList.add("waiting");
   updateActionButtons();
 }
@@ -1918,7 +2006,7 @@ function notifyRoundState() {
     const self = state.players.find((p) => p.id === state.playerId);
     const minBet = Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
 
-    if (self && Number(self.score || 0) >= minBet && !(Number(self.currentBet || 0) > 0 && self.betType)) {
+    if (self && Number(self.score || 0) >= minBet && (!isClassicMode(room) || isCurrentTurnPlayer(self, room)) && !(Number(self.currentBet || 0) > 0 && self.betType)) {
       const key = `${state.roomId}-${room.round}-needBet-${state.playerId}`;
       if (lastNeedBetKey !== key) {
         lastNeedBetKey = key;
@@ -2117,10 +2205,11 @@ function renderRoom() {
   if (room.jackpotRate !== undefined && $("jackpotRate")) $("jackpotRate").value = Math.round(Number(room.jackpotRate || 0) * 100);
   if (room.potRiskRate !== undefined && $("potRiskRate")) $("potRiskRate").value = Math.round(Number(room.potRiskRate || 0.2) * 100);
   if (room.rebuyAmount !== undefined && $("rebuyAmount")) $("rebuyAmount").value = room.rebuyAmount;
+  if (room.passFee !== undefined && $("passFee")) $("passFee").value = room.passFee;
   if (room.pairPostPenalty !== undefined && $("pairPostPenalty")) $("pairPostPenalty").value = room.pairPostPenalty;
   updateCasinoPanel();
   $("betHint").textContent = isClassicMode(room)
-    ? `正規射龍門：只下注「射龍門」；進洞贏 1 倍，出界輸 1 倍，撞柱賠 ${getPairPostPenaltyValue(room)} 倍。最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`
+    ? `正規射龍門：輪到的玩家可選「射龍門」或 PASS；PASS 費 ${getPassFeeValue(room)} 分。進洞贏 1 倍，出界輸 1 倍，撞柱賠 ${getPairPostPenaltyValue(room)} 倍。最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`
     : `${isCasinoMode(room) ? `自由下注模式：輸分進獎金池，贏分從獎金池支付；單局承擔 ${Math.round(getPotRiskRateValue(room) * 100)}%，對子撞柱賠 ${getPairPostPenaltyValue(room)} 倍，對子局可猜花色 3 倍。 ` : ""}普通局：進洞依門寬浮動，撞柱 3 倍，出界 1 倍。對子局：改猜大 / 猜小，抽到同點視為撞柱；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`;
 
   setCardView("gateA", room.gateA);
@@ -2147,6 +2236,8 @@ function renderRoom() {
     $("roundResult").textContent = isResultRevealActiveForRoom(room)
       ? "結果牌開獎中……"
       : (room.roundResult || "本局已結算。");
+  } else if (room.status === "settled" && room.roundResult) {
+    $("roundResult").textContent = room.roundResult;
   } else if (gate?.same) {
     $("roundResult").textContent = isCasinoMode(room)
       ? `對子局：門柱 ${cardRankName(room.gateA.rank)}，可猜大 / 猜小 / 猜花色；大小同點撞柱賠 ${getPairPostPenaltyValue(room)} 倍，猜花色只看花色。`
@@ -2155,7 +2246,7 @@ function renderRoom() {
     $("roundResult").textContent = "順子門無效：沒有進洞空間，請主持人重新發牌。";
   } else {
     $("roundResult").textContent = isClassicMode(room)
-      ? `門寬 ${gate.width} 格，正規射龍門：玩家只能下注射門。`
+      ? `門寬 ${gate.width} 格，輪到 ${room.turnPlayerName || "玩家"}：可射龍門或 PASS。`
       : `門寬 ${gate.width} 格，等待玩家下注。`;
   }
 
@@ -2177,7 +2268,7 @@ function renderPlayers() {
   $("rankingList").innerHTML = sorted.length
     ? sorted.map((p, index) => {
         const roundState = getPlayerRoundState(p);
-        const rowClass = `${roundState.className === "waiting" ? "pending" : roundState.className === "ready" ? "done" : ""} ${isPlayerLeft(p) ? "left-player" : ""}`;
+        const rowClass = `${roundState.className === "waiting" ? "pending" : roundState.className === "ready" ? "done" : ""} ${isPlayerLeft(p) ? "left-player" : ""} ${isCurrentTurnPlayer(p) ? "current-turn-player" : ""}`;
         return `
           <div class="rank-row ${rowClass}">
             <div class="rank-no">${index + 1}</div>
@@ -2187,7 +2278,7 @@ function renderPlayers() {
               ${getPlayerStatsText(p) ? `<div class="player-extra">${getPlayerStatsText(p)}</div>` : ""}
               <div class="player-state ${roundState.className}">${roundState.label}</div>
               <div class="player-status-pill ${getPlayerStatusClass(p)}">${getPlayerStatusLabel(p)}</div>
-              <div class="player-status-pill ${getPlayerStatusClass(p)}">${getPlayerStatusLabel(p)}</div>
+              
             </div>
             <div class="score">${p.score || 0}</div>
           </div>
@@ -2198,7 +2289,7 @@ function renderPlayers() {
   $("playerList").innerHTML = sorted.length
     ? sorted.map((p) => {
         const roundState = getPlayerRoundState(p);
-        const rowClass = `${roundState.className === "waiting" ? "pending" : roundState.className === "ready" ? "done" : ""} ${isPlayerLeft(p) ? "left-player" : ""}`;
+        const rowClass = `${roundState.className === "waiting" ? "pending" : roundState.className === "ready" ? "done" : ""} ${isPlayerLeft(p) ? "left-player" : ""} ${isCurrentTurnPlayer(p) ? "current-turn-player" : ""}`;
         return `
           <div class="player-row ${rowClass}">
             <div class="rank-no">•</div>
@@ -2207,6 +2298,8 @@ function renderPlayers() {
               <div class="player-meta">${p.currentBet ? `已押 ${BET_LABELS[p.betType] || p.betType} ${p.currentBet} 分` : (p.lastResult || "等待中")}</div>
               ${getPlayerStatsText(p) ? `<div class="player-extra">${getPlayerStatsText(p)}</div>` : ""}
               <div class="player-state ${roundState.className}">${roundState.label}</div>
+              <div class="player-status-pill ${getPlayerStatusClass(p)}">${getPlayerStatusLabel(p)}</div>
+              
             </div>
             <div class="player-actions">
               <div class="score">${p.score || 0}</div>
@@ -2307,7 +2400,16 @@ async function hostCreateRoom() {
   const casinoPatch = getCasinoRoomPatchFromInputs();
 
   if (existing) {
-    casinoPatch.pot = Number(existing.pot || 0);
+    const existingPot = Number(existing.pot || 0);
+    const shouldRepairClassicPot =
+      casinoPatch.gameMode === "classic" &&
+      existingPot === 0 &&
+      Number(existing.round || 0) === 0 &&
+      !existing.gateA &&
+      !existing.gateB &&
+      !existing.resultCard;
+
+    casinoPatch.pot = shouldRepairClassicPot ? getInitialPotValue({ initialPot: Number($("initialPot")?.value || 5000) }) : existingPot;
     casinoPatch.jackpot = Number(existing.jackpot || 0);
   }
 
@@ -2338,6 +2440,29 @@ async function hostCreateRoom() {
   setStatus("主持人房間已建立 / 連線，邀請碼已可複製。", "ok");
 }
 
+async function findLeftPlayerByName(displayName) {
+  const name = String(displayName || "").trim();
+  if (!name || !state.roomId) return null;
+
+  const snap = await getDocs(playersRef());
+  let found = null;
+
+  snap.forEach((docSnap) => {
+    if (found) return;
+    const data = docSnap.data();
+    if (
+      docSnap.id !== state.playerId &&
+      data.playerStatus === "left" &&
+      data.joinedRoomId === state.roomId &&
+      String(data.name || "").trim() === name
+    ) {
+      found = { id: docSnap.id, ref: docSnap.ref, data };
+    }
+  });
+
+  return found;
+}
+
 async function playerJoinRoom() {
   await ensurePlayerAuth();
 
@@ -2351,7 +2476,15 @@ async function playerJoinRoom() {
   const roomSnap = await getDoc(roomRef());
   const roomData = roomSnap.exists() ? roomSnap.data() : (state.room || {});
   const existingSnap = await getDoc(playerRef());
-  const existing = existingSnap.exists() ? existingSnap.data() : {};
+  let existing = existingSnap.exists() ? existingSnap.data() : {};
+  let reclaimedPlayer = null;
+
+  if (!existingSnap.exists()) {
+    reclaimedPlayer = await findLeftPlayerByName(state.displayName);
+    if (reclaimedPlayer) {
+      existing = reclaimedPlayer.data || {};
+    }
+  }
 
   const startScore = Math.max(0, Number(roomData.startScore ?? $("startScore").value ?? 2500));
   const casino = isCasinoMode(roomData);
@@ -2393,9 +2526,22 @@ async function playerJoinRoom() {
     });
   }
 
+  if (reclaimedPlayer) {
+    try {
+      await deleteDoc(reclaimedPlayer.ref);
+    } catch (error) {
+      console.warn("Failed to remove reclaimed old player doc:", error);
+    }
+  }
+
   connectRoom();
   renderAuthState();
-  setStatus(returningFromLeft ? "玩家已重新加入房間，原籌碼已保留。" : (actualAnte ? `玩家已加入房間，已投入底注 ${actualAnte} 分。` : "玩家已加入房間。"), "ok");
+  setStatus(
+    reclaimedPlayer
+      ? "玩家已重新加入房間，已依同暱稱接回原籌碼。"
+      : (returningFromLeft ? "玩家已重新加入房間，原籌碼已保留。" : (actualAnte ? `玩家已加入房間，已投入底注 ${actualAnte} 分。` : "玩家已加入房間。")),
+    "ok"
+  );
 }
 
 function ensureRoomActive() {
@@ -2415,7 +2561,16 @@ async function newRound() {
     return;
   }
 
-  const preparedDeck = prepareUsedCardsForNewRound(state.room || {});
+  const roomBefore = state.room || {};
+  const classic = isClassicMode(roomBefore);
+  const nextTurn = classic ? getNextClassicTurnPlayer(roomBefore) : null;
+
+  if (classic && !nextTurn) {
+    setStatus("正規射龍門目前沒有可輪到的玩家：請等待玩家加入、結清離席玩家，或讓玩家補籌碼。", "err");
+    return;
+  }
+
+  const preparedDeck = prepareUsedCardsForNewRound(roomBefore);
   const deckDraw = drawFromDeck(2, preparedDeck.usedCards);
   const [gateA, gateB] = deckDraw.drawn;
   const betSeconds = getBetSecondsValue();
@@ -2424,15 +2579,31 @@ async function newRound() {
     ? `已重新洗牌，牌堆剩餘 ${remainingAfterGate} 張。`
     : `牌堆剩餘 ${remainingAfterGate} 張。`;
 
+  const turnPatch = classic
+    ? {
+        turnPlayerId: nextTurn.player.id,
+        turnPlayerName: nextTurn.player.name || "玩家",
+        turnIndex: nextTurn.index
+      }
+    : {
+        turnPlayerId: "",
+        turnPlayerName: "",
+        turnIndex: -1
+      };
+
   await updateDoc(roomRef(), {
     status: "betting",
     round: increment(1),
     gateA,
     gateB,
     resultCard: null,
+    ...turnPatch,
+    lastPassedPlayerId: "",
     usedCards: deckDraw.usedCards,
     deckResetCount: increment(preparedDeck.reshuffled ? 1 : 0),
-    roundResult: `新一局開始，下注倒數 ${betSeconds} 秒。進洞倍率會依門寬浮動。${deckText}`,
+    roundResult: classic
+      ? `輪到 ${turnPatch.turnPlayerName} 射門。下注倒數 ${betSeconds} 秒；可射龍門或 PASS（PASS 費 ${getPassFeeValue(roomBefore)} 分）。${deckText}`
+      : `新一局開始，下注倒數 ${betSeconds} 秒。進洞倍率會依門寬浮動。${deckText}`,
     betSeconds,
     betDeadlineAt: Timestamp.fromMillis(Date.now() + betSeconds * 1000),
     autoFilled: false,
@@ -2445,7 +2616,7 @@ async function newRound() {
     batch.update(docSnap.ref, {
       currentBet: 0,
       betType: "",
-      lastResult: "等待下注",
+      lastResult: classic && docSnap.id === turnPatch.turnPlayerId ? "輪到你射門" : "等待下注",
       updatedAt: serverTimestamp()
     });
   });
@@ -2463,7 +2634,7 @@ async function newRound() {
   chipAccumulated = false;
   setBetAmount(state.room?.minBet || $("minBet").value || 100);
 
-  setStatus("已開始新一局，等待玩家下注。", "ok");
+  setStatus(classic ? `已開門牌，輪到 ${turnPatch.turnPlayerName}。` : "已開始新一局，等待玩家下注。", "ok");
 }
 
 async function submitBet() {
@@ -2475,6 +2646,12 @@ async function submitBet() {
   }
 
   if (!assertPlayerBetEditable("送出或修改下注")) return;
+
+  if (isClassicMode() && !isCurrentTurnPlayer(state.playerId)) {
+    setStatus(`目前輪到 ${state.room?.turnPlayerName || "其他玩家"}，請等待自己的回合。`, "err");
+    updateActionButtons();
+    return;
+  }
 
   const minBet = getMinBetValue();
   const amount = setBetAmount($("betAmount").value);
@@ -2526,6 +2703,56 @@ async function submitBet() {
   setStatus("下注已送出。", "ok");
 }
 
+async function passTurn() {
+  if (!ensureRoomActive()) return;
+
+  if (state.role !== "player" || !state.playerId) {
+    setStatus("請先以玩家身份加入房間。", "err");
+    return;
+  }
+
+  const room = state.room || {};
+  if (!isClassicMode(room)) {
+    setStatus("只有正規射龍門模式可以 PASS。", "err");
+    return;
+  }
+
+  if (!canPlayerActThisTurn()) {
+    if (!isCurrentTurnPlayer(state.playerId, room)) {
+      setStatus(`目前輪到 ${room.turnPlayerName || "其他玩家"}，請等待自己的回合。`, "err");
+    } else {
+      setStatus("目前不能 PASS，可能已截止、已下注或本局已結算。", "err");
+    }
+    updateActionButtons();
+    return;
+  }
+
+  const self = getSelfPlayer();
+  const fee = Math.min(getPassFeeValue(room), Math.max(0, Math.floor(Number(self?.score || 0))));
+  const batch = writeBatch(db);
+
+  batch.update(playerRef(), {
+    score: increment(-fee),
+    currentBet: 0,
+    betType: "",
+    lastResult: fee > 0 ? `PASS，支付 ${fee} 分進獎金池` : "PASS",
+    contributedToPot: increment(fee),
+    updatedAt: serverTimestamp()
+  });
+
+  batch.update(roomRef(), {
+    status: "settled",
+    resultCard: null,
+    pot: increment(fee),
+    lastPassedPlayerId: state.playerId,
+    roundResult: `${state.displayName || self?.name || "玩家"} 選擇 PASS${fee > 0 ? `，支付 ${fee} 分進獎金池` : ""}。請主持人開始下一位玩家回合。`,
+    updatedAt: serverTimestamp()
+  });
+
+  await batch.commit();
+  setStatus(fee > 0 ? `已 PASS，支付 ${fee} 分進獎金池。` : "已 PASS。", "ok");
+}
+
 async function clearBet() {
   if (!ensureRoomActive()) return;
   if (state.role !== "player" || !state.playerId) return;
@@ -2554,14 +2781,50 @@ async function autoFillMissingBets(reason = "manual") {
     return;
   }
 
-  if (autoFillingBets) return;
+  if (autoFillingBets || (reason === "timeout" && room.autoFilled)) return;
   autoFillingBets = true;
 
   try {
     const snap = await getDocs(playersRef());
     const players = snap.docs.map((docSnap) => ({ id: docSnap.id, ref: docSnap.ref, ...docSnap.data() }));
     const minBet = Math.max(1, Number(room.minBet ?? $("minBet").value ?? 100));
-    const missing = players.filter((p) => Number(p.score || 0) >= minBet && !(Number(p.currentBet || 0) > 0 && p.betType));
+
+    if (isClassicMode(room)) {
+      const turnPlayer = players.find((p) => p.id === room.turnPlayerId);
+      if (!turnPlayer || Number(turnPlayer.currentBet || 0) > 0 || turnPlayer.betType) {
+        setStatus("正規射龍門：目前沒有需要自動 PASS 的玩家。", "");
+        return;
+      }
+
+      const fee = Math.min(getPassFeeValue(room), Math.max(0, Math.floor(Number(turnPlayer.score || 0))));
+      const batch = writeBatch(db);
+
+      batch.update(turnPlayer.ref, {
+        score: increment(-fee),
+        currentBet: 0,
+        betType: "",
+        lastResult: fee > 0 ? `逾時自動 PASS，支付 ${fee} 分進獎金池` : "逾時自動 PASS",
+        contributedToPot: increment(fee),
+        updatedAt: serverTimestamp()
+      });
+
+      batch.update(roomRef(), {
+        status: "settled",
+        resultCard: null,
+        pot: increment(fee),
+        autoFilled: true,
+        autoFilledAt: serverTimestamp(),
+        autoFillReason: reason,
+        lastPassedPlayerId: turnPlayer.id,
+        roundResult: `${turnPlayer.name || "玩家"} 逾時自動 PASS${fee > 0 ? `，支付 ${fee} 分進獎金池` : ""}。請主持人開始下一位玩家回合。`,
+        updatedAt: serverTimestamp()
+      });
+
+      await batch.commit();
+      setStatus(`${turnPlayer.name || "玩家"} 逾時自動 PASS。`, "ok");
+      return;
+    }
+    const missing = players.filter((p) => Number(p.score || 0) >= minBet && isPlayerEligibleForBet(p) && !(Number(p.currentBet || 0) > 0 && p.betType));
 
     if (!missing.length) {
       setStatus("沒有需要補齊下注的玩家。", "");
@@ -2606,8 +2869,12 @@ async function autoFillMissingBets(reason = "manual") {
 
     await batch.commit();
 
-    playSound("allReady");
-    setStatus(`已補齊未下注玩家：${lines.join("、")}`, "ok");
+    if (lines.length) {
+      playSound("allReady");
+      setStatus(`已補齊未下注玩家：${lines.join("、")}`, "ok");
+    } else {
+      setStatus("下注時間已截止，但目前沒有可自動補齊的下注。請荷官補池、調整風險比例或手動處理。", "err");
+    }
   } finally {
     autoFillingBets = false;
     renderRoom();
@@ -2693,6 +2960,8 @@ async function drawResult() {
     jackpotAfter = Math.max(0, jackpotAfter - jackpotTotalPaid);
 
     currentPlayers.forEach((p) => {
+      if (isClassicMode(room) && p.id !== room.turnPlayerId) return;
+
       const amount = Math.max(0, Number(p.currentBet || 0));
 
       if (!amount || !p.betType) {
@@ -2924,8 +3193,9 @@ async function clearRoom() {
     jackpotRate: getJackpotRateValue(),
     potRiskRate: getPotRiskRateValue(),
     rebuyAmount: getRebuyAmountValue(),
+    passFee: getPassFeeValue(),
     pairPostPenalty: getPairPostPenaltyValue(),
-    pot: getGameModeValue() === "casino" ? getInitialPotValue() : 0,
+    pot: isCasinoMode({ gameMode: getGameModeValue() }) ? getInitialPotValue() : 0,
     jackpot: 0,
     betDeadlineAt: null,
     autoFilled: false,
@@ -2933,6 +3203,10 @@ async function clearRoom() {
     gateA: null,
     gateB: null,
     resultCard: null,
+    turnPlayerId: "",
+    turnPlayerName: "",
+    turnIndex: -1,
+    lastPassedPlayerId: "",
     usedCards: [],
     deckResetCount: 0,
     roundResult: "本場已清空，等待主持人開局。",
@@ -3055,7 +3329,7 @@ async function resetLocal() {
     await markPlayerLeft(leavingPlayerId);
   }
 
-  if (hadRoom) {
+  if (hadRoom && leavingRole !== "player") {
     await checkAndCleanupIfEmpty();
   }
 
@@ -3093,7 +3367,7 @@ async function leaveRoom() {
     await markPlayerLeft(leavingPlayerId);
   }
 
-  if (hadRoom) {
+  if (hadRoom && leavingRole !== "player") {
     await checkAndCleanupIfEmpty();
   }
 
@@ -3233,6 +3507,7 @@ $("playerJoinBtn").addEventListener("click", () => playerJoinRoom().catch((e) =>
 $("newRoundBtn").addEventListener("click", () => newRound().catch((e) => setStatus(e.message, "err")));
 $("submitBetBtn").addEventListener("click", () => submitBet().catch((e) => setStatus(e.message, "err")));
 $("allInBtn").addEventListener("click", allIn);
+$("passTurnBtn").addEventListener("click", () => passTurn().catch((e) => setStatus(e.message, "err")));
 $("clearBetBtn").addEventListener("click", () => clearBet().catch((e) => setStatus(e.message, "err")));
 $("autoFillBetsBtn").addEventListener("click", () => autoFillMissingBets("manual").catch((e) => setStatus(e.message, "err")));
 $("drawResultBtn").addEventListener("click", () => drawResult().catch((e) => setStatus(e.message, "err")));
