@@ -1931,3 +1931,192 @@ body.pair-gate .pair-suit-bet .bet-type-desc {
   border-color: rgba(183,239,197,.54);
   background: rgba(183,239,197,.14);
 }
+
+
+/* V37：結果牌開獎動畫 */
+.playing-card.result.reveal-spinning {
+  animation: resultCardSpinPulse .16s linear infinite;
+  border-color: rgba(232,201,129,.42);
+  box-shadow:
+    inset 0 0 0 1px rgba(232,201,129,.10),
+    0 0 28px rgba(232,201,129,.12);
+}
+
+.playing-card.result.reveal-final {
+  animation: resultCardFinalGlow 1.2s ease-out 1;
+}
+
+.main-game-panel.result-reveal-active {
+  border-color: rgba(232,201,129,.30);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.28),
+    0 0 52px rgba(232,201,129,.08);
+}
+
+@keyframes resultCardSpinPulse {
+  0% {
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  50% {
+    transform: translateY(-1px) scale(1.025);
+    filter: blur(.35px);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes resultCardFinalGlow {
+  0% {
+    transform: scale(.96);
+    border-color: rgba(232,201,129,.75);
+    box-shadow:
+      inset 0 0 0 1px rgba(232,201,129,.20),
+      0 0 42px rgba(232,201,129,.24);
+  }
+  40% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+    border-color: rgba(232,201,129,.22);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+  }
+}
+
+
+/* V39：賭場風控限注 */
+.bet-limit-hint {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(232,201,129,.22);
+  border-radius: 14px;
+  background: rgba(232,201,129,.075);
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.bet-limit-hint.warning {
+  border-color: rgba(255,154,169,.30);
+  background: rgba(255,154,169,.075);
+  color: var(--danger);
+}
+
+
+/* V40：賭場資訊精簡與下注區優化 */
+.bet-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.bet-panel h3 {
+  margin-bottom: 10px;
+}
+
+.bet-grid {
+  align-items: start;
+  gap: 12px;
+}
+
+.bet-grid > label {
+  align-content: start;
+  gap: 6px;
+}
+
+.bet-type-picker {
+  gap: 8px;
+}
+
+.bet-type-option {
+  min-height: 52px;
+  padding: 9px 12px;
+  align-content: center;
+}
+
+.bet-type-title {
+  line-height: 1.15;
+}
+
+.bet-type-desc {
+  line-height: 1.25;
+}
+
+.bet-amount-control {
+  gap: 8px;
+  align-content: start;
+}
+
+.amount-input-wrap {
+  min-height: 52px;
+  padding: 7px;
+}
+
+.chip-row {
+  gap: 7px;
+}
+
+.chip-btn {
+  min-height: 34px;
+  padding: 5px 12px;
+}
+
+.bet-side-actions {
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.bet-side-actions .btn {
+  min-height: 40px;
+  padding-block: 8px;
+}
+
+.bet-limit-hint {
+  margin-top: 8px;
+  padding: 9px 11px;
+}
+
+.bet-panel .hint {
+  margin-top: 8px;
+}
+
+/* 對子局花色選項較多，改成緊湊 2 欄卡片 */
+body.pair-gate .bet-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, .92fr);
+  gap: 12px;
+}
+
+body.pair-gate .pair-bet {
+  min-height: 60px;
+}
+
+body.pair-gate .pair-suit-bet {
+  min-height: 54px;
+  padding: 9px 11px;
+}
+
+body.pair-gate .pair-suit-bet .bet-type-title {
+  font-size: 15px;
+}
+
+body.pair-gate .pair-suit-bet .bet-type-desc {
+  font-size: 11px;
+}
+
+/* 已結算或不可下注時，降低區塊高度與視覺負擔 */
+.bet-type-picker.locked .bet-type-option,
+.bet-amount-control.locked .amount-input-wrap,
+.bet-amount-control.locked .chip-row,
+.bet-amount-control.locked .bet-side-actions {
+  opacity: .56;
+}
+
+@media (max-width: 820px) {
+  body.pair-gate .bet-grid,
+  .bet-grid {
+    grid-template-columns: 1fr;
+  }
+}
