@@ -32,16 +32,28 @@ window.allCasts = [
   {
     name: "傑傑諾利",
     image: "images/staff-03.jpg",
-    desc: "日式會館風格，適合想要儀式感、高級感與沉浸式接待的客人。互動節奏偏穩重細膩。",
-    shortDesc: "日式會館、高級感、儀式感。",
-    quote: "燈火已候，酒盞已溫，只待您入席。",
-    tags: ["日式會館", "高級感", "指名推薦"],
-    filterTags: ["chat", "japanese", "champagne"],
+    desc: "擅長以細膩而不急不徐的節奏陪您度過夜晚。無論是談話、留影，或是一段只獻給您的歌，都願為這場相遇留下值得珍藏的回憶。",
+    shortDesc: "溫柔陪席、拍立得、獻唱錄音。",
+    quote: "今晚的月色真美呢。",
+    tags: ["輕 RP","陪聊互動", "拍立得", "獻唱錄音"],
+    filterTags: ["chat"],
     status: "available",
     statusLabel: "接受指名",
-    workDays: [5],
-    recommended: "日式陪席、香檳 CALL、儀式感 RP",
-    extraServices: ["日式迎賓", "儀式感陪席", "香檳祝詞"]
+    workDays: [5,6],
+    recommended: "日式陪席",
+    extraServices: ["拍立得", "唱歌錄音"],
+        personalMenu: [
+      {
+        title: "🔲｜拍立得 ",
+        desc: "為精彩的回憶...留下點印記吧？",
+        price: "無簽 3萬G、有簽 8萬G"
+      },
+      {
+        title: "🎙️｜唱歌 (錄音)",
+        desc: "這首曲子，只獻給你。",
+        price: "副歌一段 70萬"
+      },
+    ]
   },
   {
     name: "阿希Axi",

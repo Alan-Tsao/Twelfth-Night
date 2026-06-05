@@ -1,5 +1,5 @@
 // dragon-gate.js
-// 第十二夜｜射龍門多人房間 V41：特殊池公平分配
+// 第十二夜｜射龍門多人房間 V43：正規射龍門模式
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import {
@@ -62,6 +62,7 @@ const RANKS = [
 
 const SUITS = ["♠", "♥", "♦", "♣"];
 const BET_LABELS = {
+  shoot: "射龍門",
   inside: "進洞",
   post: "撞柱",
   outside: "出界",
@@ -82,7 +83,8 @@ const BET_SUIT_MAP = {
 
 const GAME_MODE_LABELS = {
   normal: "一般模式",
-  casino: "賭場模式"
+  casino: "自由下注模式",
+  classic: "正規射龍門"
 };
 
 let state = {
@@ -514,7 +516,16 @@ function getGameModeValue(room = state.room) {
   return room?.gameMode || $("gameMode")?.value || "normal";
 }
 
+function isClassicMode(room = state.room) {
+  return getGameModeValue(room) === "classic";
+}
+
 function isCasinoMode(room = state.room) {
+  const mode = getGameModeValue(room);
+  return mode === "casino" || mode === "classic";
+}
+
+function isFreeBetMode(room = state.room) {
   return getGameModeValue(room) === "casino";
 }
 
@@ -590,16 +601,41 @@ function getPlayerStatsText(player) {
   return parts.join("｜");
 }
 
+function getPlayerStatus(player) {
+  return player?.playerStatus === "left" ? "left" : "active";
+}
+
+function isPlayerLeft(player) {
+  return getPlayerStatus(player) === "left";
+}
+
+function getPlayerStatusLabel(player) {
+  return isPlayerLeft(player) ? "已離席，待荷官結清" : "在線 / 牌局中";
+}
+
+function getPlayerStatusClass(player) {
+  return isPlayerLeft(player) ? "left" : "active";
+}
+
+function isPlayerEligibleForBet(player) {
+  // 已送出下注的玩家即使離席，也會保留本局下注並參與結算；
+  // 未下注且已離席的玩家不會卡住下注進度。
+  const hasSubmittedBet = Number(player?.currentBet || 0) > 0 && Boolean(player?.betType);
+  return !isPlayerLeft(player) || hasSubmittedBet;
+}
+
 function setGameMode(value = "normal") {
-  const mode = value === "casino" ? "casino" : "normal";
+  const mode = value === "classic" ? "classic" : value === "casino" ? "casino" : "normal";
   if ($("gameMode")) $("gameMode").value = mode;
+
+  document.body.classList.toggle("classic-mode", mode === "classic");
 
   document.querySelectorAll(".mode-option").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.gameMode === mode);
   });
 
   document.querySelectorAll(".casino-only").forEach((el) => {
-    el.hidden = mode !== "casino";
+    el.hidden = !(mode === "casino" || mode === "classic");
   });
 }
 
@@ -1265,25 +1301,36 @@ function updateMultiplierPanel() {
   }
 
   gateLabel.textContent = mode === "invalid" ? "門牌" : "門寬";
-  insideLabel.textContent = "進洞";
-  postLabel.textContent = "押撞柱";
-  outsideLabel.textContent = "出界";
-  widthText.textContent = mode === "invalid" ? "順子門" : `${multipliers.width} 格`;
-  insideText.textContent = mode === "invalid" ? "不可" : multiplierText(multipliers.inside);
-  postText.textContent = multiplierText(multipliers.post);
-  outsideText.textContent = multiplierText(multipliers.outside);
+  if (isClassicMode(room) && mode === "normal") {
+    insideLabel.textContent = "進洞";
+    postLabel.textContent = "出界";
+    outsideLabel.textContent = "撞柱";
+    widthText.textContent = `${multipliers.width} 格`;
+    insideText.textContent = "+1 倍";
+    postText.textContent = "-1 倍";
+    outsideText.textContent = `賠 ${getPairPostPenaltyValue(room)} 倍`;
+  } else {
+    insideLabel.textContent = "進洞";
+    postLabel.textContent = "押撞柱";
+    outsideLabel.textContent = "出界";
+    widthText.textContent = mode === "invalid" ? "順子門" : `${multipliers.width} 格`;
+    insideText.textContent = mode === "invalid" ? "不可" : multiplierText(multipliers.inside);
+    postText.textContent = multiplierText(multipliers.post);
+    outsideText.textContent = multiplierText(multipliers.outside);
+  }
   if (suitItem) suitItem.hidden = true;
 }
 
 function getAvailableBetTypes() {
   const room = state.room || {};
   const mode = getGateMode(room.gateA, room.gateB);
+  const classic = isClassicMode(room);
 
   if (mode === "pair") {
     const rank = room.gateA?.rank ?? 0;
     const values = ["higher", "lower"].filter((type) => getPairMultiplier(rank, type) > 0);
 
-    if (isCasinoMode(room)) {
+    if (isFreeBetMode(room)) {
       values.push("suit_spade", "suit_heart", "suit_diamond", "suit_club");
     }
 
@@ -1291,7 +1338,7 @@ function getAvailableBetTypes() {
   }
 
   if (mode === "normal") {
-    return ["inside", "post", "outside"];
+    return classic ? ["shoot"] : ["inside", "post", "outside"];
   }
 
   return [];
@@ -1301,10 +1348,15 @@ function updateBetTypeOptions() {
   const room = state.room || {};
   const mode = getGateMode(room.gateA, room.gateB);
   const available = getAvailableBetTypes();
-  const casinoPair = mode === "pair" && isCasinoMode(room);
+  const classic = isClassicMode(room);
+  const freeBetPair = mode === "pair" && isFreeBetMode(room);
 
   document.querySelectorAll(".normal-bet").forEach((btn) => {
-    btn.hidden = mode === "pair";
+    btn.hidden = mode === "pair" || classic;
+  });
+
+  document.querySelectorAll(".classic-bet").forEach((btn) => {
+    btn.hidden = !(classic && mode === "normal");
   });
 
   document.querySelectorAll(".pair-bet").forEach((btn) => {
@@ -1312,13 +1364,13 @@ function updateBetTypeOptions() {
   });
 
   document.querySelectorAll(".pair-suit-bet").forEach((btn) => {
-    btn.hidden = !casinoPair;
+    btn.hidden = !freeBetPair;
   });
 
   document.querySelectorAll(".bet-type-option").forEach((btn) => {
     const usable = available.includes(btn.dataset.betType);
     btn.classList.toggle("unavailable", !usable && mode === "pair");
-    btn.disabled = btn.disabled || (!usable && mode === "pair");
+    btn.disabled = btn.disabled || (!usable && (mode === "pair" || classic));
   });
 
   const current = $("betType")?.value;
@@ -1380,6 +1432,19 @@ function judgeBet(betType, amount, gateA, gateB, resultCard) {
   const inside = resultCard.rank > gate.low && resultCard.rank < gate.high;
   const outside = !inside && !hitPost;
 
+  if (betType === "shoot") {
+    if (inside) {
+      return { delta: amount, label: "射龍門成功", multiplier: 1 };
+    }
+
+    if (hitPost) {
+      const postPenalty = getPairPostPenaltyValue();
+      return { delta: -(amount * postPenalty), label: `撞柱失敗 ×${postPenalty}`, multiplier: postPenalty };
+    }
+
+    return { delta: -amount, label: "出界失敗", multiplier: 1 };
+  }
+
   if (betType === "inside") {
     return inside
       ? { delta: amount * multipliers.inside, label: `進洞成功 ×${multipliers.inside}`, multiplier: multipliers.inside }
@@ -1427,6 +1492,8 @@ function getMinBetValue() {
 function getPotentialWinMultiplier(betType = $("betType")?.value, room = state.room || {}) {
   if (!room?.gateA || !room?.gateB) return 0;
 
+  if (betType === "shoot") return 1;
+
   const mode = getGateMode(room.gateA, room.gateB);
   const multipliers = getRoundMultipliers(room.gateA, room.gateB);
 
@@ -1444,15 +1511,26 @@ function getPotentialWinMultiplier(betType = $("betType")?.value, room = state.r
   return 0;
 }
 
+function getPotentialLossMultiplier(betType = $("betType")?.value, room = state.room || {}) {
+  if (betType === "shoot") return getPairPostPenaltyValue(room);
+  if (betType === "higher" || betType === "lower") return getPairPostPenaltyValue(room);
+  return 1;
+}
+
 function getCasinoRiskLimitInfo(betType = $("betType")?.value, room = state.room || {}) {
+  const score = getSelfScore();
+
   if (!isCasinoMode(room)) {
     return {
       enabled: false,
-      maxBet: Infinity,
+      maxBet: score,
       maxPayout: Infinity,
       multiplier: getPotentialWinMultiplier(betType, room),
+      lossMultiplier: getPotentialLossMultiplier(betType, room),
       rate: 1,
-      pot: Math.floor(Number(room?.pot || 0))
+      pot: Math.floor(Number(room?.pot || 0)),
+      bankrollCap: score,
+      payoutCap: Infinity
     };
   }
 
@@ -1460,15 +1538,21 @@ function getCasinoRiskLimitInfo(betType = $("betType")?.value, room = state.room
   const rate = getPotRiskRateValue(room);
   const maxPayout = Math.floor(pot * rate);
   const multiplier = getPotentialWinMultiplier(betType, room);
-  const maxBet = multiplier > 0 ? Math.floor(maxPayout / multiplier) : 0;
+  const lossMultiplier = getPotentialLossMultiplier(betType, room);
+  const payoutCap = multiplier > 0 ? Math.floor(maxPayout / multiplier) : 0;
+  const bankrollCap = lossMultiplier > 0 ? Math.floor(score / lossMultiplier) : score;
+  const maxBet = Math.max(0, Math.min(payoutCap, bankrollCap, score));
 
   return {
     enabled: true,
     maxBet,
     maxPayout,
     multiplier,
+    lossMultiplier,
     rate,
-    pot
+    pot,
+    bankrollCap,
+    payoutCap
   };
 }
 
@@ -1510,7 +1594,7 @@ function updateBetLimitHint() {
   const riskPct = Math.round(info.rate * 100);
   const typeLabel = BET_LABELS[betType] || betType;
 
-  el.textContent = `賭場限注：${typeLabel} 最高可下注 ${cap} 分（獎金池單局承擔 ${riskPct}%＝${info.maxPayout} 分，倍率 ${info.multiplier} 倍）。`;
+  el.textContent = `賭場限注：${typeLabel} 最高可下注 ${cap} 分（獎金池承擔 ${riskPct}%＝${info.maxPayout} 分，最壞損失 ${info.lossMultiplier} 倍）。`;
 }
 
 function getSelfScore() {
@@ -1641,7 +1725,7 @@ function addChipAmount(chipValue) {
 
 function getEligiblePlayers(players = state.players) {
   const minBet = Math.max(1, Number(state.room?.minBet ?? $("minBet").value ?? 100));
-  return players.filter((p) => Number(p.score || 0) >= minBet);
+  return players.filter((p) => Number(p.score || 0) >= minBet && isPlayerEligibleForBet(p));
 }
 
 function getBetProgress(players = state.players) {
@@ -2035,7 +2119,9 @@ function renderRoom() {
   if (room.rebuyAmount !== undefined && $("rebuyAmount")) $("rebuyAmount").value = room.rebuyAmount;
   if (room.pairPostPenalty !== undefined && $("pairPostPenalty")) $("pairPostPenalty").value = room.pairPostPenalty;
   updateCasinoPanel();
-  $("betHint").textContent = `${isCasinoMode(room) ? `賭場模式：輸分進獎金池，贏分從獎金池支付；單局承擔 ${Math.round(getPotRiskRateValue(room) * 100)}%，對子撞柱賠 ${getPairPostPenaltyValue(room)} 倍，對子局可猜花色 3 倍。 ` : ""}普通局：進洞依門寬浮動，撞柱 3 倍，出界 1 倍。對子局：改猜大 / 猜小，抽到同點視為撞柱；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`;
+  $("betHint").textContent = isClassicMode(room)
+    ? `正規射龍門：只下注「射龍門」；進洞贏 1 倍，出界輸 1 倍，撞柱賠 ${getPairPostPenaltyValue(room)} 倍。最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`
+    : `${isCasinoMode(room) ? `自由下注模式：輸分進獎金池，贏分從獎金池支付；單局承擔 ${Math.round(getPotRiskRateValue(room) * 100)}%，對子撞柱賠 ${getPairPostPenaltyValue(room)} 倍，對子局可猜花色 3 倍。 ` : ""}普通局：進洞依門寬浮動，撞柱 3 倍，出界 1 倍。對子局：改猜大 / 猜小，抽到同點視為撞柱；最低下注 ${room.minBet || Number($("minBet").value || 100)} 分。`;
 
   setCardView("gateA", room.gateA);
   setCardView("gateB", room.gateB);
@@ -2068,7 +2154,9 @@ function renderRoom() {
   } else if (gate?.adjacent) {
     $("roundResult").textContent = "順子門無效：沒有進洞空間，請主持人重新發牌。";
   } else {
-    $("roundResult").textContent = `門寬 ${gate.width} 格，等待玩家下注。`;
+    $("roundResult").textContent = isClassicMode(room)
+      ? `門寬 ${gate.width} 格，正規射龍門：玩家只能下注射門。`
+      : `門寬 ${gate.width} 格，等待玩家下注。`;
   }
 
   $("hostPanel").style.display = canHostControl() ? "block" : "none";
@@ -2089,7 +2177,7 @@ function renderPlayers() {
   $("rankingList").innerHTML = sorted.length
     ? sorted.map((p, index) => {
         const roundState = getPlayerRoundState(p);
-        const rowClass = roundState.className === "waiting" ? "pending" : roundState.className === "ready" ? "done" : "";
+        const rowClass = `${roundState.className === "waiting" ? "pending" : roundState.className === "ready" ? "done" : ""} ${isPlayerLeft(p) ? "left-player" : ""}`;
         return `
           <div class="rank-row ${rowClass}">
             <div class="rank-no">${index + 1}</div>
@@ -2098,6 +2186,8 @@ function renderPlayers() {
               <div class="player-meta">${p.currentBet ? `${BET_LABELS[p.betType] || p.betType}｜${p.currentBet} 分` : "尚未下注"}</div>
               ${getPlayerStatsText(p) ? `<div class="player-extra">${getPlayerStatsText(p)}</div>` : ""}
               <div class="player-state ${roundState.className}">${roundState.label}</div>
+              <div class="player-status-pill ${getPlayerStatusClass(p)}">${getPlayerStatusLabel(p)}</div>
+              <div class="player-status-pill ${getPlayerStatusClass(p)}">${getPlayerStatusLabel(p)}</div>
             </div>
             <div class="score">${p.score || 0}</div>
           </div>
@@ -2108,7 +2198,7 @@ function renderPlayers() {
   $("playerList").innerHTML = sorted.length
     ? sorted.map((p) => {
         const roundState = getPlayerRoundState(p);
-        const rowClass = roundState.className === "waiting" ? "pending" : roundState.className === "ready" ? "done" : "";
+        const rowClass = `${roundState.className === "waiting" ? "pending" : roundState.className === "ready" ? "done" : ""} ${isPlayerLeft(p) ? "left-player" : ""}`;
         return `
           <div class="player-row ${rowClass}">
             <div class="rank-no">•</div>
@@ -2120,7 +2210,8 @@ function renderPlayers() {
             </div>
             <div class="player-actions">
               <div class="score">${p.score || 0}</div>
-              ${canHostControl() && isCasinoMode() ? `<button class="rebuy-btn ${isPreStartBuyInAvailable() ? "prebuy" : ""}" type="button" data-rebuy-player="${p.id}">${getRebuyActionLabel()}</button>` : ""}
+              ${canHostControl() && isCasinoMode() && !isPlayerLeft(p) ? `<button class="rebuy-btn ${isPreStartBuyInAvailable() ? "prebuy" : ""}" type="button" data-rebuy-player="${p.id}">${getRebuyActionLabel()}</button>` : ""}
+              ${canHostControl() ? `<button class="settle-btn" type="button" data-settle-player="${p.id}">結清移除</button>` : ""}
             </div>
           </div>
         `;
@@ -2270,14 +2361,20 @@ async function playerJoinRoom() {
   const actualAnte = casino && !alreadyPaid ? Math.min(ante, baseScore) : 0;
   const finalScore = Math.max(0, baseScore - actualAnte);
 
+  const returningFromLeft = existing.playerStatus === "left" && existing.joinedRoomId === state.roomId;
+
   await setDoc(playerRef(), {
     name: state.displayName,
     score: finalScore,
     currentBet: existing.currentBet || 0,
     betType: existing.betType || "",
-    lastResult: actualAnte ? `剛加入房間，已投入底注 ${actualAnte} 分` : (existing.lastResult || "剛加入房間"),
+    lastResult: returningFromLeft
+      ? "已重新回到房間，籌碼已保留"
+      : (actualAnte ? `剛加入房間，已投入底注 ${actualAnte} 分` : (existing.lastResult || "剛加入房間")),
     antePaid: casino ? true : false,
     joinedRoomId: state.roomId,
+    playerStatus: "active",
+    leftAt: null,
     contributedToPot: Number(existing.contributedToPot || 0) + actualAnte,
     totalWin: Number(existing.totalWin || 0),
     totalLoss: Number(existing.totalLoss || 0),
@@ -2298,7 +2395,7 @@ async function playerJoinRoom() {
 
   connectRoom();
   renderAuthState();
-  setStatus(actualAnte ? `玩家已加入房間，已投入底注 ${actualAnte} 分。` : "玩家已加入房間。", "ok");
+  setStatus(returningFromLeft ? "玩家已重新加入房間，原籌碼已保留。" : (actualAnte ? `玩家已加入房間，已投入底注 ${actualAnte} 分。` : "玩家已加入房間。"), "ok");
 }
 
 function ensureRoomActive() {
@@ -2911,6 +3008,42 @@ function allIn() {
   setStatus(amount < score ? `已依賭場限注填入：${amount} 分。` : `已填入 All in：${score} 分。`, "ok");
 }
 
+async function markPlayerLeft(playerId = state.playerId) {
+  if (!state.roomId || !playerId) return;
+
+  try {
+    await setDoc(playerRef(playerId), {
+      playerStatus: "left",
+      leftAt: serverTimestamp(),
+      lastResult: "已離席，籌碼保留待荷官結清",
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  } catch (error) {
+    console.warn("Failed to mark player left:", error);
+  }
+}
+
+async function settleRemovePlayer(playerId) {
+  if (!ensureRoomActive()) return;
+  if (!canHostControl()) {
+    setStatus("只有此房間主持人或 manager 可以結清移除玩家。", "err");
+    return;
+  }
+
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player) {
+    setStatus("找不到該玩家。", "err");
+    return;
+  }
+
+  const score = Math.floor(Number(player.score || 0));
+  const ok = confirm(`確定要結清並移除「${player.name}」嗎？\\n目前籌碼：${score}\\n請先完成 Gil 兌換或確認不兌換後再移除。`);
+  if (!ok) return;
+
+  await deleteDoc(playerRef(playerId));
+  setStatus(`已結清並移除 ${player.name}。`, "ok");
+}
+
 async function resetLocal() {
   const hadRoom = Boolean(state.roomId);
   const leavingRole = state.role;
@@ -2919,11 +3052,7 @@ async function resetLocal() {
   await stopPresence(true);
 
   if (leavingRole === "player" && leavingPlayerId) {
-    try {
-      await deleteDoc(playerRef(leavingPlayerId));
-    } catch (error) {
-      console.warn("Failed to delete player doc:", error);
-    }
+    await markPlayerLeft(leavingPlayerId);
   }
 
   if (hadRoom) {
@@ -2950,7 +3079,7 @@ async function resetLocal() {
 
   disconnectRoom();
   syncRoomUrl();
-  setStatus("已清除本機資料並離線。若房間已無人，系統會自動清空。", "");
+  setStatus(leavingRole === "player" ? "已離開房間，籌碼已保留；請找荷官結清兌換。" : "已清除本機資料並離線。若房間已無人，系統會自動清空。", "");
 }
 
 async function leaveRoom() {
@@ -2961,11 +3090,7 @@ async function leaveRoom() {
   await stopPresence(true);
 
   if (leavingRole === "player" && leavingPlayerId) {
-    try {
-      await deleteDoc(playerRef(leavingPlayerId));
-    } catch (error) {
-      console.warn("Failed to delete player doc:", error);
-    }
+    await markPlayerLeft(leavingPlayerId);
   }
 
   if (hadRoom) {
@@ -2987,7 +3112,7 @@ async function leaveRoom() {
   disconnectRoom();
   syncRoomUrl();
 
-  setStatus(leavingRole === "player" ? "已離開房間，並從玩家列表移除。" : "已離開房間並停止監聽。若房間已無人，系統會自動清空。", "");
+  setStatus(leavingRole === "player" ? "已離開房間，籌碼已保留；請找荷官結清兌換。" : "已離開房間並停止監聽。若房間已無人，系統會自動清空。", "");
 }
 
 window.addEventListener("pagehide", () => {
@@ -3005,9 +3130,16 @@ document.querySelectorAll(".mode-option").forEach((btn) => {
 });
 
 $("playerList").addEventListener("click", (event) => {
-  const btn = event.target.closest("[data-rebuy-player]");
-  if (!btn) return;
-  openRebuyModal(btn.dataset.rebuyPlayer);
+  const rebuyBtn = event.target.closest("[data-rebuy-player]");
+  if (rebuyBtn) {
+    openRebuyModal(rebuyBtn.dataset.rebuyPlayer);
+    return;
+  }
+
+  const settleBtn = event.target.closest("[data-settle-player]");
+  if (settleBtn) {
+    settleRemovePlayer(settleBtn.dataset.settlePlayer).catch((error) => setStatus(error.message, "err"));
+  }
 });
 
 $("rebuyCancelBtn").addEventListener("click", closeRebuyModal);

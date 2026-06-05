@@ -124,8 +124,12 @@
                 <small>只計算玩家自己的籌碼</small>
               </button>
               <button type="button" class="mode-option" data-game-mode="casino">
-                <span>賭場模式</span>
-                <small>啟用入場底注、獎金池與特殊池</small>
+                <span>自由下注模式</span>
+                <small>可押進洞、撞柱、出界</small>
+              </button>
+              <button type="button" class="mode-option" data-game-mode="classic">
+                <span>正規射龍門</span>
+                <small>只下注射門，適合正式賭場</small>
               </button>
               <input id="gameMode" type="hidden" value="normal" />
             </div>
@@ -167,7 +171,7 @@
             </label>
           </div>
 
-          <p class="hint">一般模式適合陪玩；賭場模式會讓玩家入場先付底注進獎金池，輸分進池，贏分從池支付。</p>
+          <p class="hint">一般模式適合陪玩；自由下注模式可押不同結果；正規射龍門只下注「射門」，更適合正式賭場。</p>
         </div>
 
         <div class="actions">
@@ -297,6 +301,10 @@
                 <button type="button" class="bet-type-option normal-bet" data-bet-type="outside">
                   <span class="bet-type-title">出界</span>
                   <span class="bet-type-desc">結果牌落在門牌之外</span>
+                </button>
+                <button type="button" class="bet-type-option classic-bet" data-bet-type="shoot" hidden>
+                  <span class="bet-type-title">射龍門</span>
+                  <span class="bet-type-desc">進洞贏 1 倍；出界輸 1 倍；撞柱依規則賠倍數</span>
                 </button>
                 <button type="button" class="bet-type-option pair-bet" data-bet-type="higher" hidden>
                   <span class="bet-type-title">猜大</span>
