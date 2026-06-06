@@ -4,16 +4,16 @@ window.allCasts = [
   {
     name: "圖圖",
     image: "images/staff-01.jpg",
-    desc: "",
-    shortDesc: "",
-    quote: "若您願意，我會把今晚的月光，輕輕留在您的杯中。",
-    tags: ["店長", "俏皮可愛", "香檳 CALL"],
-    filterTags: ["chat", "cute", "champagne"],
+    desc: "第十二夜的店長，掌管夢境入口與今夜的燈火。擅長以溫柔而帶有儀式感的節奏，引導客人沉入會館氛圍；雖不接受一般指名，仍會在特別的夜晚，以香檳 CALL 與輕 RP 為夢境添上一筆華麗的光。",
+    shortDesc: "夢境店長、香檳 CALL、輕 RP。",
+    quote: "我與你的距離，只有一場夢。",
+    tags: ["店長","香檳 CALL"],
+    filterTags: ["chat", "rp", "champagne"],
     status: "unbookable",
     statusLabel: "不接受指名",
     workDays: [5, 6],
     recommended: "陪酒聊天、輕 RP",
-    extraServices: [ "小遊戲", "按摩 RP"],
+    extraServices: ["香檳 CALL"],
   },
   {
     name: "咕嚕小貓",
@@ -94,40 +94,40 @@ window.allCasts = [
   {
     name: "花形",
     image: "images/staff-05.jpg",
-    desc: "夢境裡的貓魅公關，語尾偶爾會悄悄落下一聲喵。適合想被溫柔陪伴，也想要一點可愛互動的客人。",
-    shortDesc: "安靜陪伴、小遊戲、聊天談心。",
+    desc: "夢境裡的貓魅公關，平時溫柔安靜，語尾偶爾會悄悄落下一聲喵。擅長陪客人慢慢聊天、玩小遊戲，也能在香檳 CALL、演奏與上車舞中替夜晚點亮氣氛。適合想被細膩陪伴，也想偶爾熱鬧一下的客人。",
+    shortDesc: "安靜陪伴、小遊戲、香檳 CALL。",
     quote: "不必急著說話，今晚的燈會替您慢慢沉澱。",
-    tags: ["輕RP","安靜陪伴", "香檳CALL", "聊天談心", "小遊戲", "演奏", "上車舞"],
-    filterTags: ["rp","chat", "champagne","game","music"],
+    tags: ["輕 RP", "安靜陪伴", "聊天談心", "小遊戲", "香檳 CALL", "演奏", "上車舞"],
+    filterTags: ["rp", "chat", "cute", "champagne", "game", "music"],
     status: "pending",
     statusLabel: "排班確認中",
     workDays: [5, 6],
-    recommended: "香檳CALL、小遊戲",
-    extraServices: ["香檳CALL", "小遊戲", "上車舞", "演奏"],
+    recommended: "聊天談心、小遊戲、香檳 CALL",
+    extraServices: ["香檳 CALL", "小遊戲", "上車舞", "演奏", "小故事"],
     personalMenu: [
       {
-        title: "🍾單人香檳CALL ",
-        desc: "每一位主人都有可能會有不同的香檳CALL，微醺登場，氣氛直接拉滿。",
+        title: "🍾｜單人香檳CALL ",
+        desc: "每一位主人都值得擁有專屬的登場時刻。微醺開場，讓今晚的氣氛一口氣升溫。",
         price: "依店家報價"
       },
       {
-        title: "🪭 上車舞",
-        desc: "上車的不只是節奏，是今晚的浪漫。",
-        price: "一次10萬"
+        title: "🪭｜上車舞",
+        desc: "上車的不只是節奏，也是今晚悄悄靠近的浪漫。",
+        price: "一次10萬 G"
       },
       {
-        title: "🎻 演奏",
-        desc: "一段旋律，一場不願醒來的夜晚。(歌曲隨機暫時不開放點歌)",
-        price: "思考中"
+        title: "🎻｜演奏",
+        desc: "一段旋律，一場不願醒來的夜晚。歌曲目前採隨機演奏，暫不開放指定曲目。",
+        price: "依現場狀況"
       },
       {
-        title: "🌮 小故事",
-        desc: "在某次因緣際會之下聽到主訴說著故事，因而學到了該技能。",
+        title: "🌮｜小故事",
+        desc: "從某次因緣際會下，學會了把奇妙、溫柔或有點無厘頭的故事，說給願意停下來的客人聽。",
         price: "陪伴中無料"
       },
       {
-        title: "🕹️ 小遊戲",
-        desc: "有些相遇，從一場遊戲開始。",
+        title: "🕹️｜小遊戲",
+        desc: "有些相遇，從一場遊戲開始。適合想放鬆互動、炒熱氣氛，或不知道該聊什麼的夜晚。",
         price: "陪伴中無料"
       }
     ]
@@ -221,7 +221,7 @@ window.allCasts = [
     image: "images/staff-11.jpg",
     desc: "不吃紙，但很會吃掉冷場的氣氛。活潑、親切、反應快，適合想找人聊天、玩鬧、輕鬆互動，或讓包廂氣氛更熱鬧的客人。",
     shortDesc: "熱場、香檳 CALL、活動主持。",
-    quote: "嗨!要一起玩嗎?玩誰都行。",
+    quote: "嗨！要一起玩嗎？玩誰都行。",
     tags: ["服裝店員", "服裝穿搭", "談心交流"],
     filterTags: ["ootd", "game", "chat"],
     status: "available",
@@ -233,16 +233,16 @@ window.allCasts = [
   {
     name: "千反田",
     image: "images/staff-12.jpg",
-    desc: "服裝搭配:「深宵換裝，讓夜晚成為你的時裳」。",
-    shortDesc: "熱場、香檳 CALL、活動主持。",
-    quote: "你是我的月神嗎。",
-    tags: ["服裝店員", "服裝穿搭", "談心交流"],
-    filterTags: ["ootd", "game", "chat"],
-    status: "available",
-    statusLabel: "接受指名",
+    desc: "第十二夜的經理，擅長以沉穩細膩的語調，引導客人在夢境之中慢慢說出心裡的話。比起熱鬧喧嘩，更適合安靜談心、情緒整理與深度交流；雖不接受一般指名，仍會在需要時，為迷路的旅人點亮一盞溫柔的燈。",
+    shortDesc: "夢境經理、談心交流、溫柔引導。",
+    quote: "在這個夢境當中，您渴望看見什麼呢？",
+    tags: ["經理", "談心交流", "溫柔引導", "沉穩", "夢境系"],
+    filterTags: ["chat"],
+    status: "unbookable",
+    statusLabel: "不接受指名",
     workDays: [5, 6],
-    recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "談心交流"]
+    recommended: "談心交流",
+    extraServices: ["談心交流"]
   },
   {
     name: "權順榮",
@@ -422,16 +422,16 @@ window.allCasts = [
   {
     name: "參參",
     image: "images/staff-21.jpg",
-    desc: "服裝搭配:「深宵換裝，讓夜晚成為你的時裳」。",
-    shortDesc: "熱場、香檳 CALL、活動主持。",
-    quote: "你是我的月神嗎。",
-    tags: ["服裝店員", "服裝穿搭", "談心交流"],
-    filterTags: ["ootd", "game", "chat"],
+    desc: "帶著貓系撒嬌感的陪聊公關，擅長用輕鬆可愛的節奏陪客人聊天、互動與放鬆。喜歡被稱讚，也很容易因為客人的小費與關心而充滿幹勁；適合想要可愛陪伴、輕鬆談話與一點俏皮感的客人。",
+    shortDesc: "貓系陪聊、可愛撒嬌、小費動力。",
+    quote: "客人給的小費，是我的動力喵。",
+    tags: ["貓系", "可愛", "陪聊", "撒嬌", "輕鬆互動"],
+    filterTags: ["chat", "cute"],
     status: "available",
     statusLabel: "接受指名",
     workDays: [5, 6],
-    recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "談心交流"]
+    recommended: "陪聊互動、可愛陪席",
+    extraServices: ["輕 RP", "陪聊"]
   },
   {
     name: "咪幾馬麻",
