@@ -5,17 +5,13 @@ const GOOGLE_FORM_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSeBaSem6rf9xX
 const F={discordId:"entry.1545709974",playerName:"entry.1718936699",serverName:"entry.750062138",guestCount:"entry.999763483",bookingDate:"entry.975020306",bookingTime:"entry.361264469",sessionCount:"entry.1283018425",castNames:"entry.1254505299",serviceType:"entry.356715083",notes:"entry.467701533"};
 
 const SERVER_OPTIONS=[
-  "Bahamut",
-  "Chocobo",
-  "Tonberry",
-  "Typhon",
-  "Carbuncle",
-  "Aegis",
-  "Atomos",
-  "Garuda",
-  "Gungnir",
-  "Kujata",
-  "其他，請於備註說明"
+  "伊弗利特",
+  "迦樓羅",
+  "利維坦",
+  "鳳凰",
+  "奧汀",
+  "巴哈姆特",
+  "泰坦",
 ];
 
 const SERVICE_OPTIONS=[
