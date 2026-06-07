@@ -1,0 +1,1252 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第十二夜｜管理小工具 V1.7.2.8.7.6.5.4.3.4</title>
+<style>
+:root{--bg:#08070d;--panel:rgba(255,255,255,.075);--border:rgba(255,255,255,.14);--text:#f7edf8;--muted:#cbbfd0;--gold:#e8c981;--pink:#f2a7c6;--danger:#ff9aa9;--shadow:0 22px 70px rgba(0,0,0,.42)}
+*{box-sizing:border-box}
+*{scrollbar-width:thin;scrollbar-color:rgba(232,201,129,.42) rgba(255,255,255,.055)}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-track{background:rgba(255,255,255,.055);border-radius:999px}
+*::-webkit-scrollbar-thumb{background:rgba(232,201,129,.42);border-radius:999px}
+*::-webkit-scrollbar-thumb:hover{background:rgba(232,201,129,.62)}html{min-height:100%;background:#08070d}
+body{margin:0;min-height:100vh;font-family:"Noto Serif TC","Microsoft JhengHei",serif;color:var(--text);background:#08070d;line-height:1.7;position:relative}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+radial-gradient(circle at 18% 0%,rgba(242,167,198,.22),transparent 34%),
+radial-gradient(circle at 78% 8%,rgba(155,135,245,.20),transparent 36%),
+radial-gradient(circle at 50% 100%,rgba(242,167,198,.09),transparent 42%),
+linear-gradient(180deg,#08070d 0%,#11101a 58%,#08070d 100%)}
+header{position:sticky;top:0;z-index:5;background:rgba(8,7,13,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.08)}
+.top{width:min(1220px,calc(100% - 32px));margin:auto;padding:14px 0;display:flex;justify-content:space-between;gap:14px;align-items:center}.brand{color:var(--gold);font-weight:700;letter-spacing:.16em}.sub{color:var(--muted);font-size:13px}
+main{width:min(1220px,calc(100% - 32px));margin:auto;padding:30px 0 48px}.hero,.panel{border:1px solid var(--border);background:var(--panel);border-radius:28px;box-shadow:var(--shadow);padding:24px}.hero{border-radius:36px;margin-bottom:18px}
+h1{font-size:clamp(32px,5vw,58px);line-height:1.16;letter-spacing:.08em;margin:0 0 10px}h2{color:var(--gold);margin:0 0 8px}h3{color:var(--gold);margin:0 0 8px}p{color:var(--muted);margin:0}.eyebrow{color:var(--gold);letter-spacing:.22em;font-size:13px;margin-bottom:10px}
+.notice{margin-top:16px;border:1px solid rgba(232,201,129,.28);background:rgba(232,201,129,.08);border-radius:20px;padding:14px;color:#fff7df}
+.tabs,.actions{display:flex;flex-wrap:wrap;gap:10px}.tabs{margin:18px 0}.tab,.btn{appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:var(--text);border-radius:999px;min-height:40px;padding:8px 15px;font:inherit;cursor:pointer}.tab.active,.btn.primary{background:linear-gradient(135deg,rgba(232,201,129,.96),rgba(242,167,198,.92));color:#22131b;font-weight:700;border-color:transparent}.btn.danger{color:var(--danger);border-color:rgba(255,154,169,.35);background:rgba(255,154,169,.08)}.btn.small{min-height:32px;padding:4px 10px;font-size:14px}
+.page{display:none}.page.active{display:grid;gap:18px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+label{display:grid;gap:6px;color:var(--gold);font-size:14px}input,select,textarea{width:100%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:var(--text);border-radius:14px;min-height:40px;padding:9px 11px;font:inherit;outline:none}select option{color:#22131b}textarea{min-height:110px;resize:vertical;font-family:Consolas,"Microsoft JhengHei",monospace;line-height:1.55}.muted{color:var(--muted);font-size:14px}
+.table-wrap{overflow:auto;border:1px solid rgba(255,255,255,.08);border-radius:20px;margin-top:14px}table{width:100%;border-collapse:collapse;min-width:900px;background:rgba(0,0,0,.12)}th,td{border-bottom:1px solid rgba(255,255,255,.08);padding:10px;text-align:left;vertical-align:top}th{background:rgba(232,201,129,.08);color:var(--gold);white-space:nowrap}tr:last-child td{border-bottom:0}.name{font-weight:700;color:#fff8f2;min-width:150px}.cell{display:grid;gap:7px;min-width:180px}.csv{min-height:230px}.toast{position:fixed;right:18px;bottom:18px;background:rgba(20,18,28,.96);border:1px solid rgba(232,201,129,.35);border-radius:16px;padding:10px 14px;opacity:0;transform:translateY(8px);transition:.2s;box-shadow:var(--shadow)}.toast.show{opacity:1;transform:translateY(0)}.role-box{display:grid;gap:6px;max-height:210px;overflow:auto;min-width:190px}.role-check{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:14px}.role-check input{width:auto;min-height:auto}.role-tools{display:grid;gap:10px}.staff-layout{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}.editor-panel{position:sticky;top:92px}.role-badges{display:flex;flex-wrap:wrap;gap:6px}.badge{display:inline-flex;align-items:center;border:1px solid rgba(232,201,129,.28);background:rgba(232,201,129,.08);color:var(--gold);border-radius:999px;padding:2px 8px;font-size:12px}.status-badge{display:inline-flex;border-radius:999px;padding:3px 9px;font-size:13px;border:1px solid rgba(255,255,255,.14)}.status-available{color:#b7efc5;background:rgba(183,239,197,.08);border-color:rgba(183,239,197,.28)}.status-pending{color:#ffd37a;background:rgba(255,211,122,.08);border-color:rgba(255,211,122,.3)}.status-unbookable,.status-rest{color:#ff9aa9;background:rgba(255,154,169,.08);border-color:rgba(255,154,169,.3)}.icon-btn{width:34px;height:34px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:var(--muted);cursor:pointer}.icon-btn:hover{color:var(--gold);border-color:rgba(232,201,129,.35)}.editor-hint{font-size:13px;color:var(--muted);margin-top:8px}.overview-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px}.overview-card{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);border-radius:22px;padding:18px}.overview-card h4{margin:0 0 8px;color:var(--gold);font-size:20px}.overview-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.stat{border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.14);border-radius:16px;padding:10px}.stat strong{display:block;font-size:22px;color:#fff}.stat span{font-size:12px;color:var(--muted)}.overview-list{display:grid;gap:6px;margin-top:10px}.overview-line{font-size:14px;color:var(--muted)}.overview-line b{color:var(--gold)}.dashboard-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.mini-list{display:grid;gap:8px;margin-top:12px}.mini-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);padding:8px 0;color:var(--muted)}.mini-row:last-child{border-bottom:0}.mini-row b{color:var(--gold)}.quick-actions{display:grid;gap:10px;margin-top:12px}.settings-note{margin-top:12px;color:var(--muted);font-size:14px}.load-status{margin-top:10px;color:var(--muted);font-size:14px}.load-status.ok{color:#b7efc5}.load-status.err{color:#ff9aa9}
+.sch-status{
+  appearance:none;
+  -webkit-appearance:none;
+  min-height:38px;
+  border-radius:999px;
+  padding:6px 34px 6px 14px;
+  border:1px solid rgba(232,201,129,.26);
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.045)),
+    linear-gradient(45deg,transparent 50%,rgba(232,201,129,.85) 50%) right 14px center/7px 7px no-repeat;
+  color:var(--text);
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.sch-status:hover{border-color:rgba(232,201,129,.48);background-color:rgba(232,201,129,.08)}
+.sch-status:focus{border-color:rgba(242,167,198,.52);box-shadow:0 0 0 3px rgba(242,167,198,.12)}
+.sch-status option{color:#22131b;background:#f7edf8}
+.status-picker{position:relative;min-width:170px}.staff-status-picker{width:100%;min-width:0}.staff-status-picker .status-menu{min-width:100%}
+.staff-status-picker .status-button{min-height:42px}
+.staff-status-picker .status-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.staff-editor-status-row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+.staff-editor-status-row input{min-height:42px}
+.staff-editor-status-row label{min-width:0}
+.status-picker .sch-status{display:none}
+.status-button{
+  width:100%;
+  min-height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border:1px solid rgba(232,201,129,.26);
+  border-radius:999px;
+  background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.045));
+  color:var(--text);
+  padding:6px 12px 6px 14px;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.status-button:hover{border-color:rgba(232,201,129,.48);background-color:rgba(232,201,129,.08)}
+.status-button .status-left{display:inline-flex;align-items:center;gap:8px}
+.status-dot{width:11px;height:11px;border-radius:999px;display:inline-block;box-shadow:0 0 12px currentColor}
+.status-blank .status-dot{color:rgba(255,255,255,.46);background:rgba(255,255,255,.46)}
+.status-available .status-dot{color:#43e0a2;background:#43e0a2}
+.status-pending .status-dot{color:#ffd25f;background:#ffd25f}
+.status-rest .status-dot{color:#ff6f8c;background:#ff6f8c}
+.status-arrow{color:var(--gold);font-size:12px;transition:transform .18s ease}
+.status-picker.open .status-arrow{transform:rotate(180deg)}
+.status-menu{
+  display:none;
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(100% + 8px);
+  z-index:60;
+  padding:7px;
+  border:1px solid rgba(232,201,129,.28);
+  border-radius:18px;
+  background:rgba(20,18,28,.98);
+  box-shadow:0 18px 50px rgba(0,0,0,.45);
+  backdrop-filter:blur(16px);
+}
+.status-picker.open .status-menu{display:grid;gap:5px}
+.status-option{
+  width:100%;
+  min-height:34px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  color:var(--text);
+  font:inherit;
+  cursor:pointer;
+  padding:6px 8px;
+  text-align:left;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.status-option:hover,.status-option.active{background:rgba(232,201,129,.12);color:var(--gold)}
+
+.role-box{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  max-height:260px;
+  overflow:auto;
+  padding-right:4px;
+}
+.role-option{
+  position:relative;
+  display:block;
+  cursor:pointer;
+}
+.role-option input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.role-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:42px;
+  padding:10px 12px;
+  border:1px solid rgba(232,201,129,.20);
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.03));
+  transition:all .18s ease;
+  color:var(--text);
+}
+.role-option:hover .role-card{
+  border-color:rgba(232,201,129,.40);
+  background:linear-gradient(135deg,rgba(232,201,129,.10),rgba(255,255,255,.04));
+}
+.role-check{
+  width:18px;
+  height:18px;
+  border-radius:6px;
+  border:1px solid rgba(232,201,129,.34);
+  background:rgba(255,255,255,.04);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 18px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.role-check::after{
+  content:"✓";
+  font-size:12px;
+  line-height:1;
+  color:#1c1623;
+  opacity:0;
+  transform:scale(.75);
+  transition:all .16s ease;
+}
+.role-name{
+  font-weight:700;
+  letter-spacing:.3px;
+}
+.role-option input:checked + .role-card{
+  border-color:rgba(242,167,198,.48);
+  background:linear-gradient(135deg,rgba(242,167,198,.18),rgba(232,201,129,.10));
+  box-shadow:0 10px 26px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.role-option input:checked + .role-card .role-check{
+  border-color:rgba(242,167,198,.56);
+  background:linear-gradient(135deg,#e8c981,#f2a7c6);
+}
+.role-option input:checked + .role-card .role-check::after{
+  opacity:1;
+  transform:scale(1);
+}
+
+
+
+.settings-hero{
+  display:grid;
+  grid-template-columns:1.4fr .8fr;
+  gap:14px;
+  align-items:stretch;
+  margin-top:14px;
+}
+.settings-summary-card{
+  border:1px solid rgba(232,201,129,.18);
+  background:
+    radial-gradient(circle at 0% 0%,rgba(242,167,198,.12),transparent 42%),
+    rgba(255,255,255,.045);
+  border-radius:24px;
+  padding:18px;
+}
+.settings-summary-card h3{
+  margin:0 0 8px;
+  color:var(--gold);
+  font-size:20px;
+}
+.settings-summary-card p{
+  font-size:14px;
+}
+.settings-quick-card{
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.12);
+  border-radius:24px;
+  padding:18px;
+}
+.business-days{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  margin-top:14px;
+}
+.business-day-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(232,201,129,.20);
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.032)),
+    radial-gradient(circle at 100% 0%,rgba(232,201,129,.10),transparent 42%);
+  border-radius:26px;
+  padding:18px;
+  box-shadow:0 18px 44px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.business-day-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(115deg,transparent 0%,rgba(255,255,255,.055) 42%,transparent 68%);
+  opacity:.65;
+}
+.business-day-head{
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:14px;
+}
+.business-day-kicker{
+  color:var(--muted);
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.business-day-title{
+  color:var(--gold);
+  font-weight:800;
+  font-size:22px;
+  letter-spacing:.06em;
+}
+.business-day-badge{
+  flex:0 0 auto;
+  border:1px solid rgba(232,201,129,.30);
+  background:rgba(232,201,129,.08);
+  color:var(--gold);
+  border-radius:999px;
+  padding:5px 11px;
+  font-size:13px;
+}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+
+.settings-field{display:flex;flex-direction:column;gap:8px}
+.settings-input{
+  min-height:46px;
+  border-radius:16px;
+  border:1px solid rgba(232,201,129,.18);
+  background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+  color:var(--text);
+  padding:0 14px;
+  font-size:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+.settings-input:focus{
+  outline:none;
+  border-color:rgba(232,201,129,.42);
+  box-shadow:0 0 0 3px rgba(232,201,129,.08);
+}
+.settings-date-hint,.settings-time-hint{
+  font-size:12px;
+  color:var(--muted);
+}
+.settings-date-hint b{color:var(--gold)}
+.settings-time-row{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:10px;
+  align-items:center;
+}
+.settings-time-sep{
+  color:var(--muted);
+  font-size:13px;
+  letter-spacing:.12em;
+}
+.settings-presets{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.settings-chip{
+  appearance:none;
+  border:1px solid rgba(232,201,129,.22);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:999px;
+  padding:7px 12px;
+  font-size:12px;
+  cursor:pointer;
+  transition:all .18s ease;
+}
+.settings-chip:hover{
+  border-color:rgba(232,201,129,.44);
+  background:rgba(232,201,129,.10);
+}
+.calendar-popover{
+  position:fixed;
+  z-index:1000;
+  width:310px;
+  border:1px solid rgba(232,201,129,.30);
+  border-radius:22px;
+  background:rgba(20,18,28,.98);
+  box-shadow:0 24px 70px rgba(0,0,0,.48);
+  padding:14px;
+  backdrop-filter:blur(18px);
+}
+.calendar-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.calendar-title{
+  color:var(--gold);
+  font-weight:800;
+  letter-spacing:.06em;
+}
+.calendar-nav{
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  cursor:pointer;
+}
+.calendar-nav:hover{
+  color:var(--gold);
+  border-color:rgba(232,201,129,.40);
+  background:rgba(232,201,129,.09);
+}
+.calendar-weekdays,.calendar-days{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+.calendar-weekdays{
+  margin-bottom:6px;
+  color:var(--gold);
+  font-size:12px;
+  text-align:center;
+}
+.calendar-day{
+  min-height:34px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  font:inherit;
+  font-size:13px;
+}
+.calendar-day:hover{
+  border-color:rgba(232,201,129,.34);
+  background:rgba(232,201,129,.10);
+}
+.calendar-day.other{
+  color:rgba(203,191,208,.46);
+}
+.calendar-day.today{
+  border-color:rgba(242,167,198,.42);
+}
+.calendar-day.selected{
+  color:#22131b;
+  background:linear-gradient(135deg,#e8c981,#f2a7c6);
+  font-weight:800;
+}
+.calendar-footer{
+  margin-top:10px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.calendar-footer button{
+  flex:1;
+  min-height:32px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  cursor:pointer;
+}
+.calendar-footer button:hover{
+  color:var(--gold);
+  border-color:rgba(232,201,129,.36);
+}
+.news-date-input{
+  min-width:138px;
+  min-height:38px;
+  border-radius:14px;
+  border:1px solid rgba(232,201,129,.18);
+  background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.035));
+  color:var(--text);
+  padding:8px 11px;
+  font:inherit;
+}
+.news-date-input:focus{
+  outline:none;
+  border-color:rgba(232,201,129,.42);
+  box-shadow:0 0 0 3px rgba(232,201,129,.08);
+}
+.yn-picker{
+  display:inline-flex;
+  gap:4px;
+  padding:4px;
+  border:1px solid rgba(232,201,129,.20);
+  background:rgba(255,255,255,.045);
+  border-radius:999px;
+  min-width:112px;
+}
+.yn-option{
+  appearance:none;
+  border:0;
+  border-radius:999px;
+  background:transparent;
+  color:var(--muted);
+  min-height:30px;
+  padding:5px 12px;
+  font:inherit;
+  font-size:13px;
+  cursor:pointer;
+}
+.yn-option:hover{
+  color:var(--gold);
+  background:rgba(232,201,129,.10);
+}
+.yn-option.active{
+  color:#22131b;
+  background:linear-gradient(135deg,#e8c981,#f2a7c6);
+  font-weight:800;
+}
+
+@media(max-width:980px){
+  .settings-grid,.business-days,.settings-hero{grid-template-columns:1fr}
+}
+
+@media(max-width:980px){.dashboard-grid{grid-template-columns:1fr}}@media(max-width:980px){.staff-layout{grid-template-columns:1fr}.editor-panel{position:static}.overview-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.top,.grid2,.grid4{grid-template-columns:1fr;flex-direction:column;align-items:flex-start}.grid2,.grid4{display:grid}}
+</style>
+</head>
+<body>
+<header><div class="top"><div><div class="brand">第十二夜｜管理小工具 V1.7.2.8.7.6.5.4.3.4</div><div class="sub">純前端假後台，不直接修改 Google Sheet</div></div><div class="actions"><button class="btn small" id="save">儲存本機</button><button class="btn small" id="load">讀取本機</button><button class="btn small danger" id="clear">清空暫存</button></div></div></header>
+<main>
+<section class="hero"><div class="eyebrow">MANAGER TOOL</div><h1>視覺化產生班表、狀態與公告 CSV。</h1><p>這個工具只在瀏覽器前端運作，可用來整理資料、複製 CSV，再貼到 Google Sheet。它不會直接寫入正式網站資料。</p><div class="notice">建議不要在正式網站導覽列放連結；即使有人知道網址，也只能產生 CSV，不能直接修改 Google Sheet。</div></section>
+<nav class="tabs"><button class="tab active" data-tab="overview">總覽</button><button class="tab" data-tab="settings">營業設定</button><button class="tab" data-tab="schedule">出勤班表</button><button class="tab" data-tab="staff">人員狀態</button><button class="tab" data-tab="news">公告管理</button><button class="tab" data-tab="export">CSV 匯出</button></nav>
+
+<section class="page active" id="overview">
+<div class="dashboard-grid">
+  <div class="panel">
+    <h2>營業總覽</h2>
+    <p>快速查看目前設定的兩天班表、人員數量與公告數量。</p>
+    <div id="dashboardOverview" class="overview-grid"></div>
+  </div>
+  <div class="panel">
+    <h2>資料概況</h2>
+    <div class="mini-list">
+      <div class="mini-row"><span>公關 / 店員名單</span><b id="dashRosterCount">0 位</b></div>
+      <div class="mini-row"><span>已登錄人員狀態</span><b id="dashStaffCount">0 位</b></div>
+      <div class="mini-row"><span>公告數量</span><b id="dashNewsCount">0 則</b></div>
+      <div class="mini-row"><span>已產生班表列數</span><b id="dashScheduleRows">0 列</b></div>
+    </div>
+    <div class="quick-actions">
+      <button class="btn primary" data-jump="settings">前往營業設定</button>
+      <button class="btn" data-jump="schedule">前往出勤班表</button>
+      <button class="btn" data-jump="export">查看 CSV 匯出</button>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="page" id="settings">
+<div class="panel"><h2>營業設定</h2><p>先設定本週營業日期、時間與公關名單。出勤班表頁會依這裡的設定生成表格。</p>
+<div class="settings-hero">
+  <div class="settings-summary-card">
+    <h3>營業日期與時段</h3>
+    <p>請先設定本週兩天營業日。日期可直接輸入 YYYY-MM-DD，時段可填 21:00、22:00、24:00，也可以使用快速時段。</p>
+  </div>
+  <div class="settings-quick-card">
+    <h3>快速設定</h3>
+    <div class="actions" style="margin-top:10px">
+      <button type="button" class="btn small" id="setThisWeek">套用本週五、週六</button>
+      <button type="button" class="btn small" id="setNextWeek">套用下週五、週六</button>
+    </div>
+    <div class="settings-note">適合每週開班時快速重設日期。</div>
+  </div>
+</div>
+
+<div class="business-days">
+  <section class="business-day-card">
+    <div class="business-day-head">
+      <div>
+        <div class="business-day-kicker">First Business Day</div>
+        <div class="business-day-title">第一天營業</div>
+      </div>
+      <div class="business-day-badge" id="dateABadge">週五</div>
+    </div>
+    <label class="settings-field">日期
+      <input id="dateA" class="settings-input" type="text" data-calendar="true" autocomplete="off" placeholder="例：2026-06-12">
+      <div class="settings-date-hint" id="dateAHint">請輸入 YYYY-MM-DD</div>
+    </label>
+    <label class="settings-field" style="margin-top:12px">營業時段
+      <div class="settings-time-row">
+        <input id="startA" class="settings-input" type="text" value="21:00" placeholder="21:00">
+        <span class="settings-time-sep">至</span>
+        <input id="endA" class="settings-input" type="text" value="24:00" placeholder="24:00">
+      </div>
+      <div class="settings-presets">
+        <button type="button" class="settings-chip" data-preset-day="A" data-start="21:00" data-end="24:00">21:00–24:00</button>
+        <button type="button" class="settings-chip" data-preset-day="A" data-start="22:00" data-end="24:00">22:00–24:00</button>
+        <button type="button" class="settings-chip" data-preset-day="A" data-start="21:30" data-end="23:30">21:30–23:30</button>
+      </div>
+      <div class="settings-time-hint">時間格式：HH:MM，結束時間可直接填 24:00</div>
+    </label>
+  </section>
+
+  <section class="business-day-card">
+    <div class="business-day-head">
+      <div>
+        <div class="business-day-kicker">Second Business Day</div>
+        <div class="business-day-title">第二天營業</div>
+      </div>
+      <div class="business-day-badge" id="dateBBadge">週六</div>
+    </div>
+    <label class="settings-field">日期
+      <input id="dateB" class="settings-input" type="text" data-calendar="true" autocomplete="off" placeholder="例：2026-06-13">
+      <div class="settings-date-hint" id="dateBHint">請輸入 YYYY-MM-DD</div>
+    </label>
+    <label class="settings-field" style="margin-top:12px">營業時段
+      <div class="settings-time-row">
+        <input id="startB" class="settings-input" type="text" value="21:00" placeholder="21:00">
+        <span class="settings-time-sep">至</span>
+        <input id="endB" class="settings-input" type="text" value="24:00" placeholder="24:00">
+      </div>
+      <div class="settings-presets">
+        <button type="button" class="settings-chip" data-preset-day="B" data-start="21:00" data-end="24:00">21:00–24:00</button>
+        <button type="button" class="settings-chip" data-preset-day="B" data-start="22:00" data-end="24:00">22:00–24:00</button>
+        <button type="button" class="settings-chip" data-preset-day="B" data-start="21:30" data-end="23:30">21:30–23:30</button>
+      </div>
+      <div class="settings-time-hint">時間格式：HH:MM，結束時間可直接填 24:00</div>
+    </label>
+  </section>
+</div>
+<div class="grid2" style="margin-top:14px">
+<label>公關名單，一行一位<textarea id="roster"></textarea></label>
+<label>匯入 schedule CSV<textarea id="scheduleImport" placeholder="date,cast,start,end,status,note"></textarea></label>
+</div>
+<label style="margin-top:14px">Google Sheet schedule CSV 網址
+  <input id="scheduleCsvUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=0&single=true&output=csv">
+</label>
+<div class="actions" style="margin-top:14px"><button class="btn primary" id="build">套用到出勤班表</button><button class="btn" id="loadScheduleUrl">讀取 Google Sheet 班表</button><button class="btn" id="importSchedule">從 CSV 匯入</button><button class="btn" id="syncStaff">用公關名單補齊人員狀態</button></div>
+<div class="load-status" id="scheduleLoadStatus"></div>
+<div class="settings-note">提示：修改日期、時間或公關名單後，出勤班表會自動更新。若本週已先填好 Google Sheet，可直接按「讀取 Google Sheet 班表」載入目前 schedule 分頁。</div>
+</div>
+</section>
+
+<section class="page" id="schedule">
+<div class="panel">
+  <h2>出勤班表 schedule</h2>
+  <p>產生欄位：date,cast,start,end,status,note。此處 status 僅使用 available / pending / rest。班表統計請到「總覽」頁查看；是否接受指名請到「人員狀態」分頁設定。</p>
+</div>
+<div class="panel"><h3>視覺化排班表</h3><p class="muted">出勤表只管理「出勤 / 排班確認 / 休息」。狀態留「未設定」就不會輸出該列。</p><div class="actions" style="margin:12px 0 0"><button class="btn" id="allAvailable">全部出勤</button><button class="btn" id="allBlank">全部清空</button></div><div id="scheduleTable" class="table-wrap"></div><div class="actions" style="margin-top:14px"><button class="btn primary" id="copySchedule">複製 schedule CSV</button><button class="btn" id="downloadSchedule">下載 schedule.csv</button></div></div>
+</section>
+
+<section class="page" id="staff">
+<div class="panel"><h2>人員狀態 staff_status</h2><p>產生欄位：cast,bookableStatus,statusLabel,role,note。此頁採「左側編輯、右側名單」：點名單中的 ✎，左側會帶入該人員資料並勾選職位。</p></div>
+
+<div class="staff-layout">
+  <div class="panel editor-panel">
+    <h3 id="staffEditorTitle">新增 / 編輯人員</h3>
+    <label>公關 / 店員名稱<input id="editStaffName" placeholder="例：月鈴"></label>
+    <div class="staff-editor-status-row">
+      <label>系統狀態
+        <div class="status-picker staff-status-picker" id="editStaffStatusPicker">
+          <button type="button" class="status-button status-available">
+            <span class="status-left"><span class="status-dot"></span><span class="status-label">接受指名</span></span>
+            <span class="status-arrow">▾</span>
+          </button>
+          <div class="status-menu">
+            <button type="button" class="status-option status-available active" data-status="available"><span class="status-dot"></span>接受指名</button>
+            <button type="button" class="status-option status-pending" data-status="pending"><span class="status-dot"></span>排班確認中</button>
+            <button type="button" class="status-option status-unbookable" data-status="unbookable"><span class="status-dot"></span>不接受指名</button>
+            <button type="button" class="status-option status-rest" data-status="rest"><span class="status-dot"></span>暫停服務</button>
+          </div>
+          <input type="hidden" id="editStaffStatus" value="available">
+        </div>
+      </label>
+      <label>顯示文字<input id="editStaffLabel" placeholder="例：接受指名"></label>
+    </div>
+    <label style="margin-top:12px">職位分配<div id="editRoleBox" class="role-box"></div></label>
+    <label style="margin-top:12px">備註<input id="editStaffNote" placeholder="例：可出勤但不可指名"></label>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn primary" id="saveStaffEdit">確認儲存</button>
+      <button class="btn" id="cancelStaffEdit">取消編輯</button>
+    </div>
+    <div class="editor-hint" id="staffEditorHint">目前為新增模式。若要修改既有人員，請點右側名單的 ✎。</div>
+
+    <hr style="border:0;border-top:1px solid rgba(255,255,255,.1);margin:20px 0">
+
+    <h3>職位清單</h3>
+    <p class="muted">一行一個職位，更新後左側職位勾選會同步刷新。</p>
+    <label style="margin-top:10px">職位清單<textarea id="roleList" placeholder="公關&#10;店長&#10;領班&#10;服裝店員&#10;調酒師"></textarea></label>
+    <div class="grid2" style="margin-top:12px">
+      <label>新增職位<input id="newRole" placeholder="例：VIP接待 / 調香師"></label>
+      <label>匯入 staff_status CSV<textarea id="staffImport" placeholder="cast,bookableStatus,statusLabel,role,note" style="min-height:72px"></textarea></label>
+    </div>
+    <label style="margin-top:12px">Google Sheet staff_status CSV 網址
+      <input id="staffCsvUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=1310958925&single=true&output=csv">
+    </label>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn" id="addRole">新增職位</button>
+      <button class="btn" id="refreshRoles">更新職位選項</button>
+      <button class="btn" id="loadStaffUrl">讀取 Google Sheet 人員狀態</button>
+      <button class="btn" id="importStaff">從 CSV 匯入</button>
+      <button class="btn" id="syncStaff">用公關名單補齊人員</button>
+    </div>
+    <div class="load-status" id="staffLoadStatus"></div>
+  </div>
+
+  <div class="panel">
+    <h3 id="staffCountTitle">已登錄人員（0位）</h3>
+    <p class="muted">右側只顯示結果與管理按鈕，不在表格內塞滿輸入框；編輯請點 ✎。</p>
+    <div class="table-wrap"><table id="staffTable"><thead><tr><th>公關名稱</th><th>系統狀態</th><th>顯示文字</th><th>職位</th><th>備註</th><th>管理</th></tr></thead><tbody></tbody></table></div>
+    <div class="actions" style="margin-top:14px"><button class="btn primary" id="copyStaff">複製 staff_status CSV</button><button class="btn" id="downloadStaff">下載 staff_status.csv</button></div>
+  </div>
+</div>
+</section>
+
+<section class="page" id="news">
+<div class="panel"><h2>公告 announcements</h2><p>產生欄位：date,type,title,content,linkText,linkUrl,pinned,visible</p>
+<div class="grid2" style="margin-top:14px"><label>匯入 announcements CSV<textarea id="newsImport" placeholder="date,type,title,content,linkText,linkUrl,pinned,visible"></textarea></label><div><label>快速新增公告標題<input id="newNewsTitle" placeholder="例：本週正常營業"></label><label style="margin-top:12px">Google Sheet announcements CSV 網址<input id="newsCsvUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=1649492150&single=true&output=csv"></label><div class="actions" style="margin-top:14px"><button class="btn primary" id="addNews">新增公告</button><button class="btn" id="loadNewsUrl">讀取 Google Sheet 公告</button><button class="btn" id="importNews">從 CSV 匯入</button></div><div class="load-status" id="newsLoadStatus"></div></div></div>
+</div>
+<div class="panel"><div class="table-wrap"><table id="newsTable"><thead><tr><th>日期</th><th>類型</th><th>標題 / 內容</th><th>連結</th><th>置頂</th><th>顯示</th><th>操作</th></tr></thead><tbody></tbody></table></div><div class="actions" style="margin-top:14px"><button class="btn primary" id="copyNews">複製 announcements CSV</button><button class="btn" id="downloadNews">下載 announcements.csv</button></div></div>
+</section>
+
+<section class="page" id="export">
+<div class="panel"><h2>CSV 匯出總覽</h2><p>複製後貼到 Google Sheet 對應分頁。</p><div style="display:grid;gap:14px;margin-top:14px">
+<label>schedule CSV<textarea id="outSchedule" class="csv" readonly></textarea></label>
+<label>staff_status CSV<textarea id="outStaff" class="csv" readonly></textarea></label>
+<label>announcements CSV<textarea id="outNews" class="csv" readonly></textarea></label>
+</div><div class="actions" style="margin-top:14px"><button class="btn primary" id="refresh">重新產生</button><button class="btn" id="downloadAll">下載總覽 TXT</button></div></div>
+</section>
+</main>
+<div class="toast" id="toast">完成</div>
+<script>
+(function(){
+const STORAGE="tn-manager-v1";
+const defaultRoster=["圖圖","咕嚕小貓","傑傑諾利","阿希Axi","花形","系塔","月澄雪兔","賽伊","露娜弗蕾亞","柔夜","兔紙不吃紙","千反田","權順榮","夏末微涼","夜店點牛奶","山茶花","Mmaru","酒館玲阿桃","長腿木木","怜奈","參參","打喵帕尼尼堡","咪幾馬麻"];
+const defaultRoles=["公關","店長","領班","服裝店員","調酒師","活動主持","保安","DJ","演奏者","舞者","歌手","攝影師","VIP接待"];
+const labels={available:"接受指名",pending:"排班確認中",unbookable:"不接受指名",rest:"暫停服務"};
+const state={schedule:{},staff:[],news:[]};let editingStaffIndex=-1;
+const $=id=>document.getElementById(id);
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),1500)}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function csvEsc(v){const s=String(v??"");return /[",\n\r]/.test(s)?`"${s.replaceAll('"','""')}"`:s}
+function makeCsv(headers,rows){return [headers.join(","),...rows.map(r=>headers.map(h=>csvEsc(r[h]??"")).join(","))].join("\n")}
+function parseCsv(text){const rows=[];let row=[],cell="",q=false;for(let i=0;i<text.length;i++){const ch=text[i],n=text[i+1];if(ch==='"'){if(q&&n==='"'){cell+='"';i++}else q=!q;continue}if(ch===","&&!q){row.push(cell);cell="";continue}if((ch==="\n"||ch==="\r")&&!q){if(ch==="\r"&&n==="\n")i++;row.push(cell);if(row.some(x=>String(x).trim()!==""))rows.push(row);row=[];cell="";continue}cell+=ch}row.push(cell);if(row.some(x=>String(x).trim()!==""))rows.push(row);return rows}
+function objects(text){const t=parseCsv(text);if(t.length<2)return[];const h=t[0].map(x=>String(x).trim());return t.slice(1).map(c=>{const o={};h.forEach((k,i)=>o[k]=c[i]||"");return o})}
+function today(){return new Date().toISOString().slice(0,10)}
+function formatLocalDate(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function fridaySaturdayFromOffset(weekOffset=0){
+  const todayDate=new Date();
+  const day=todayDate.getDay();
+  const daysSinceMonday=(day+6)%7;
+  const monday=new Date(todayDate);
+  monday.setHours(0,0,0,0);
+  monday.setDate(todayDate.getDate()-daysSinceMonday+weekOffset*7);
+  const fri=new Date(monday);
+  const sat=new Date(monday);
+  fri.setDate(monday.getDate()+4);
+  sat.setDate(monday.getDate()+5);
+  return [formatLocalDate(fri),formatLocalDate(sat)];
+}
+function nextFriSat(){return fridaySaturdayFromOffset(0)}
+function applyBusinessWeek(weekOffset=0){
+  const [fri,sat]=fridaySaturdayFromOffset(weekOffset);
+  $("dateA").value=fri;
+  $("dateB").value=sat;
+  refreshSettingHints();
+  buildTable();
+}
+
+function roster(){return $("roster").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)}
+function normTime(t){return t==="00:00"?"24:00":t}
+function weekdayLabel(dateStr){
+  const map=["週日","週一","週二","週三","週四","週五","週六"];
+  const d=new Date(String(dateStr||"")+"T00:00:00");
+  return Number.isNaN(d.getTime()) ? "" : map[d.getDay()];
+}
+function dateWithWeekday(dateStr){
+  const week=weekdayLabel(dateStr);
+  return week ? `${dateStr}（${week}）` : dateStr;
+}
+let activeCalendarInput=null;
+let calendarViewDate=null;
+
+function parseDateValue(value){
+  const normalized=normalizeDateInput(value);
+  const m=String(normalized||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return null;
+  const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+function getCalendarEl(){
+  let el=document.getElementById("calendarPopover");
+  if(!el){
+    el=document.createElement("div");
+    el.id="calendarPopover";
+    el.className="calendar-popover";
+    el.style.display="none";
+    document.body.appendChild(el);
+  }
+  return el;
+}
+function closeCalendar(){
+  const el=getCalendarEl();
+  el.style.display="none";
+  activeCalendarInput=null;
+}
+function positionCalendar(){
+  if(!activeCalendarInput)return;
+  const el=getCalendarEl();
+  const rect=activeCalendarInput.getBoundingClientRect();
+  const width=310;
+  let left=Math.min(rect.left,window.innerWidth-width-12);
+  left=Math.max(12,left);
+  let top=rect.bottom+8;
+  if(top+360>window.innerHeight)top=Math.max(12,rect.top-360);
+  el.style.left=left+"px";
+  el.style.top=top+"px";
+}
+function openCalendar(input){
+  activeCalendarInput=input;
+  const picked=parseDateValue(input.value)||new Date();
+  calendarViewDate=new Date(picked.getFullYear(),picked.getMonth(),1);
+  renderCalendar();
+  const el=getCalendarEl();
+  el.style.display="block";
+  positionCalendar();
+}
+function pickCalendarDate(dateObj){
+  if(!activeCalendarInput)return;
+  activeCalendarInput.value=formatLocalDate(dateObj);
+  activeCalendarInput.dispatchEvent(new Event("input",{bubbles:true}));
+  activeCalendarInput.dispatchEvent(new Event("change",{bubbles:true}));
+  if(activeCalendarInput.id==="dateA"||activeCalendarInput.id==="dateB"){
+    refreshSettingHints();
+    buildTable();
+  }else{
+    update();
+  }
+  closeCalendar();
+}
+function renderCalendar(){
+  const el=getCalendarEl();
+  const year=calendarViewDate.getFullYear();
+  const month=calendarViewDate.getMonth();
+  const selected=parseDateValue(activeCalendarInput?.value);
+  const todayDate=new Date();
+  const first=new Date(year,month,1);
+  const start=new Date(first);
+  start.setDate(first.getDate()-first.getDay());
+  const monthLabel=`${year}年${String(month+1).padStart(2,"0")}月`;
+  let days="";
+  for(let i=0;i<42;i++){
+    const d=new Date(start);
+    d.setDate(start.getDate()+i);
+    const isOther=d.getMonth()!==month;
+    const isToday=formatLocalDate(d)===formatLocalDate(todayDate);
+    const isSelected=selected&&formatLocalDate(d)===formatLocalDate(selected);
+    days+=`<button type="button" class="calendar-day ${isOther?"other":""} ${isToday?"today":""} ${isSelected?"selected":""}" data-date="${formatLocalDate(d)}">${d.getDate()}</button>`;
+  }
+  el.innerHTML=`
+    <div class="calendar-head">
+      <button type="button" class="calendar-nav" data-cal-prev>‹</button>
+      <div class="calendar-title">${monthLabel}</div>
+      <button type="button" class="calendar-nav" data-cal-next>›</button>
+    </div>
+    <div class="calendar-weekdays">
+      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+    </div>
+    <div class="calendar-days">${days}</div>
+    <div class="calendar-footer">
+      <button type="button" data-cal-today>今天</button>
+      <button type="button" data-cal-close>關閉</button>
+    </div>
+  `;
+  el.querySelector("[data-cal-prev]").onclick=(e)=>{e.stopPropagation();calendarViewDate.setMonth(calendarViewDate.getMonth()-1);renderCalendar();};
+  el.querySelector("[data-cal-next]").onclick=(e)=>{e.stopPropagation();calendarViewDate.setMonth(calendarViewDate.getMonth()+1);renderCalendar();};
+  el.querySelector("[data-cal-today]").onclick=(e)=>{e.stopPropagation();pickCalendarDate(new Date());};
+  el.querySelector("[data-cal-close]").onclick=(e)=>{e.stopPropagation();closeCalendar();};
+  el.querySelectorAll("[data-date]").forEach(btn=>btn.onclick=(e)=>{
+    e.stopPropagation();
+    pickCalendarDate(parseDateValue(btn.dataset.date));
+  });
+}
+
+function normalizeDateInput(v=""){
+  const raw=String(v||"").trim().replace(/[./]/g,"-");
+  const m=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(!m)return raw;
+  return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+}
+function normalizeTimeInput(v=""){
+  const raw=String(v||"").trim().replace("：",":");
+  if(!raw)return "";
+  if(raw==="24")return "24:00";
+  const compact=raw.replace(/[^\d]/g,"");
+  if(/^\d{1,2}:\d{2}$/.test(raw)){
+    const [h,m]=raw.split(":");
+    if(h==="24")return "24:00";
+    return `${h.padStart(2,"0")}:${m}`;
+  }
+  if(/^\d{3,4}$/.test(compact)){
+    const h=compact.length===3?compact.slice(0,1):compact.slice(0,2);
+    const m=compact.slice(-2);
+    if(h==="24")return "24:00";
+    return `${h.padStart(2,"0")}:${m}`;
+  }
+  return raw;
+}
+function refreshSettingHints(){
+  ["A","B"].forEach(k=>{
+    const dateEl=$("date"+k), hintEl=$("date"+k+"Hint"), badgeEl=$("date"+k+"Badge");
+    if(dateEl){dateEl.value=normalizeDateInput(dateEl.value)}
+    const week=weekdayLabel(dateEl?.value||"");
+    if(hintEl){
+      hintEl.innerHTML = dateEl?.value ? `已選日期：<b>${week||"格式待確認"}</b>` : "請輸入 YYYY-MM-DD";
+    }
+    if(badgeEl){
+      badgeEl.textContent=week||"未設定";
+    }
+    const startEl=$("start"+k), endEl=$("end"+k);
+    if(startEl)startEl.value=normalizeTimeInput(startEl.value);
+    if(endEl)endEl.value=normalizeTimeInput(endEl.value);
+  });
+}
+function dates(){return[{k:"A",date:normalizeDateInput($("dateA").value),start:normTime(normalizeTimeInput($("startA").value)),end:normTime(normalizeTimeInput($("endA").value))},{k:"B",date:normalizeDateInput($("dateB").value),start:normTime(normalizeTimeInput($("startB").value)),end:normTime(normalizeTimeInput($("endB").value))}].filter(x=>x.date)}
+function sk(date,cast){return date+"__"+cast}
+function statusMeta(v=""){
+  if(v==="available")return{label:"出勤",cls:"available"};
+  if(v==="pending")return{label:"排班確認",cls:"pending"};
+  if(v==="rest")return{label:"休息",cls:"rest"};
+  return{label:"未設定",cls:"blank"};
+}
+function statusSelect(v=""){
+  if(v==="unbookable")v="available";
+  const meta=statusMeta(v);
+  const options=[
+    ["","未設定","blank"],
+    ["available","出勤","available"],
+    ["pending","排班確認","pending"],
+    ["rest","休息","rest"]
+  ];
+  return `<div class="status-picker" data-value="${esc(v)}">
+    <button type="button" class="status-button status-${meta.cls}">
+      <span class="status-left"><span class="status-dot"></span><span class="status-label">${esc(meta.label)}</span></span>
+      <span class="status-arrow">▾</span>
+    </button>
+    <div class="status-menu">
+      ${options.map(([value,label,cls])=>`<button type="button" class="status-option status-${cls} ${value===v?"active":""}" data-status="${esc(value)}"><span class="status-dot"></span>${esc(label)}</button>`).join("")}
+    </div>
+    <input type="hidden" class="sch-status" value="${esc(v)}">
+  </div>`
+}
+function overviewHtml(){
+  const ds=dates(),rs=roster();
+  if(!ds.length||!rs.length){
+    return '<div class="notice">請先到「營業設定」設定日期與公關名單。</div>';
+  }
+  return ds.map(d=>{
+    const buckets={available:[],pending:[],rest:[],blank:[]};
+    rs.forEach(name=>{
+      const it=state.schedule[sk(d.date,name)]||{};
+      if(it.status==="available")buckets.available.push(name);
+      else if(it.status==="pending")buckets.pending.push(name);
+      else if(it.status==="rest")buckets.rest.push(name);
+      else buckets.blank.push(name);
+    });
+    const total=buckets.available.length+buckets.pending.length;
+    const line=(title,arr)=>`<div class="overview-line"><b>${title}</b>：${arr.length?arr.map(esc).join("、"):"無"}</div>`;
+    return `<div class="overview-card">
+      <h4>${esc(dateWithWeekday(d.date))}　${esc(d.start||"21:00")}–${esc(d.end||"24:00")}</h4>
+      <div class="overview-stats">
+        <div class="stat"><strong>${total}</strong><span>總出勤</span></div>
+        <div class="stat"><strong>${buckets.available.length}</strong><span>出勤</span></div>
+        <div class="stat"><strong>${buckets.pending.length}</strong><span>排班確認</span></div>
+        <div class="stat"><strong>${buckets.rest.length}</strong><span>休息</span></div>
+      </div>
+      <div class="overview-list">
+        ${line("出勤",buckets.available)}
+        ${line("排班確認",buckets.pending)}
+        ${line("休息",buckets.rest)}
+        ${line("未設定",buckets.blank)}
+      </div>
+    </div>`
+  }).join("");
+}
+function renderScheduleOverview(){
+  const html=overviewHtml();
+  const scheduleBox=$("scheduleOverview");
+  const dashBox=$("dashboardOverview");
+  if(scheduleBox)scheduleBox.innerHTML=html;
+  if(dashBox)dashBox.innerHTML=html;
+  const dashRoster=$("dashRosterCount");
+  const dashStaff=$("dashStaffCount");
+  const dashNews=$("dashNewsCount");
+  const dashRows=$("dashScheduleRows");
+  if(dashRoster)dashRoster.textContent=`${roster().length} 位`;
+  if(dashStaff)dashStaff.textContent=`${state.staff.length} 位`;
+  if(dashNews)dashNews.textContent=`${state.news.filter(r=>r.title||r.content).length} 則`;
+  if(dashRows)dashRows.textContent=`${scheduleRows().length} 列`;
+}
+function closeStatusPickers(except=null){
+  document.querySelectorAll(".status-picker.open").forEach(p=>{if(p!==except)p.classList.remove("open")});
+}
+function setPickerStatus(picker,value){
+  const input=picker.querySelector(".sch-status");
+  const button=picker.querySelector(".status-button");
+  const label=picker.querySelector(".status-label");
+  const meta=statusMeta(value);
+  picker.dataset.value=value;
+  input.value=value;
+  button.className=`status-button status-${meta.cls}`;
+  label.textContent=meta.label;
+  picker.querySelectorAll(".status-option").forEach(opt=>opt.classList.toggle("active",opt.dataset.status===value));
+}
+function buildTable(){const ds=dates(),rs=roster(),wrap=$("scheduleTable");if(!ds.length||!rs.length){wrap.innerHTML='<div class="notice">請先填公關名單與日期。</div>';renderScheduleOverview();return}let h='<table><thead><tr><th>公關名稱</th>'+ds.map(d=>`<th>${esc(dateWithWeekday(d.date))}<br><span class="muted">${d.start}–${d.end}</span></th>`).join("")+'</tr></thead><tbody>';rs.forEach(name=>{h+=`<tr><td class="name">${esc(name)}</td>`;ds.forEach(d=>{const it=state.schedule[sk(d.date,name)]||{};h+=`<td data-date="${d.date}" data-cast="${esc(name)}"><div class="cell">${statusSelect(it.status||"")}<input class="sch-note" placeholder="備註" value="${esc(it.note||"")}"></div></td>`});h+='</tr>'});h+='</tbody></table>';wrap.innerHTML=h;wrap.querySelectorAll("td[data-date]").forEach(td=>{
+  const date=td.dataset.date,cast=td.dataset.cast,key=sk(date,cast),picker=td.querySelector(".status-picker"),sel=td.querySelector(".sch-status"),note=td.querySelector(".sch-note");
+  function upd(){state.schedule[key]={date,cast,status:sel.value,note:note.value};renderScheduleOverview();update()}
+  picker.querySelector(".status-button").onclick=(e)=>{e.stopPropagation();const isOpen=picker.classList.contains("open");closeStatusPickers();picker.classList.toggle("open",!isOpen)};
+  picker.querySelectorAll(".status-option").forEach(opt=>opt.onclick=(e)=>{e.stopPropagation();setPickerStatus(picker,opt.dataset.status);picker.classList.remove("open");upd()});
+  note.oninput=upd
+});
+if(!window.__tnStatusPickerCloseBound){document.addEventListener("click",()=>closeStatusPickers());window.__tnStatusPickerCloseBound=true;}
+renderScheduleOverview();update()}
+function scheduleRows(){const ds=dates(),rs=roster(),out=[];rs.forEach(name=>ds.forEach(d=>{const it=state.schedule[sk(d.date,name)]||{};if(!it.status)return;out.push({date:d.date,cast:name,start:d.start||"21:00",end:d.end||"24:00",status:it.status,note:it.note||""})}));return out}
+function scheduleCsv(){return makeCsv(["date","cast","start","end","status","note"],scheduleRows())}
+function importSchedule(){const rows=objects($("scheduleImport").value);if(!rows.length)return toast("沒有讀到 CSV");const names=new Set(roster()),ds=[];rows.forEach(r=>{if(r.date&&!ds.includes(r.date))ds.push(r.date);if(r.cast)names.add(r.cast);if(r.date&&r.cast){let st=r.status||""; if(st==="unbookable") st="available"; state.schedule[sk(r.date,r.cast)]={date:r.date,cast:r.cast,status:st,note:r.note||""}}});if(ds[0])$("dateA").value=ds[0];if(ds[1])$("dateB").value=ds[1];$("roster").value=[...names].join("\n");refreshSettingHints();buildTable();toast("已匯入 schedule")}
+function roles(){return $("roleList").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)}
+function splitRoles(v){return String(v||"").split(/[、,\/]/).map(x=>x.trim()).filter(Boolean)}
+function readEditorRoles(){
+  return Array.from($("editRoleBox").querySelectorAll("input:checked")).map(x=>x.value).join("、")
+}
+function renderEditorRoleBox(value=""){
+  const selected=new Set(splitRoles(value));
+  $("editRoleBox").innerHTML=roles().map(role=>`
+    <label class="role-option">
+      <input type="checkbox" value="${esc(role)}" ${selected.has(role)?"checked":""}>
+      <span class="role-card">
+        <span class="role-check"></span>
+        <span class="role-name">${esc(role)}</span>
+      </span>
+    </label>
+  `).join("") || `<div class="muted">尚未設定職位，請先在下方職位清單新增。</div>`;
+}
+function staffStatusMeta(v="available"){
+  if(v==="pending")return{label:"排班確認中",cls:"pending",display:"排班確認中"};
+  if(v==="unbookable")return{label:"不接受指名",cls:"unbookable",display:"不接受指名"};
+  if(v==="rest")return{label:"暫停服務",cls:"rest",display:"暫停服務"};
+  return{label:"接受指名",cls:"available",display:"接受指名"};
+}
+function setStaffStatusPicker(value="available",syncLabel=false){
+  const picker=$("editStaffStatusPicker");
+  const input=$("editStaffStatus");
+  if(!picker||!input)return;
+  const meta=staffStatusMeta(value);
+  input.value=value;
+  const button=picker.querySelector(".status-button");
+  const label=picker.querySelector(".status-label");
+  button.className=`status-button status-${meta.cls}`;
+  label.textContent=meta.label;
+  picker.querySelectorAll(".status-option").forEach(opt=>opt.classList.toggle("active",opt.dataset.status===value));
+  if(syncLabel)$("editStaffLabel").value=meta.display;
+}
+function initStaffStatusPicker(){
+  const picker=$("editStaffStatusPicker");
+  if(!picker)return;
+  picker.querySelector(".status-button").onclick=(e)=>{e.stopPropagation();const isOpen=picker.classList.contains("open");closeStatusPickers();picker.classList.toggle("open",!isOpen)};
+  picker.querySelectorAll(".status-option").forEach(opt=>opt.onclick=(e)=>{e.stopPropagation();setStaffStatusPicker(opt.dataset.status,true);picker.classList.remove("open")});
+  setStaffStatusPicker($("editStaffStatus").value||"available",false);
+}
+function resetStaffEditor(){
+  editingStaffIndex=-1;
+  $("staffEditorTitle").textContent="新增 / 編輯人員";
+  $("editStaffName").value="";
+  setStaffStatusPicker("available",true);
+  $("editStaffNote").value="";
+  renderEditorRoleBox("公關");
+  $("staffEditorHint").textContent="目前為新增模式。若要修改既有人員，請點右側名單的 ✎。";
+}
+function loadStaffEditor(index){
+  const r=state.staff[index];
+  if(!r)return;
+  editingStaffIndex=index;
+  $("staffEditorTitle").textContent="編輯人員｜"+(r.cast||"未命名");
+  $("editStaffName").value=r.cast||"";
+  setStaffStatusPicker(r.bookableStatus||"available",false);
+  $("editStaffLabel").value=r.statusLabel||labels[r.bookableStatus]||"接受指名";
+  $("editStaffNote").value=r.note||"";
+  renderEditorRoleBox(r.role||"");
+  $("staffEditorHint").textContent="正在編輯「"+(r.cast||"未命名")+"」。按確認儲存後會更新右側名單。";
+}
+function statusBadge(status){
+  return `<span class="status-badge status-${status||"available"}">${esc(status||"available")}</span>`
+}
+function roleBadges(role){
+  const arr=splitRoles(role);
+  if(!arr.length)return `<span class="muted">未設定</span>`;
+  return `<div class="role-badges">${arr.map(x=>`<span class="badge">${esc(x)}</span>`).join("")}</div>`
+}
+
+async function loadScheduleFromUrl(){
+  const input=$("scheduleCsvUrl");
+  const status=$("scheduleLoadStatus");
+  const url=(input?.value||"").trim();
+  if(!url){
+    if(status){status.textContent="請先貼上 Google Sheet CSV 網址。";status.className="load-status err";}
+    return;
+  }
+  try{
+    if(status){status.textContent="正在讀取 Google Sheet 班表...";status.className="load-status";}
+    const joiner=url.includes("?")?"&":"?";
+    const res=await fetch(url+joiner+"t="+Date.now(),{cache:"no-store"});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const text=await res.text();
+    if(!text.trim())throw new Error("CSV 內容是空的");
+    $("scheduleImport").value=text;
+    importSchedule();
+    if(status){status.textContent="已成功讀取並匯入 Google Sheet 班表。";status.className="load-status ok";}
+  }catch(e){
+    console.warn(e);
+    if(status){status.textContent="讀取失敗。請確認網址是「發布到網路」的 CSV 連結，或改用手動貼上 CSV。";status.className="load-status err";}
+  }
+}
+
+async function loadStaffFromUrl(){
+  const input=$("staffCsvUrl");
+  const status=$("staffLoadStatus");
+  const url=(input?.value||"").trim();
+  if(!url){
+    if(status){status.textContent="請先貼上 Google Sheet staff_status CSV 網址。";status.className="load-status err";}
+    return;
+  }
+  try{
+    if(status){status.textContent="正在讀取 Google Sheet 人員狀態...";status.className="load-status";}
+    const joiner=url.includes("?")?"&":"?";
+    const res=await fetch(url+joiner+"t="+Date.now(),{cache:"no-store"});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const text=await res.text();
+    if(!text.trim())throw new Error("CSV 內容是空的");
+    $("staffImport").value=text;
+    importStaff();
+    resetStaffEditor();
+    if(status){status.textContent="已成功讀取並匯入 Google Sheet 人員狀態。";status.className="load-status ok";}
+  }catch(e){
+    console.warn(e);
+    if(status){status.textContent="讀取失敗。請確認網址是「發布到網路」的 CSV 連結，或改用手動貼上 CSV。";status.className="load-status err";}
+  }
+}
+
+async function loadNewsFromUrl(){
+  const input=$("newsCsvUrl");
+  const status=$("newsLoadStatus");
+  const url=(input?.value||"").trim();
+  if(!url){
+    if(status){status.textContent="請先貼上 Google Sheet announcements CSV 網址。";status.className="load-status err";}
+    return;
+  }
+  try{
+    if(status){status.textContent="正在讀取 Google Sheet 公告...";status.className="load-status";}
+    const joiner=url.includes("?")?"&":"?";
+    const res=await fetch(url+joiner+"t="+Date.now(),{cache:"no-store"});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const text=await res.text();
+    if(!text.trim())throw new Error("CSV 內容是空的");
+    $("newsImport").value=text;
+    importNews();
+    if(status){status.textContent="已成功讀取並匯入 Google Sheet 公告。";status.className="load-status ok";}
+  }catch(e){
+    console.warn(e);
+    if(status){status.textContent="讀取失敗。請確認網址是「發布到網路」的 CSV 連結，或改用手動貼上 CSV。";status.className="load-status err";}
+  }
+}
+function renderStaff(){
+  const title=$("staffCountTitle");if(title)title.textContent=`已登錄人員（${state.staff.length}位）`;
+  const tb=$("staffTable").querySelector("tbody");
+  tb.innerHTML=state.staff.map((r,i)=>`<tr data-i="${i}">
+    <td class="name">${esc(r.cast||"未命名")}</td>
+    <td>${statusBadge(r.bookableStatus||"available")}</td>
+    <td>${esc(r.statusLabel||labels[r.bookableStatus]||"接受指名")}</td>
+    <td>${roleBadges(r.role||"")}</td>
+    <td>${esc(r.note||"")}</td>
+    <td><button class="icon-btn edit" title="編輯">✎</button> <button class="icon-btn del" title="刪除">🗑</button></td>
+  </tr>`).join("");
+  tb.querySelectorAll("tr").forEach(tr=>{
+    const i=+tr.dataset.i;
+    tr.querySelector(".edit").onclick=()=>loadStaffEditor(i);
+    tr.querySelector(".del").onclick=()=>{if(confirm("確定刪除「"+(state.staff[i].cast||"未命名")+"」？")){state.staff.splice(i,1);if(editingStaffIndex===i)resetStaffEditor();renderStaff()}};
+  });
+  update()
+}
+function staffCsv(){return makeCsv(["cast","bookableStatus","statusLabel","role","note"],state.staff.filter(r=>r.cast).map(r=>({cast:r.cast,bookableStatus:r.bookableStatus||"available",statusLabel:r.statusLabel||labels[r.bookableStatus]||"接受指名",role:r.role||"",note:r.note||""})))}
+function importStaff(){const rows=objects($("staffImport").value);if(!rows.length)return toast("沒有讀到 CSV");state.staff=rows.map(r=>({cast:r.cast||"",bookableStatus:r.bookableStatus||r.bookablestatus||"available",statusLabel:r.statusLabel||r.statuslabel||"",role:r.role||"",note:r.note||""}));const set=new Set(roles());state.staff.forEach(r=>splitRoles(r.role).forEach(x=>set.add(x)));$("roleList").value=[...set].filter(Boolean).join("\n");renderStaff();toast("已匯入 staff_status")}
+function yesNoPicker(cls,value){
+  const val=(value==="yes")?"yes":"no";
+  return `<div class="yn-picker" data-target="${cls}">
+    <button type="button" class="yn-option ${val==="yes"?"active":""}" data-value="yes">yes</button>
+    <button type="button" class="yn-option ${val==="no"?"active":""}" data-value="no">no</button>
+    <input type="hidden" class="${cls}" value="${val}">
+  </div>`
+}
+function bindYesNoPickers(row){
+  row.querySelectorAll(".yn-picker").forEach(picker=>{
+    const input=picker.querySelector("input");
+    picker.querySelectorAll(".yn-option").forEach(btn=>{
+      btn.onclick=()=>{
+        input.value=btn.dataset.value;
+        picker.querySelectorAll(".yn-option").forEach(b=>b.classList.toggle("active",b===btn));
+        input.dispatchEvent(new Event("input",{bubbles:true}));
+        input.dispatchEvent(new Event("change",{bubbles:true}));
+      };
+    });
+  });
+}
+function renderNews(){
+  const tb=$("newsTable").querySelector("tbody");
+  tb.innerHTML=state.news.map((r,i)=>`<tr data-i="${i}">
+    <td><input class="n-date news-date-input" type="text" data-calendar="true" autocomplete="off" value="${esc(r.date||today())}"></td>
+    <td><input class="n-type" value="${esc(r.type||"公告")}"></td>
+    <td><div class="cell"><input class="n-title" value="${esc(r.title||"")}" placeholder="標題"><textarea class="n-content" placeholder="內容">${esc(r.content||"")}</textarea></div></td>
+    <td><div class="cell"><input class="n-linkText" value="${esc(r.linkText||"")}" placeholder="按鈕文字"><input class="n-linkUrl" value="${esc(r.linkUrl||"")}" placeholder="連結"></div></td>
+    <td>${yesNoPicker("n-pinned",r.pinned==="yes"?"yes":"no")}</td>
+    <td>${yesNoPicker("n-visible",r.visible==="no"?"no":"yes")}</td>
+    <td><button class="btn small danger del">刪除</button></td>
+  </tr>`).join("");
+  tb.querySelectorAll("tr").forEach(tr=>{
+    const i=+tr.dataset.i;
+    [[".n-date","date"],[".n-type","type"],[".n-title","title"],[".n-content","content"],[".n-linkText","linkText"],[".n-linkUrl","linkUrl"],[".n-pinned","pinned"],[".n-visible","visible"]].forEach(([c,k])=>{
+      const el=tr.querySelector(c);
+      el.oninput=el.onchange=e=>{state.news[i][k]=e.target.value;update()}
+    });
+    const dateInput=tr.querySelector(".n-date");
+    dateInput.addEventListener("focus",()=>openCalendar(dateInput));
+    dateInput.addEventListener("click",(e)=>{e.stopPropagation();openCalendar(dateInput)});
+    bindYesNoPickers(tr);
+    tr.querySelector(".del").onclick=()=>{state.news.splice(i,1);renderNews()}
+  });
+  update()
+}
+function newsCsv(){return makeCsv(["date","type","title","content","linkText","linkUrl","pinned","visible"],state.news.filter(r=>r.title||r.content).map(r=>({date:r.date||"",type:r.type||"公告",title:r.title||"",content:r.content||"",linkText:r.linkText||"",linkUrl:r.linkUrl||"",pinned:r.pinned||"no",visible:r.visible||"yes"})))}
+function importNews(){const rows=objects($("newsImport").value);if(!rows.length)return toast("沒有讀到 CSV");state.news=rows.map(r=>({date:r.date||"",type:r.type||"公告",title:r.title||"",content:r.content||"",linkText:r.linkText||r.linktext||"",linkUrl:r.linkUrl||r.linkurl||"",pinned:r.pinned||"no",visible:r.visible||"yes"}));renderNews();toast("已匯入 announcements")}
+function update(){$("outSchedule").value=scheduleCsv();$("outStaff").value=staffCsv();$("outNews").value=newsCsv();renderScheduleOverview()}
+async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||"已複製")}catch(e){alert("瀏覽器不允許自動複製，請到 CSV 匯出頁手動複製。")}}
+function download(name,text){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function save(){localStorage.setItem(STORAGE,JSON.stringify({roster:$("roster").value,roles:$("roleList").value,scheduleCsvUrl:$("scheduleCsvUrl").value,staffCsvUrl:($("staffCsvUrl")?.value||""),newsCsvUrl:($("newsCsvUrl")?.value||""),dates:{dateA:$("dateA").value,startA:$("startA").value,endA:$("endA").value,dateB:$("dateB").value,startB:$("startB").value,endB:$("endB").value},state}));toast("已儲存本機")}
+function load(){const raw=localStorage.getItem(STORAGE);if(!raw)return toast("沒有本機暫存");const d=JSON.parse(raw);$("roster").value=d.roster||defaultRoster.join("\n");$("roleList").value=d.roles||defaultRoles.join("\n");if($("scheduleCsvUrl"))$("scheduleCsvUrl").value=d.scheduleCsvUrl||$("scheduleCsvUrl").value;if($("staffCsvUrl"))$("staffCsvUrl").value=d.staffCsvUrl||$("staffCsvUrl").value;if($("newsCsvUrl"))$("newsCsvUrl").value=d.newsCsvUrl||$("newsCsvUrl").value;Object.entries(d.dates||{}).forEach(([k,v])=>$(k).value=v);Object.assign(state,d.state||{});refreshSettingHints();buildTable();resetStaffEditor();renderStaff();renderNews();toast("已讀取本機")}
+function openTab(name){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));
+  document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===name));
+  update();
+}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
+document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>openTab(b.dataset.jump));
+$("build").onclick=buildTable;$("importSchedule").onclick=importSchedule;$("loadScheduleUrl").onclick=loadScheduleFromUrl;$("allAvailable").onclick=()=>{dates().forEach(d=>roster().forEach(name=>state.schedule[sk(d.date,name)]={date:d.date,cast:name,status:"available",note:""}));buildTable()};$("allBlank").onclick=()=>{state.schedule={};buildTable()};
+$("copySchedule").onclick=()=>copy(scheduleCsv(),"已複製 schedule CSV");$("downloadSchedule").onclick=()=>download("schedule.csv",scheduleCsv());
+$("saveStaffEdit").onclick=()=>{
+  const name=$("editStaffName").value.trim();
+  if(!name)return toast("請先輸入名稱");
+  const status=$("editStaffStatus").value;
+  const row={cast:name,bookableStatus:status,statusLabel:$("editStaffLabel").value.trim()||labels[status],role:readEditorRoles(),note:$("editStaffNote").value.trim()};
+  if(editingStaffIndex>=0)state.staff[editingStaffIndex]=row;
+  else state.staff.push(row);
+  renderStaff();
+  resetStaffEditor();
+  toast("已儲存人員狀態");
+};
+$("cancelStaffEdit").onclick=resetStaffEditor;
+initStaffStatusPicker();
+$("importStaff").onclick=importStaff;$("loadStaffUrl").onclick=loadStaffFromUrl;
+$("syncStaff").onclick=()=>{const set=new Set(state.staff.map(r=>r.cast));roster().forEach(n=>{if(!set.has(n))state.staff.push({cast:n,bookableStatus:"available",statusLabel:"接受指名",role:"公關",note:""})});renderStaff();toast("已同步公關名單")};
+$("addRole").onclick=()=>{const r=$("newRole").value.trim();if(!r)return;const list=roles();if(!list.includes(r))$("roleList").value=(list.concat(r)).join("\n");$("newRole").value="";renderEditorRoleBox(readEditorRoles());renderStaff();toast("已新增職位")};$("refreshRoles").onclick=()=>{renderEditorRoleBox(readEditorRoles());renderStaff();toast("已更新職位選項")};$("roleList").oninput=()=>{renderEditorRoleBox(readEditorRoles());renderStaff()};$("copyStaff").onclick=()=>copy(staffCsv(),"已複製 staff_status CSV");$("downloadStaff").onclick=()=>download("staff_status.csv",staffCsv());
+$("addNews").onclick=()=>{state.news.unshift({date:today(),type:"公告",title:$("newNewsTitle").value.trim(),content:"",linkText:"",linkUrl:"",pinned:"no",visible:"yes"});$("newNewsTitle").value="";renderNews()};$("importNews").onclick=importNews;$("loadNewsUrl").onclick=loadNewsFromUrl;
+$("copyNews").onclick=()=>copy(newsCsv(),"已複製 announcements CSV");$("downloadNews").onclick=()=>download("announcements.csv",newsCsv());
+$("refresh").onclick=()=>{update();toast("已重新產生")};$("downloadAll").onclick=()=>download("twelfth-night-csv.txt","===== schedule.csv =====\n"+scheduleCsv()+"\n\n===== staff_status.csv =====\n"+staffCsv()+"\n\n===== announcements.csv =====\n"+newsCsv());
+$("save").onclick=save;$("load").onclick=load;$("clear").onclick=()=>{if(confirm("確定清空本機暫存？")){localStorage.removeItem(STORAGE);toast("已清空")}};
+["dateA","dateB","startA","startB","endA","endB","roster"].forEach(id=>{
+  $(id).oninput=()=>{refreshSettingHints();buildTable()};
+  $(id).onblur=()=>{refreshSettingHints();buildTable()};
+});
+["dateA","dateB"].forEach(id=>{
+  const el=$(id);
+  el.addEventListener("focus",()=>openCalendar(el));
+  el.addEventListener("click",(e)=>{e.stopPropagation();openCalendar(el)});
+});
+document.addEventListener("click",(e)=>{
+  const cal=document.getElementById("calendarPopover");
+  if(cal && cal.style.display!=="none" && !cal.contains(e.target) && e.target!==activeCalendarInput){
+    closeCalendar();
+  }
+});
+window.addEventListener("resize",positionCalendar);
+window.addEventListener("scroll",positionCalendar,true);
+document.querySelectorAll("[data-preset-day]").forEach(btn=>btn.onclick=()=>{
+  const day=btn.dataset.presetDay;
+  $("start"+day).value=btn.dataset.start||"21:00";
+  $("end"+day).value=btn.dataset.end||"24:00";
+  refreshSettingHints();
+  buildTable();
+});
+$("setThisWeek").onclick=()=>applyBusinessWeek(0);
+$("setNextWeek").onclick=()=>applyBusinessWeek(1);
+
+(function init(){const [f,s]=nextFriSat();$("dateA").value=f;$("dateB").value=s;$("roster").value=defaultRoster.join("\n");$("roleList").value=defaultRoles.join("\n");state.staff=defaultRoster.map(c=>({cast:c,bookableStatus:"available",statusLabel:"接受指名",role:"公關",note:""}));state.news=[{date:today(),type:"營業公告",title:"本週正常營業",content:"週五、週六 21:00–24:00 開館，歡迎提前預約。",linkText:"前往預約",linkUrl:"booking.html",pinned:"yes",visible:"yes"}];refreshSettingHints();buildTable();resetStaffEditor();renderStaff();renderNews()})();
+})();
+</script>
+</body>
+</html>
