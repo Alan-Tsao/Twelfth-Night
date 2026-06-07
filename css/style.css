@@ -2325,3 +2325,24 @@ body.modal-open {
   stroke-width: 2.05;
 }
 
+/* =========================================================
+   Inquiry native select upgrade v1
+   詢問排班「希望時段」使用同款美化下拉選單
+   ========================================================= */
+.inquiry-panel select.native-select-upgraded {
+  display: none !important;
+}
+
+.inquiry-panel .field {
+  overflow: visible;
+  position: relative;
+}
+
+.inquiry-panel .tn-select.open {
+  z-index: 420;
+}
+
+.inquiry-panel .tn-select.open .tn-select-menu {
+  z-index: 421;
+}
+
