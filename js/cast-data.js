@@ -197,7 +197,7 @@ window.allCasts = [
     name: "露娜弗蕾亞",
     image: "images/staff-09.jpg",
     desc: "她調的不是酒，是撫慰靈魂的解藥。露娜弗蕾亞以調酒師的身份守在吧檯後，為每位來客調製屬於今晚的味道。",
-    shortDesc: "熱場、香檳 CALL、活動主持。",
+    shortDesc: "調酒、吧檯服務、靈魂療癒。",
     quote: "我調的不是酒，是撫慰靈魂的解藥。",
     tags: ["調酒師", "吧檯服務", "酒館氛圍"],
     filterTags: ["rp","bar", "chat"],
