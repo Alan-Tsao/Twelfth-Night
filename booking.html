@@ -184,7 +184,7 @@
             <div class="button-row"><a class="btn" href="cast.html">返回公關介紹</a>
                 <div style="display:flex;gap:12px;flex-wrap:wrap"><button type="button" class="btn primary"
                         id="generateInquiryBtn">產生詢問單</button><button type="button" class="btn"
-                        id="copyInquiryBtn">複製詢問單</button><a class="btn" href="https://discord.gg/你的邀請碼" target="_blank"
+                        id="copyInquiryBtn">複製詢問單</button><a class="btn" href="https://discord.gg/invite/vMp8d3zMV8" target="_blank"
                         rel="noopener">前往 Discord</a></div>
             </div>
             <div class="summary-box" id="inquirySummaryBox" style="margin-top:24px"></div>
@@ -288,6 +288,7 @@
 
             upgradeNativeSelect("bookingTime", "請選擇開始時間");
             upgradeNativeSelect("sessionCount", "可不選，由接待協助安排");
+            upgradeNativeSelect("inquiryTime", "尚未決定");
 
             document.addEventListener("click", (event) => {
                 if (event.target.closest(".tn-select")) return;
