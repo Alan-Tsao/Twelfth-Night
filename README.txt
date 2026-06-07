@@ -1,17 +1,3 @@
-夢境會館 GitHub Pages 最終乾淨版
-
-檔案結構：
-index.html
-service.html
-cast.html
-booking.html
-css/style.css
-js/cast-data.js
-js/featured-cast.js
-js/cast-page.js
-js/booking.js
-images/
-
 維護方式：
 1. 新增/修改公關：只改 js/cast-data.js。
    status: available / pending / rest。
@@ -21,3 +7,4 @@ images/
 4. 首頁推薦設定在 js/cast-data.js：window.FEATURE_CONFIG。
 5. 圖片放 images/main-visual.jpg、images/staff-01.jpg 等。
 6. 搜尋「你的邀請碼」「你的帳號」替換成正式 Discord / Threads 連結。
+7.新增音樂撥放器
