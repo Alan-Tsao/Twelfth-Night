@@ -21,6 +21,10 @@
   const SPECIAL_SERVICE_FILTERS = ["ootd", "music", "dung", "bar", "fishing"];
   const CARD_VISIBLE_TAG_COUNT = 3;
 
+  // 是否在公關卡片底部顯示「推薦服務」。
+  // false = 暫時隱藏；true = 有填 recommended 時才顯示。
+  const SHOW_RECOMMENDED_SERVICE = false;
+
 
   let scheduleRows = [];
   let scheduleLoaded = false;
@@ -580,8 +584,8 @@
 
               <div class="meta">
                 <div><strong>常駐時段：</strong>${escapeHtml(days(cast.workDays))}</div>
-                ${cast.role ? `<div><strong>身份：</strong>${escapeHtml(cast.role)}</div>` : ""}
-                <div><strong>推薦服務：</strong>${escapeHtml(cast.recommended || "未設定")}</div>
+                ${cast.role ? `<div><strong>身份：</strong>${escapeHtml(cast.role)}</div>` : ""} 
+                ${SHOW_RECOMMENDED_SERVICE && cast.recommended ? `<div><strong>推薦服務：</strong>${escapeHtml(cast.recommended)}</div>` : ""}
               </div>
 
               <div class="cta-row" data-cast-actions>${buttonHtml(cast)}${personalMenuButtonHtml(cast)}</div>
