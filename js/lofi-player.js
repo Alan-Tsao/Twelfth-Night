@@ -90,7 +90,27 @@
 
       <div class="lofi-controls">
         <div class="lofi-progress" aria-hidden="true"><span></span></div>
-        <input class="lofi-volume" type="range" min="0" max="1" step="0.01" value="0.55" aria-label="調整音量" />
+
+        <div class="lofi-volume-wrap">
+          <button class="lofi-volume-icon" type="button" aria-label="靜音">
+            <svg class="lofi-volume-on" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 9.5v5h3.2l4.8 4.1V5.4L7.7 9.5H4.5Z"></path>
+              <path d="M16 8.3c1.1 1 1.7 2.3 1.7 3.7s-.6 2.8-1.7 3.7"></path>
+              <path d="M18.7 5.7A8.6 8.6 0 0 1 21 12a8.6 8.6 0 0 1-2.3 6.3"></path>
+            </svg>
+            <svg class="lofi-volume-off" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.5 9.5v5h3.2l4.8 4.1V5.4L7.7 9.5H4.5Z"></path>
+              <path d="M16.2 9.2 21 14"></path>
+              <path d="M21 9.2 16.2 14"></path>
+            </svg>
+          </button>
+
+          <div class="lofi-volume-control">
+            <input class="lofi-volume" type="range" min="0" max="1" step="0.01" value="0.55" aria-label="調整音量" />
+            <div class="lofi-volume-track" aria-hidden="true"><span></span></div>
+            <div class="lofi-volume-thumb" aria-hidden="true"></div>
+          </div>
+        </div>
       </div>
 
       <div class="lofi-note">點一下，讓夢境慢慢開始。</div>
@@ -135,6 +155,7 @@
     const next = player.querySelector(".lofi-next");
     const reset = player.querySelector(".lofi-reset");
     const collapse = player.querySelector(".lofi-collapse");
+    const volumeButton = player.querySelector(".lofi-volume-icon");
     const volume = player.querySelector(".lofi-volume");
     const progress = player.querySelector(".lofi-progress span");
     const note = player.querySelector(".lofi-note");
@@ -147,6 +168,7 @@
     const FLOATING_MIN_WIDTH = 1701;
     let currentIndex = 0;
     let failedSkips = 0;
+    let lastVolumeBeforeMute = 0.55;
 
     function canFloat() {
       return window.innerWidth >= FLOATING_MIN_WIDTH;
@@ -166,8 +188,15 @@
 
     function updateVolumeVisual() {
       if (!volume) return;
-      const pct = `${Number(volume.value || audio.volume || 0) * 100}%`;
+
+      const currentVolume = Number(volume.value || audio.volume || 0);
+      const isMuted = audio.muted || currentVolume <= 0;
+      const pct = `${currentVolume * 100}%`;
+
       volume.style.setProperty("--volume-pct", pct);
+      player.style.setProperty("--volume-pct", pct);
+      player.classList.toggle("is-muted", isMuted);
+      volumeButton?.setAttribute("aria-label", isMuted ? "取消靜音" : "靜音");
     }
 
     function setTitleText(text) {
@@ -338,7 +367,36 @@
     });
 
     volume?.addEventListener("input", () => {
-      audio.volume = Number(volume.value);
+      const nextVolume = Number(volume.value);
+
+      audio.volume = nextVolume;
+
+      if (nextVolume > 0) {
+        audio.muted = false;
+        lastVolumeBeforeMute = nextVolume;
+      }
+
+      updateVolumeVisual();
+    });
+
+    volumeButton?.addEventListener("click", () => {
+      const currentVolume = Number(volume?.value || audio.volume || 0);
+      const shouldUnmute = audio.muted || currentVolume <= 0;
+
+      if (shouldUnmute) {
+        const restoredVolume = lastVolumeBeforeMute > 0 ? lastVolumeBeforeMute : 0.55;
+
+        audio.muted = false;
+        audio.volume = restoredVolume;
+
+        if (volume) {
+          volume.value = String(restoredVolume);
+        }
+      } else {
+        lastVolumeBeforeMute = currentVolume;
+        audio.muted = true;
+      }
+
       updateVolumeVisual();
     });
 
@@ -421,6 +479,7 @@
 
     if (volume) {
       audio.volume = Number(volume.value);
+      lastVolumeBeforeMute = audio.volume > 0 ? audio.volume : 0.55;
       updateVolumeVisual();
     }
 

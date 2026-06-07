@@ -1974,3 +1974,354 @@ body.modal-open {
   }
 }
 
+/* =========================================================
+   Home Lofi Player volume slim v8
+   音量區瘦身：用自訂 track/thumb 取代原生 range 外觀，置中並降低厚重感
+   ========================================================= */
+.lofi-player .lofi-controls {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.lofi-player .lofi-volume-wrap {
+  min-width: 108px;
+  height: 26px;
+  display: grid;
+  grid-template-columns: 22px 66px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 3px 8px 3px 5px;
+  border: 1px solid rgba(232, 201, 129, 0.13);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(232, 201, 129, 0.10), transparent 44%),
+    rgba(255, 255, 255, 0.042);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 8px 22px rgba(0, 0, 0, 0.10);
+}
+
+.lofi-player .lofi-volume-icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(247, 237, 248, 0.70);
+  cursor: pointer;
+  transition: color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.lofi-player .lofi-volume-icon:hover {
+  color: var(--gold);
+  background: rgba(232, 201, 129, 0.07);
+  transform: translateY(-1px);
+}
+
+.lofi-player .lofi-volume-icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lofi-player .lofi-volume-off {
+  display: none !important;
+}
+
+.lofi-player.is-muted .lofi-volume-on {
+  display: none !important;
+}
+
+.lofi-player.is-muted .lofi-volume-off {
+  display: block !important;
+}
+
+.lofi-player.is-muted .lofi-volume-icon {
+  color: rgba(255, 154, 169, 0.86);
+}
+
+.lofi-player .lofi-volume-control {
+  position: relative;
+  width: 66px;
+  height: 14px;
+  display: grid;
+  align-items: center;
+}
+
+.lofi-player .lofi-volume-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.lofi-player .lofi-volume-track span {
+  display: block;
+  width: var(--volume-pct, 55%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(232, 201, 129, 0.95), rgba(242, 167, 198, 0.82));
+}
+
+.lofi-player.is-muted .lofi-volume-track span {
+  background: rgba(255, 154, 169, 0.72);
+}
+
+.lofi-player .lofi-volume-thumb {
+  position: absolute;
+  top: 50%;
+  left: var(--volume-pct, 55%);
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: var(--gold);
+  box-shadow:
+    0 0 0 3px rgba(232, 201, 129, 0.11),
+    0 4px 10px rgba(0, 0, 0, 0.24);
+  pointer-events: none;
+}
+
+.lofi-player.is-muted .lofi-volume-thumb {
+  background: var(--danger);
+  box-shadow:
+    0 0 0 3px rgba(255, 154, 169, 0.10),
+    0 4px 10px rgba(0, 0, 0, 0.24);
+}
+
+.lofi-player .lofi-volume {
+  position: absolute;
+  inset: -5px 0;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 24px !important;
+  height: 24px !important;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  z-index: 2;
+}
+
+.lofi-player .lofi-volume:focus-visible + .lofi-volume-track {
+  box-shadow: 0 0 0 4px rgba(232, 201, 129, 0.12);
+}
+
+.lofi-player.is-collapsed .lofi-volume-wrap {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .lofi-player .lofi-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .lofi-player .lofi-volume-wrap {
+    width: 100%;
+    grid-template-columns: 24px 1fr;
+  }
+
+  .lofi-player .lofi-volume-control {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   Home Lofi Player volume clean v9
+   音量區移除外層膠囊，改成輕量 SVG + 細線滑桿，並與進度條中心對齊
+   ========================================================= */
+.lofi-player .lofi-controls {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+/* 取消音量區外層膠囊感，讓播放器整體更乾淨 */
+.lofi-player .lofi-volume-wrap {
+  min-width: 98px;
+  height: 18px;
+  display: grid;
+  grid-template-columns: 18px 72px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* 音量圖示更小、更貼近精品播放器的輕量感 */
+.lofi-player .lofi-volume-icon {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(247, 237, 248, 0.66);
+  cursor: pointer;
+  transition: color 0.16s ease, transform 0.16s ease, opacity 0.16s ease;
+}
+
+.lofi-player .lofi-volume-icon:hover {
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.lofi-player .lofi-volume-icon svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lofi-player .lofi-volume-off {
+  display: none !important;
+}
+
+.lofi-player.is-muted .lofi-volume-on {
+  display: none !important;
+}
+
+.lofi-player.is-muted .lofi-volume-off {
+  display: block !important;
+}
+
+.lofi-player.is-muted .lofi-volume-icon {
+  color: rgba(255, 154, 169, 0.84);
+}
+
+/* 自訂音量滑桿：視覺中心與左側進度條中心對齊 */
+.lofi-player .lofi-volume-control {
+  position: relative;
+  width: 72px;
+  height: 18px;
+  display: grid;
+  align-items: center;
+}
+
+.lofi-player .lofi-volume-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.115);
+  pointer-events: none;
+}
+
+.lofi-player .lofi-volume-track span {
+  display: block;
+  width: var(--volume-pct, 55%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(232, 201, 129, 0.92), rgba(242, 167, 198, 0.78));
+}
+
+.lofi-player.is-muted .lofi-volume-track span {
+  background: rgba(255, 154, 169, 0.66);
+}
+
+.lofi-player .lofi-volume-thumb {
+  position: absolute;
+  top: 50%;
+  left: var(--volume-pct, 55%);
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: var(--gold);
+  box-shadow:
+    0 0 0 2px rgba(232, 201, 129, 0.11),
+    0 4px 10px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+}
+
+.lofi-player.is-muted .lofi-volume-thumb {
+  background: var(--danger);
+  box-shadow:
+    0 0 0 2px rgba(255, 154, 169, 0.10),
+    0 4px 10px rgba(0, 0, 0, 0.22);
+}
+
+/* 原生 input 只負責拖曳操作，視覺交給自訂 track/thumb */
+.lofi-player .lofi-volume {
+  position: absolute;
+  inset: -5px 0;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 28px !important;
+  height: 28px !important;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  z-index: 2;
+}
+
+.lofi-player .lofi-volume:focus-visible + .lofi-volume-track {
+  box-shadow: 0 0 0 4px rgba(232, 201, 129, 0.12);
+}
+
+.lofi-player.is-collapsed .lofi-volume-wrap {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .lofi-player .lofi-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .lofi-player .lofi-volume-wrap {
+    width: 100%;
+    grid-template-columns: 20px 1fr;
+  }
+
+  .lofi-player .lofi-volume-control {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   Home Lofi Player volume icon v10
+   只放大喇叭 SVG，不改外層尺寸與對齊位置
+   ========================================================= */
+.lofi-player .lofi-volume-icon svg {
+  width: 18.5px;
+  height: 18.5px;
+  stroke-width: 2.05;
+}
+

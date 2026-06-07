@@ -8,39 +8,39 @@
 
 window.TWELFTH_NIGHT_LOFI_PLAYLIST = [
   {
-    title: "Twelfth Night 柔夢票根",
+    title: "Twelfth Night 01.柔夢票根",
     src: "audio/lofi.mp3"
   },
   {
-    title: "Twelfth Night 柔光刃影",
+    title: "Twelfth Night 02.柔光刃影",
     src: "audio/lofi-02.mp3"
   },
   {
-    title: "Twelfth Night 絨夜憑證",
+    title: "Twelfth Night 03.絨夜憑證",
     src: "audio/lofi-03.mp3"
   },
   {
-    title: "Twelfth Night 夢旅安眠曲",
+    title: "Twelfth Night 04.夢旅安眠曲",
     src: "audio/lofi-04.mp3"
   },
   {
-    title: "Twelfth Night 雨落琴鍵",
+    title: "Twelfth Night 05.雨落琴鍵",
     src: "audio/lofi-05.mp3"
   },
   {
-    title: "Twelfth Night 雨光留影",
+    title: "Twelfth Night 06.雨光留影",
     src: "audio/lofi-06.mp3"
   },
   {
-    title: "Twelfth Night 櫻色雜訊",
+    title: "Twelfth Night 07.櫻色雜訊",
     src: "audio/lofi-07.mp3"
   },
   {
-    title: "Twelfth Night 櫻色迴路",
+    title: "Twelfth Night 08.櫻色迴路",
     src: "audio/lofi-08.mp3"
   },
   {
-    title: "Twelfth Night 雨落黑膠",
+    title: "Twelfth Night 09.雨落黑膠",
     src: "audio/lofi-09.mp3"
   },
 ];
