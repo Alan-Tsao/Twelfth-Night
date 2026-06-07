@@ -978,3 +978,53 @@ body.modal-open {
   }
 }
 
+/* =========================================================
+   Cast special service filter
+   將少數服務合併為「特殊服務」後的按鈕視覺
+   ========================================================= */
+.cast-filter-toolbar .special-filter {
+  border-color: rgba(155, 135, 245, 0.34);
+  background:
+    linear-gradient(135deg, rgba(155, 135, 245, 0.12), rgba(242, 167, 198, 0.07));
+}
+
+.cast-filter-toolbar .special-filter.active,
+.cast-filter-toolbar .special-filter:hover {
+  border-color: rgba(155, 135, 245, 0.62);
+  background:
+    linear-gradient(135deg, rgba(155, 135, 245, 0.18), rgba(242, 167, 198, 0.12));
+  color: #eee4ff;
+}
+
+/* =========================================================
+   Cast tag collapse
+   公關卡片標籤：預設只顯示前三個，其餘用 +N 收起
+   ========================================================= */
+.cast-card-profile .tag-row {
+  align-items: center;
+}
+
+.cast-card-profile .tag-hidden {
+  display: none;
+}
+
+.cast-card-profile .tag-row.expanded .tag-hidden {
+  display: inline-flex;
+}
+
+.cast-card-profile .tag-more {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  color: rgba(247, 237, 248, 0.72);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cast-card-profile .tag-more:hover,
+.cast-card-profile .tag-row.expanded .tag-more {
+  color: var(--gold);
+  border-color: rgba(232, 201, 129, 0.48);
+  background: rgba(232, 201, 129, 0.10);
+}
+

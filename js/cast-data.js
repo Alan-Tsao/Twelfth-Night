@@ -219,7 +219,19 @@ window.allCasts = [
     statusLabel: "接受指名",
     workDays: [5, 6],
     recommended: "輕 RP、談心交流",
-    extraServices: []
+    extraServices: [],
+    personalMenu: [
+      {
+        title: "⚔️｜紛爭前線歡樂陪打",
+        desc: "勝負交給戰場，快樂交給我們。不能保證第一，但會陪您一起衝、一起笑，把每一場紛爭都打成不孤單的回憶。",
+        price: "25萬/一場"
+      },
+      {
+        title: "🗡️｜極本陪打(除6.0極本)",
+        desc: "若今晚想挑戰更高難度的夢，就讓我陪您一同前往。無論是練習、通關，還是把獎勵帶回家，都願陪您穩穩走完這場戰鬥。",
+        price: "一飯/30萬"
+      },
+    ]
   },
   {
     name: "兔紙不吃紙",
@@ -264,12 +276,12 @@ window.allCasts = [
     extraServices: ["迷宮討伐", "青魔傳授"],
     personalMenu: [
       {
-        title: "🎩青魔傳授",
+        title: "🎩｜青魔傳授",
         desc: "看過一次，就變成我的技能。",
         price: "一個技能10萬"
       },
       {
-        title: "💀迷宮討伐",
+        title: "💀｜迷宮討伐",
         desc: "今晚的目標：登上第100層。✦ 深層100層過關：沒過不用錢!!!",
         price: "死宮100萬、天宮150萬、優宮200萬"
       },
@@ -293,7 +305,7 @@ window.allCasts = [
     name: "夜店點牛奶",
     image: "images/staff-15.jpg",
     desc: "像深夜裡一杯溫柔的牛奶，安靜卻能讓人慢慢放下疲憊。擅長談心交流與輕 RP 陪伴，適合想找個人安靜聊天、整理心情，或在夜色中稍微休息一下的客人。",
-    shortDesc: "熱場、香檳 CALL、活動主持。",
+    shortDesc: "談心交流、輕 RP、夢境同行。",
     quote: "願此處的夜色能撫平你片刻的疲憊。",
     tags: ["輕RP", "談心交流"],
     filterTags: ["chat", "rp"],
@@ -301,7 +313,14 @@ window.allCasts = [
     statusLabel: "接受指名",
     workDays: [5, 6],
     recommended: "談心交流",
-    extraServices: []
+    extraServices: [],
+    personalMenu: [
+      {
+        title: "🌐｜夢中夢",
+        desc: "不想只停留在此刻的夢境嗎？那就讓我陪您沉入更深一層的世界。可外出同行至 6.0 初期地圖，陪您日隨、閒聊、散步、拍照，或只是一起在夜色裡慢慢走一段路。※ 拍照與 PVP 非專精項目，歡迎先與本人確認後再體驗。",
+        price: "30分鐘 25萬"
+      },
+    ]
   },
   {
     name: "山茶花",
@@ -318,12 +337,12 @@ window.allCasts = [
     extraServices: ["服裝搭配", "談心交流"],
     personalMenu: [
       {
-        title: "👗服裝搭配 ",
+        title: "👗｜服裝搭配 ",
         desc: "深宵換裝，讓夜晚成為你的時裳。配到滿意!",
         price: "一套20萬"
       },
       {
-        title: "♥️談心交流",
+        title: "♥️｜談心交流",
         desc: "夜色深處，安放未曾言說的情緒。一次30分鐘",
         price: "免費"
         }
@@ -372,17 +391,17 @@ window.allCasts = [
     extraServices: ["服裝搭配", "感情諮商"],
     personalMenu: [
       {
-        title: "♥️感情諮商 ",
+        title: "♥️｜感情諮商 ",
         desc: "在燈光與酒杯之間，聽見內心的答案。",
         price: "10萬/10分鐘"
       },
       {
-        title: "👗服裝推薦",
+        title: "👗｜服裝推薦",
         desc: "每一套搭配，都是另一種靈魂。配到滿意!",
         price: "一套 30萬"
       },
       {
-        title: "🎣釣魚教學/陪釣",
+        title: "🎣｜釣魚教學/陪釣",
         desc: "願者上鉤，陪伴是你的動力。",
         price: "30萬/30分鐘"
       }

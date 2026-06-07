@@ -16,6 +16,11 @@
   // bookableStatus 給系統判斷；statusLabel 給網頁顯示。
   const STAFF_STATUS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=1310958925&single=true&output=csv";
 
+  // 前台篩選按鈕「特殊服務」會涵蓋這些較少數、較細分的服務標籤。
+  // 不需要改 cast-data.js，保留各公關原本的 filterTags 即可。
+  const SPECIAL_SERVICE_FILTERS = ["ootd", "music", "dung", "bar", "fishing"];
+  const CARD_VISIBLE_TAG_COUNT = 3;
+
 
   let scheduleRows = [];
   let scheduleLoaded = false;
@@ -351,6 +356,37 @@
     return `<button type="button" class="btn personal-menu-btn" data-personal-menu="${escapeHtml(cast.name)}">個人服務</button>`;
   }
 
+  function tagRowHtml(cast) {
+    const tags = Array.isArray(cast.tags) ? cast.tags.filter(Boolean) : [];
+    if (!tags.length) return "";
+
+    const visibleTags = tags.slice(0, CARD_VISIBLE_TAG_COUNT);
+    const hiddenTags = tags.slice(CARD_VISIBLE_TAG_COUNT);
+
+    const visibleHtml = visibleTags
+      .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
+      .join("");
+
+    if (!hiddenTags.length) return visibleHtml;
+
+    const hiddenHtml = hiddenTags
+      .map((tag) => `<span class="tag tag-hidden">${escapeHtml(tag)}</span>`)
+      .join("");
+
+    return `
+      ${visibleHtml}
+      ${hiddenHtml}
+      <button type="button"
+        class="tag tag-more"
+        data-tag-toggle
+        data-more-label="+${hiddenTags.length}"
+        data-less-label="收合"
+        aria-expanded="false">
+        +${hiddenTags.length}
+      </button>
+    `;
+  }
+
   function menuItemHtml(item) {
     const title = item?.title || "未命名服務";
     const desc = item?.desc || "";
@@ -457,6 +493,16 @@
     ensurePersonalMenuModal();
 
     document.addEventListener("click", (event) => {
+      const tagToggle = event.target.closest("[data-tag-toggle]");
+      if (tagToggle) {
+        event.preventDefault();
+        const tagRow = tagToggle.closest(".tag-row");
+        const expanded = tagRow?.classList.toggle("expanded");
+        tagToggle.setAttribute("aria-expanded", String(Boolean(expanded)));
+        tagToggle.textContent = expanded ? tagToggle.dataset.lessLabel : tagToggle.dataset.moreLabel;
+        return;
+      }
+
       const openButton = event.target.closest("[data-personal-menu]");
       if (openButton) {
         event.preventDefault();
@@ -497,9 +543,7 @@
         ].join(" ");
 
         const img = imagePath(cast);
-        const tagsHtml = (cast.tags || [])
-          .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
-          .join("");
+        const tagsHtml = tagRowHtml(cast);
 
         return `
           <article class="card cast-card-profile"
@@ -595,9 +639,15 @@
     let count = 0;
 
     document.querySelectorAll(".cast-card-profile").forEach((card) => {
+      const tagText = normalize(card.dataset.tags);
+      const matchesSpecialService =
+        filterValue === "special" &&
+        SPECIAL_SERVICE_FILTERS.some((tag) => tagText.split(/\s+/).includes(tag));
+
       const matchesFilter =
         filterValue === "all" ||
-        normalize(card.dataset.tags).includes(filterValue) ||
+        matchesSpecialService ||
+        tagText.split(/\s+/).includes(filterValue) ||
         normalize(card.dataset.status) === filterValue ||
         normalize(card.dataset.today) === filterValue;
 
