@@ -35,4 +35,12 @@ window.TWELFTH_NIGHT_LOFI_PLAYLIST = [
     title: "Twelfth Night 櫻色雜訊",
     src: "audio/lofi-07.mp3"
   },
+  {
+    title: "Twelfth Night 櫻色迴路",
+    src: "audio/lofi-08.mp3"
+  },
+  {
+    title: "Twelfth Night 雨落黑膠",
+    src: "audio/lofi-09.mp3"
+  },
 ];
