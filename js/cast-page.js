@@ -538,7 +538,6 @@
                 <div><strong>常駐時段：</strong>${escapeHtml(days(cast.workDays))}</div>
                 ${cast.role ? `<div><strong>身份：</strong>${escapeHtml(cast.role)}</div>` : ""}
                 <div><strong>推薦服務：</strong>${escapeHtml(cast.recommended || "未設定")}</div>
-                ${extraServicesText(cast) ? `<div><strong>個人加購：</strong>${escapeHtml(extraServicesText(cast))}</div>` : ""}
               </div>
 
               <div class="cta-row" data-cast-actions>${buttonHtml(cast)}${personalMenuButtonHtml(cast)}</div>
