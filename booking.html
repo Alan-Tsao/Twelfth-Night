@@ -83,8 +83,17 @@
                     <h2>預約內容</h2>
                     <p class="lead">請先選擇日期。公關與服務皆可不指定，接待會依當日狀況協助安排。</p>
                     <div class="form-grid">
-                        <div class="field"><label for="bookingDate">預約日期</label><input id="bookingDate" type="date"
-                                required /></div>
+                        <div class="field booking-date-field">
+                            <label for="bookingDatePickerButton">預約日期</label>
+                            <input id="bookingDate" type="hidden" required />
+                            <div class="tn-date-picker" id="bookingDatePicker" data-target="bookingDate">
+                                <button type="button" class="tn-date-value" id="bookingDatePickerButton"
+                                    aria-expanded="false">
+                                    <span class="tn-date-placeholder">請選擇日期</span>
+                                </button>
+                                <div class="tn-date-panel" role="dialog" aria-label="選擇預約日期"></div>
+                            </div>
+                        </div>
                         <div class="field"><label for="bookingTime">預約開始時間</label><select id="bookingTime" required>
                                 <option value="">請選擇</option>
                                 <option value="22:00">22:00 開始</option>
@@ -144,7 +153,17 @@
                 <div class="field"><label for="inquiryDiscord">Discord ID</label><input id="inquiryDiscord"
                         placeholder="例：dreamcat_0123" /></div>
                 <div class="field"><label for="inquiryCast">詢問公關</label><input id="inquiryCast" readonly /></div>
-                <div class="field"><label for="inquiryDate">希望日期</label><input id="inquiryDate" type="date" /></div>
+                <div class="field booking-date-field">
+                    <label for="inquiryDatePickerButton">希望日期</label>
+                    <input id="inquiryDate" type="hidden" />
+                    <div class="tn-date-picker" id="inquiryDatePicker" data-target="inquiryDate">
+                        <button type="button" class="tn-date-value" id="inquiryDatePickerButton"
+                            aria-expanded="false">
+                            <span class="tn-date-placeholder">請選擇日期</span>
+                        </button>
+                        <div class="tn-date-panel" role="dialog" aria-label="選擇希望日期"></div>
+                    </div>
+                </div>
                 <div class="field"><label for="inquiryTime">希望時段，可不填</label><select id="inquiryTime">
                         <option value="">尚未決定</option>
                         <option>21:00–21:20</option>
@@ -273,6 +292,185 @@
             document.addEventListener("click", (event) => {
                 if (event.target.closest(".tn-select")) return;
                 closeOtherSelects(null);
+            });
+        })();
+    </script>
+
+
+    <script>
+        (() => {
+            function pad(value) {
+                return String(value).padStart(2, "0");
+            }
+
+            function formatIso(date) {
+                return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+            }
+
+            function formatDisplay(iso) {
+                if (!iso) return "";
+                const parts = String(iso).split("-");
+                if (parts.length !== 3) return iso;
+                return `${parts[0]}/${parts[1]}/${parts[2]}`;
+            }
+
+            function parseIso(iso) {
+                const parts = String(iso || "").split("-").map(Number);
+                if (parts.length !== 3) return null;
+                const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                if (
+                    date.getFullYear() !== parts[0] ||
+                    date.getMonth() !== parts[1] - 1 ||
+                    date.getDate() !== parts[2]
+                ) {
+                    return null;
+                }
+                return date;
+            }
+
+            function closeDatePickers(current) {
+                document.querySelectorAll(".tn-date-picker.open").forEach((picker) => {
+                    if (picker === current) return;
+                    picker.classList.remove("open");
+                    picker.querySelector(".tn-date-value")?.setAttribute("aria-expanded", "false");
+                });
+            }
+
+            function initDatePicker(rootId, targetId, placeholder) {
+                const root = document.getElementById(rootId);
+                const target = document.getElementById(targetId);
+                if (!root || !target || root.dataset.dateReady === "true") return;
+
+                root.dataset.dateReady = "true";
+
+                const valueBtn = root.querySelector(".tn-date-value");
+                const valueText = valueBtn.querySelector("span");
+                const panel = root.querySelector(".tn-date-panel");
+                const today = new Date();
+                let viewDate = parseIso(target.value) || today;
+                viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+
+                function setValue(iso) {
+                    target.value = iso || "";
+                    target.dispatchEvent(new Event("change", { bubbles: true }));
+                    render();
+                }
+
+                function render() {
+                    const selected = parseIso(target.value);
+                    const year = viewDate.getFullYear();
+                    const month = viewDate.getMonth();
+                    const firstDay = new Date(year, month, 1);
+                    const startOffset = firstDay.getDay();
+                    const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+
+                    if (target.value) {
+                        valueText.classList.remove("tn-date-placeholder");
+                        valueText.textContent = formatDisplay(target.value);
+                    } else {
+                        valueText.classList.add("tn-date-placeholder");
+                        valueText.textContent = placeholder;
+                    }
+
+                    const cells = [];
+                    for (let i = 0; i < 42; i += 1) {
+                        const date = new Date(year, month, 1 - startOffset + i);
+                        const iso = formatIso(date);
+                        const isOutside = date.getMonth() !== month;
+                        const isToday = iso === formatIso(today);
+                        const isSelected = selected && iso === formatIso(selected);
+
+                        cells.push(`
+                            <button type="button"
+                                class="tn-date-day ${isOutside ? "outside" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""}"
+                                data-date="${iso}">
+                                ${date.getDate()}
+                            </button>
+                        `);
+                    }
+
+                    panel.innerHTML = `
+                        <div class="tn-date-header">
+                            <button type="button" class="tn-date-nav" data-date-nav="-1" aria-label="上一個月">‹</button>
+                            <div class="tn-date-title">${year}年${pad(month + 1)}月</div>
+                            <button type="button" class="tn-date-nav" data-date-nav="1" aria-label="下一個月">›</button>
+                        </div>
+                        <div class="tn-date-weekdays">
+                            ${weekdays.map((day) => `<span>${day}</span>`).join("")}
+                        </div>
+                        <div class="tn-date-grid">
+                            ${cells.join("")}
+                        </div>
+                        <div class="tn-date-actions">
+                            <button type="button" class="tn-date-action" data-date-clear>清除</button>
+                            <button type="button" class="tn-date-action" data-date-today>今天</button>
+                        </div>
+                    `;
+                }
+
+                valueBtn.addEventListener("click", () => {
+                    const willOpen = !root.classList.contains("open");
+                    closeDatePickers(root);
+                    document.querySelectorAll(".tn-select.open").forEach((el) => {
+                        el.classList.remove("open");
+                        el.querySelector(".tn-select-value")?.setAttribute("aria-expanded", "false");
+                    });
+
+                    root.classList.toggle("open", willOpen);
+                    valueBtn.setAttribute("aria-expanded", String(willOpen));
+
+                    if (willOpen) {
+                        const current = parseIso(target.value);
+                        if (current) viewDate = new Date(current.getFullYear(), current.getMonth(), 1);
+                        render();
+                    }
+                });
+
+                panel.addEventListener("click", (event) => {
+                    const nav = event.target.closest("[data-date-nav]");
+                    if (nav) {
+                        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + Number(nav.dataset.dateNav), 1);
+                        render();
+                        return;
+                    }
+
+                    if (event.target.closest("[data-date-today]")) {
+                        const now = new Date();
+                        viewDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                        setValue(formatIso(now));
+                        root.classList.remove("open");
+                        valueBtn.setAttribute("aria-expanded", "false");
+                        return;
+                    }
+
+                    if (event.target.closest("[data-date-clear]")) {
+                        setValue("");
+                        root.classList.remove("open");
+                        valueBtn.setAttribute("aria-expanded", "false");
+                        return;
+                    }
+
+                    const dayBtn = event.target.closest("[data-date]");
+                    if (!dayBtn) return;
+
+                    const chosen = parseIso(dayBtn.dataset.date);
+                    if (chosen) viewDate = new Date(chosen.getFullYear(), chosen.getMonth(), 1);
+                    setValue(dayBtn.dataset.date);
+
+                    root.classList.remove("open");
+                    valueBtn.setAttribute("aria-expanded", "false");
+                });
+
+                target.addEventListener("change", render);
+                render();
+            }
+
+            initDatePicker("bookingDatePicker", "bookingDate", "請選擇日期");
+            initDatePicker("inquiryDatePicker", "inquiryDate", "請選擇日期");
+
+            document.addEventListener("click", (event) => {
+                if (event.target.closest(".tn-date-picker")) return;
+                closeDatePickers(null);
             });
         })();
     </script>

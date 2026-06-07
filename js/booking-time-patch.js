@@ -100,11 +100,11 @@
 Discord ID：${value("discordId") || "未填寫"}
 預約人數：${guestLabel() || "未填寫"}
 
-希望安排公關：${casts.join("、") || "未填寫"}
+希望安排公關：${casts.join("、") || "不指定，由接待協助安排"}
 預約日期：${value("bookingDate") || "未填寫"}
 預約時段：${bookingTimeLabel() || "未填寫"}
-預約節數：${sessionLabel() || "未填寫"}
-服務項目：${value("serviceType") || "未填寫"}
+預約節數：${sessionLabel() || "不指定，由接待協助安排"}
+服務項目：${value("serviceType") || "不指定，由接待協助安排"}
 
 其他需求：
 ${value("notes") || "無"}
@@ -118,15 +118,18 @@ ${value("notes") || "無"}
   }
 
   function validateBeforeSubmit() {
-    const required = ["playerName", "serverName", "discordId", "guestCount", "bookingDate", "bookingTime", "serviceType", "sessionCount"];
+    const required = ["playerName", "serverName", "discordId", "guestCount", "bookingDate", "bookingTime"];
     const okFields = required.every((id) => value(id) !== "");
-    const okCasts = selectedCasts().length > 0;
+    const hasCast = selectedCasts().length > 0;
+    const okSession = !hasCast || value("sessionCount") !== "";
 
-    if ((!okFields || !okCasts) && $("step3Error")) {
+    if ((!okFields || !okSession) && $("step3Error")) {
       $("step3Error").classList.add("show");
+    } else if ($("step3Error")) {
+      $("step3Error").classList.remove("show");
     }
 
-    return okFields && okCasts;
+    return okFields && okSession;
   }
 
   function submitToGoogleForm() {
@@ -147,9 +150,9 @@ ${value("notes") || "無"}
       [GOOGLE_FORM_FIELDS.guestCount]: guestLabel(),
       [GOOGLE_FORM_FIELDS.bookingDate]: value("bookingDate"),
       [GOOGLE_FORM_FIELDS.bookingTime]: bookingTimeLabel(),
-      [GOOGLE_FORM_FIELDS.sessionCount]: sessionLabel(),
-      [GOOGLE_FORM_FIELDS.castNames]: selectedCasts().join("、"),
-      [GOOGLE_FORM_FIELDS.serviceType]: value("serviceType"),
+      [GOOGLE_FORM_FIELDS.sessionCount]: sessionLabel() || "不指定，由接待協助安排",
+      [GOOGLE_FORM_FIELDS.castNames]: selectedCasts().join("、") || "不指定，由接待協助安排",
+      [GOOGLE_FORM_FIELDS.serviceType]: value("serviceType") || "不指定，由接待協助安排",
       [GOOGLE_FORM_FIELDS.notes]: value("notes") || "無"
     };
 
