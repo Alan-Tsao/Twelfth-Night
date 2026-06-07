@@ -8,15 +8,15 @@
 
 window.TWELFTH_NIGHT_LOFI_PLAYLIST = [
   {
-    title: "Twelfth Night Lofi",
+    title: "Twelfth Night 柔夢票根",
     src: "audio/lofi.mp3"
   },
   {
-    title: "Twelfth Night Lofi-02",
+    title: "Twelfth Night 柔光刃影",
     src: "audio/lofi-02.mp3"
   },
   {
-    title: "Twelfth Night Lofi-03",
+    title: "Twelfth Night 絨夜憑證",
     src: "audio/lofi-03.mp3"
   },
   {
