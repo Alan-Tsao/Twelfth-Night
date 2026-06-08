@@ -279,7 +279,7 @@ window.allCasts = [
     desc: "自稱最後一隻老虎，卻意外適合替人帶路。擅長青魔技能、深層迷宮帶隊，能在挑戰與閒聊之間找到剛好的節奏，陪你把今晚變成一段值得記住的旅程。",
     shortDesc: "深沉迷宮、死宮、天宮。",
     quote: "大韓民國最後一隻老虎。",
-    tags: ["輕 RP", "迷宮討罰", "青魔傳授"],
+    tags: ["輕 RP", "迷宮討伐", "青魔傳授"],
     filterTags: ["rp","dung", "chat"],
     status: "available",
     statusLabel: "接受指名",
