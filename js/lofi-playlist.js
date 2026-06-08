@@ -43,4 +43,12 @@ window.TWELFTH_NIGHT_LOFI_PLAYLIST = [
     title: "Twelfth Night 09.雨落黑膠",
     src: "audio/lofi-09.mp3"
   },
+  {
+    title: "Twelfth Night 10.星鈴咖啡",
+    src: "audio/lofi-10.mp3"
+  },
+  {
+    title: "Twelfth Night 11.枕邊旅夢",
+    src: "audio/lofi-11.mp3"
+  },
 ];
