@@ -51,4 +51,28 @@ window.TWELFTH_NIGHT_LOFI_PLAYLIST = [
     title: "Twelfth Night 11.枕邊旅夢",
     src: "audio/lofi-11.mp3"
   },
+  {
+    title: "Twelfth Night 12.月台餅乾",
+    src: "audio/lofi-12.mp3"
+  },
+  {
+    title: "Twelfth Night 13.琥珀節拍",
+    src: "audio/lofi-13.mp3"
+  },
+  {
+    title: "Twelfth Night 14.柔夢微醺",
+    src: "audio/lofi-14.mp3"
+  },
+  {
+    title: "Twelfth Night 15.雨季索引",
+    src: "audio/lofi-15.mp3"
+  },
+  {
+    title: "Twelfth Night 16.晚安收銀台",
+    src: "audio/lofi-16.mp3"
+  },
+  {
+    title: "Twelfth Night 17.夜燈小調",
+    src: "audio/lofi-17.mp3"
+  },
 ];

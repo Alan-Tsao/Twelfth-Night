@@ -50,6 +50,10 @@
     aside.setAttribute("aria-label", "第十二夜 Lofi 音樂播放器");
 
     aside.innerHTML = `
+      <button class="lofi-corner-collapse lofi-collapse" type="button" aria-label="縮小播放器" aria-expanded="true">
+        <span aria-hidden="true">－</span>
+      </button>
+
       <div class="lofi-player-main">
         <button class="lofi-toggle" type="button" aria-label="播放 Lofi 音樂">
           <span class="lofi-icon-play" aria-hidden="true">▶</span>
@@ -76,10 +80,8 @@
             </svg>
           </button>
 
-          <button class="lofi-mini-btn lofi-collapse" type="button" aria-label="縮小播放器" aria-expanded="true">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6.5 14.5 12 9l5.5 5.5"></path>
-            </svg>
+          <button class="lofi-mini-btn lofi-playlist-toggle" type="button" aria-label="展開歌單" aria-expanded="false">
+            <span>歌單</span>
           </button>
         </div>
 
@@ -89,7 +91,20 @@
       </div>
 
       <div class="lofi-controls">
-        <div class="lofi-progress" aria-hidden="true"><span></span></div>
+        <div class="lofi-progress-area">
+          <div class="lofi-progress" aria-hidden="true"><span></span></div>
+          <button class="lofi-loop" type="button" aria-label="開啟單曲循環" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 7h8.5a4.5 4.5 0 0 1 0 9H13"></path>
+              <path d="M7 7l3-3"></path>
+              <path d="M7 7l3 3"></path>
+              <path d="M17 17h-8.5a4.5 4.5 0 0 1 0-9H11"></path>
+              <path d="M17 17l-3 3"></path>
+              <path d="M17 17l-3-3"></path>
+              <text x="12" y="15.2">1</text>
+            </svg>
+          </button>
+        </div>
 
         <div class="lofi-volume-wrap">
           <button class="lofi-volume-icon" type="button" aria-label="靜音">
@@ -114,6 +129,14 @@
       </div>
 
       <div class="lofi-note">點一下，讓夢境慢慢開始。</div>
+
+      <div class="lofi-playlist-panel" hidden>
+        <div class="lofi-playlist-head">
+          <span>PLAYLIST</span>
+          <button class="lofi-playlist-close" type="button" aria-label="關閉歌單">×</button>
+        </div>
+        <div class="lofi-playlist-list"></div>
+      </div>
     `;
 
     return aside;
@@ -155,6 +178,11 @@
     const next = player.querySelector(".lofi-next");
     const reset = player.querySelector(".lofi-reset");
     const collapse = player.querySelector(".lofi-collapse");
+    const playlistToggle = player.querySelector(".lofi-playlist-toggle");
+    const playlistPanel = player.querySelector(".lofi-playlist-panel");
+    const playlistList = player.querySelector(".lofi-playlist-list");
+    const playlistClose = player.querySelector(".lofi-playlist-close");
+    const loopButton = player.querySelector(".lofi-loop");
     const volumeButton = player.querySelector(".lofi-volume-icon");
     const volume = player.querySelector(".lofi-volume");
     const progress = player.querySelector(".lofi-progress span");
@@ -165,7 +193,9 @@
 
     const STORAGE_KEY = "twelfthNightLofiPlayerPosition";
     const COLLAPSE_STORAGE_KEY = "twelfthNightLofiPlayerCollapsed";
+    const LOOP_STORAGE_KEY = "twelfthNightLofiSingleLoop";
     const FLOATING_MIN_WIDTH = 1701;
+    let singleLoop = localStorage.getItem(LOOP_STORAGE_KEY) === "true";
     let currentIndex = 0;
     let failedSkips = 0;
     let lastVolumeBeforeMute = 0.55;
@@ -184,6 +214,45 @@
 
     function trackSrc(index) {
       return tracks[index]?.src || "";
+    }
+
+    function applyLoopMode() {
+      audio.loop = tracks.length <= 1 || singleLoop;
+      player.classList.toggle("is-single-loop", singleLoop);
+      loopButton?.setAttribute("aria-pressed", String(singleLoop));
+      loopButton?.setAttribute("aria-label", singleLoop ? "關閉單曲循環" : "開啟單曲循環");
+    }
+
+    function closePlaylist() {
+      player.classList.remove("is-playlist-open");
+      if (playlistPanel) playlistPanel.hidden = true;
+      playlistToggle?.setAttribute("aria-expanded", "false");
+    }
+
+    function openPlaylist() {
+      renderPlaylist();
+      player.classList.add("is-playlist-open");
+      if (playlistPanel) playlistPanel.hidden = false;
+      playlistToggle?.setAttribute("aria-expanded", "true");
+    }
+
+    function togglePlaylist() {
+      if (player.classList.contains("is-playlist-open")) {
+        closePlaylist();
+      } else {
+        openPlaylist();
+      }
+    }
+
+    function renderPlaylist() {
+      if (!playlistList) return;
+
+      playlistList.innerHTML = tracks.map((track, index) => `
+        <button class="lofi-playlist-item ${index === currentIndex ? "active" : ""}" type="button" data-index="${index}">
+          <span class="lofi-playlist-index">${String(index + 1).padStart(2, "0")}</span>
+          <span class="lofi-playlist-name">${track.title || `Twelfth Night Lofi ${index + 1}`}</span>
+        </button>
+      `).join("");
     }
 
     function updateVolumeVisual() {
@@ -225,6 +294,8 @@
       audio.load();
 
       setTitleText(trackTitle(currentIndex));
+      renderPlaylist();
+      applyLoopMode();
       if (progress) progress.style.width = "0%";
 
       if (note && !player.classList.contains("is-error")) {
@@ -311,6 +382,15 @@
       collapse?.setAttribute("aria-expanded", String(!isCollapsed));
       collapse?.setAttribute("aria-label", isCollapsed ? "展開播放器" : "縮小播放器");
 
+      const collapseSymbol = collapse?.querySelector("span");
+      if (collapseSymbol) {
+        collapseSymbol.textContent = isCollapsed ? "＋" : "－";
+      }
+
+      if (isCollapsed) {
+        closePlaylist();
+      }
+
       if (shouldSave) {
         localStorage.setItem(COLLAPSE_STORAGE_KEY, isCollapsed ? "true" : "false");
       }
@@ -364,6 +444,31 @@
 
     collapse?.addEventListener("click", () => {
       setCollapsed(!player.classList.contains("is-collapsed"));
+    });
+
+    playlistToggle?.addEventListener("click", () => {
+      togglePlaylist();
+    });
+
+    playlistClose?.addEventListener("click", () => {
+      closePlaylist();
+    });
+
+    playlistList?.addEventListener("click", (event) => {
+      const item = event.target.closest(".lofi-playlist-item");
+      if (!item) return;
+
+      const index = Number(item.dataset.index);
+      if (!Number.isFinite(index)) return;
+
+      loadTrack(index, !audio.paused);
+      closePlaylist();
+    });
+
+    loopButton?.addEventListener("click", () => {
+      singleLoop = !singleLoop;
+      localStorage.setItem(LOOP_STORAGE_KEY, singleLoop ? "true" : "false");
+      applyLoopMode();
     });
 
     volume?.addEventListener("input", () => {
@@ -465,6 +570,12 @@
       window.addEventListener("pointercancel", up);
     });
 
+    document.addEventListener("click", (event) => {
+      if (!player.classList.contains("is-playlist-open")) return;
+      if (event.target.closest(".lofi-player")) return;
+      closePlaylist();
+    });
+
     function handleResponsiveCollapse() {
       if (localStorage.getItem(COLLAPSE_STORAGE_KEY) !== null) {
         applySavedPosition();
@@ -483,6 +594,8 @@
       updateVolumeVisual();
     }
 
+    renderPlaylist();
+    applyLoopMode();
     loadTrack(0, false);
     applySavedCollapse();
     applySavedPosition();
