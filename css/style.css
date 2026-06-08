@@ -2695,3 +2695,321 @@ body.modal-open {
   }
 }
 
+/* =========================================================
+   Home Lofi Player real audio visualizer v13
+   將右側音波燈條改成柔和跟隨音訊能量的視覺化
+   ========================================================= */
+.lofi-bars {
+  align-self: center;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.lofi-bars span {
+  width: 4px;
+  height: var(--bar-height, 8px);
+  min-height: 4px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg,
+      rgba(232, 201, 129, 0.95),
+      rgba(242, 167, 198, 0.78));
+  opacity: calc(0.50 + (var(--bar-glow, 0) * 0.42));
+  box-shadow:
+    0 0 calc(4px + (var(--bar-glow, 0) * 12px)) rgba(232, 201, 129, 0.20),
+    0 0 calc(2px + (var(--bar-glow, 0) * 8px)) rgba(242, 167, 198, 0.12);
+  transform-origin: center;
+  transition:
+    height 0.09s linear,
+    opacity 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+/* 未成功啟動 Web Audio 時，退回原本的柔和裝飾動畫 */
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span {
+  animation: lofiBarFallback 1.05s ease-in-out infinite;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(4) {
+  animation-delay: 0.36s;
+}
+
+@keyframes lofiBarFallback {
+  0%, 100% {
+    height: 7px;
+    opacity: 0.55;
+  }
+
+  50% {
+    height: 19px;
+    opacity: 0.90;
+  }
+}
+
+/* 暫停與收合時保持低調待機狀態 */
+.lofi-player:not(.is-playing) .lofi-bars span,
+.lofi-player.is-collapsed .lofi-bars span {
+  opacity: 0.48;
+  box-shadow: none;
+}
+
+/* =========================================================
+   Home Lofi Player lofi beat visualizer v14
+   音波改為由下往上長，並強化 lofi kick / bass 的慢節奏反應
+   ========================================================= */
+.lofi-bars {
+  align-self: center;
+  height: 28px;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding-bottom: 2px;
+}
+
+.lofi-bars span {
+  width: 4px;
+  height: var(--bar-height, 7px);
+  min-height: 4px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg,
+      rgba(242, 167, 198, 0.84) 0%,
+      rgba(232, 201, 129, 0.96) 100%);
+  opacity: calc(0.54 + (var(--bar-glow, 0) * 0.38));
+  box-shadow:
+    0 0 calc(3px + (var(--bar-glow, 0) * 10px)) rgba(232, 201, 129, 0.18),
+    0 0 calc(2px + (var(--bar-glow, 0) * 7px)) rgba(242, 167, 198, 0.12);
+  transform-origin: bottom center;
+  transition:
+    height 0.075s linear,
+    opacity 0.11s ease,
+    box-shadow 0.11s ease;
+}
+
+/* 第一、二根偏低頻，稍微厚一點點，讓 lofi 的 bass 呼吸更明顯 */
+.lofi-bars span:nth-child(1),
+.lofi-bars span:nth-child(2) {
+  width: 4.5px;
+}
+
+/* 未成功啟動 Web Audio 時，退回柔和的由下往上裝飾動畫 */
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span {
+  animation: lofiBarFallbackBottom 1.15s ease-in-out infinite;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(3) {
+  animation-delay: 0.30s;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(4) {
+  animation-delay: 0.44s;
+}
+
+@keyframes lofiBarFallbackBottom {
+  0%, 100% {
+    height: 6px;
+    opacity: 0.54;
+  }
+
+  45% {
+    height: 20px;
+    opacity: 0.88;
+  }
+}
+
+/* 暫停與收合時保持低調待機狀態 */
+.lofi-player:not(.is-playing) .lofi-bars span,
+.lofi-player.is-collapsed .lofi-bars span {
+  opacity: 0.48;
+  box-shadow: none;
+}
+
+/* =========================================================
+   Home Lofi Player transient beat visualizer v15
+   低頻瞬態偵測版：第一根抓 kick，第二根抓 bass，第三四根只做細節陪襯
+   ========================================================= */
+.lofi-bars {
+  align-self: center;
+  height: 30px;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding-bottom: 2px;
+}
+
+.lofi-bars span {
+  width: 4px;
+  height: var(--bar-height, 6px);
+  min-height: 4px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg,
+      rgba(242, 167, 198, 0.82) 0%,
+      rgba(232, 201, 129, 0.98) 100%);
+  opacity: calc(0.52 + (var(--bar-glow, 0) * 0.42));
+  box-shadow:
+    0 0 calc(3px + (var(--bar-glow, 0) * 11px)) rgba(232, 201, 129, 0.18),
+    0 0 calc(2px + (var(--bar-glow, 0) * 7px)) rgba(242, 167, 198, 0.12);
+  transform-origin: bottom center;
+  transition:
+    height 0.065s linear,
+    opacity 0.10s ease,
+    box-shadow 0.10s ease;
+}
+
+/* 第 1 根代表 kick / bass transient；第 2 根代表 bass body */
+.lofi-bars span:nth-child(1) {
+  width: 4.8px;
+}
+
+.lofi-bars span:nth-child(2) {
+  width: 4.4px;
+  opacity: calc(0.50 + (var(--bar-glow, 0) * 0.36));
+}
+
+/* 第 3、4 根降低存在感，避免看起來像固定波浪排序 */
+.lofi-bars span:nth-child(3) {
+  width: 3.8px;
+  opacity: calc(0.46 + (var(--bar-glow, 0) * 0.32));
+}
+
+.lofi-bars span:nth-child(4) {
+  width: 3.4px;
+  opacity: calc(0.40 + (var(--bar-glow, 0) * 0.28));
+}
+
+/* fallback 不再使用依序波浪，只做低調同步呼吸 */
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span {
+  animation: lofiBarFallbackBreath 1.35s ease-in-out infinite;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(1) {
+  animation-duration: 1.18s;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(2) {
+  animation-duration: 1.46s;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(3) {
+  animation-duration: 1.72s;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(4) {
+  animation-duration: 2.10s;
+}
+
+@keyframes lofiBarFallbackBreath {
+  0%, 100% {
+    height: 5px;
+    opacity: 0.42;
+  }
+
+  50% {
+    height: 12px;
+    opacity: 0.62;
+  }
+}
+
+.lofi-player:not(.is-playing) .lofi-bars span,
+.lofi-player.is-collapsed .lofi-bars span {
+  opacity: 0.46;
+  box-shadow: none;
+}
+
+/* =========================================================
+   Home Lofi Player groove visualizer v17
+   第一根稍微提高 kick 反應；第二根改成 bass groove 起伏，降低持續亂動
+   ========================================================= */
+.lofi-bars {
+  align-self: center;
+  height: 30px;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding-bottom: 2px;
+}
+
+.lofi-bars span {
+  width: 4px;
+  height: var(--bar-height, 5px);
+  min-height: 4px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg,
+      rgba(242, 167, 198, 0.82) 0%,
+      rgba(232, 201, 129, 0.98) 100%);
+  opacity: calc(0.45 + (var(--bar-glow, 0) * 0.47));
+  box-shadow:
+    0 0 calc(2px + (var(--bar-glow, 0) * 12px)) rgba(232, 201, 129, 0.18),
+    0 0 calc(1px + (var(--bar-glow, 0) * 8px)) rgba(242, 167, 198, 0.12);
+  transform-origin: bottom center;
+  transition:
+    height 0.058s linear,
+    opacity 0.09s ease,
+    box-shadow 0.09s ease;
+}
+
+.lofi-bars span:nth-child(1) {
+  width: 4.8px;
+}
+
+.lofi-bars span:nth-child(2) {
+  width: 4.2px;
+  opacity: calc(0.42 + (var(--bar-glow, 0) * 0.38));
+}
+
+.lofi-bars span:nth-child(3) {
+  width: 3.6px;
+  opacity: calc(0.36 + (var(--bar-glow, 0) * 0.26));
+}
+
+.lofi-bars span:nth-child(4) {
+  width: 3.2px;
+  opacity: calc(0.30 + (var(--bar-glow, 0) * 0.22));
+}
+
+/* fallback 不做假波浪，只維持安靜待機 */
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span {
+  animation: none !important;
+  height: 6px;
+  opacity: 0.40;
+  box-shadow: none;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(2) {
+  height: 6px;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(3) {
+  height: 5px;
+}
+
+.lofi-player.visualizer-fallback.is-playing .lofi-bars span:nth-child(4) {
+  height: 4px;
+}
+
+.lofi-player:not(.is-playing) .lofi-bars span,
+.lofi-player.is-collapsed .lofi-bars span {
+  opacity: 0.40;
+  box-shadow: none;
+}
+

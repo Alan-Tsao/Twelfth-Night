@@ -190,6 +190,7 @@
     const title = player.querySelector(".lofi-title");
     const titleText = player.querySelector(".lofi-title span");
     const dragHandle = player.querySelector(".lofi-player-main");
+    const visualBars = Array.from(player.querySelectorAll(".lofi-bars span"));
 
     const STORAGE_KEY = "twelfthNightLofiPlayerPosition";
     const COLLAPSE_STORAGE_KEY = "twelfthNightLofiPlayerCollapsed";
@@ -199,6 +200,23 @@
     let currentIndex = 0;
     let failedSkips = 0;
     let lastVolumeBeforeMute = 0.55;
+    let audioContext = null;
+    let analyser = null;
+    let analyserData = null;
+    let analyserTimeData = null;
+    let visualizerFrame = null;
+    let visualizerReady = false;
+    let kickEnvelope = 0;
+    let bassEnvelope = 0;
+    let midEnvelope = 0;
+    let airEnvelope = 0;
+    let pulseEnvelope = 0;
+    let previousBass = 0;
+    let previousBassBody = 0;
+    let bassBaseline = 0;
+    let bassBodyBaseline = 0;
+    let kickGateHold = 0;
+    let bassGateHold = 0;
 
     function canFloat() {
       return window.innerWidth >= FLOATING_MIN_WIDTH;
@@ -266,6 +284,194 @@
       player.style.setProperty("--volume-pct", pct);
       player.classList.toggle("is-muted", isMuted);
       volumeButton?.setAttribute("aria-label", isMuted ? "取消靜音" : "靜音");
+    }
+
+    function setVisualizerIdle() {
+      kickEnvelope = 0;
+      bassEnvelope = 0;
+      midEnvelope = 0;
+      airEnvelope = 0;
+      pulseEnvelope = 0;
+      previousBass = 0;
+      previousBassBody = 0;
+      bassBaseline = 0;
+      bassBodyBaseline = 0;
+      kickGateHold = 0;
+      bassGateHold = 0;
+
+      visualBars.forEach((bar, index) => {
+        const idleHeights = [6, 9, 7, 5];
+        bar.style.setProperty("--bar-height", `${idleHeights[index % idleHeights.length]}px`);
+        bar.style.setProperty("--bar-glow", "0");
+      });
+    }
+
+    function initVisualizer() {
+      if (visualizerReady || !visualBars.length) return true;
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        player.classList.add("visualizer-fallback");
+        return false;
+      }
+
+      try {
+        audioContext = new AudioContextClass();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.36;
+
+        const source = audioContext.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        analyserData = new Uint8Array(analyser.frequencyBinCount);
+        analyserTimeData = new Uint8Array(analyser.fftSize);
+        visualizerReady = true;
+        player.classList.add("visualizer-ready");
+        return true;
+      } catch (error) {
+        console.warn("音波視覺化初始化失敗，已改用柔和裝飾動畫。", error);
+        player.classList.add("visualizer-fallback");
+        return false;
+      }
+    }
+
+    async function resumeVisualizer() {
+      if (!initVisualizer() || !audioContext) return;
+
+      if (audioContext.state === "suspended") {
+        try {
+          await audioContext.resume();
+        } catch (error) {
+          console.warn("音波視覺化啟動失敗。", error);
+        }
+      }
+    }
+
+    function startVisualizer() {
+      if (!visualBars.length || !analyser || !analyserData) return;
+
+      cancelAnimationFrame(visualizerFrame);
+
+      function averageRange(start, end) {
+        let sum = 0;
+        let count = 0;
+
+        for (let i = start; i < Math.min(end, analyserData.length); i += 1) {
+          sum += analyserData[i];
+          count += 1;
+        }
+
+        return count ? sum / count : 0;
+      }
+
+      function averageHz(fromHz, toHz) {
+        if (!audioContext || !analyser) return 0;
+
+        const binHz = audioContext.sampleRate / analyser.fftSize;
+        const start = Math.max(1, Math.floor(fromHz / binHz));
+        const end = Math.max(start + 1, Math.ceil(toHz / binHz));
+
+        return averageRange(start, end) / 255;
+      }
+
+      function follow(current, target, attack = 0.32, release = 0.09) {
+        return current + (target - current) * (target > current ? attack : release);
+      }
+
+      function draw() {
+        if (audio.paused || player.classList.contains("is-collapsed")) {
+          setVisualizerIdle();
+          return;
+        }
+
+        analyser.getByteFrequencyData(analyserData);
+
+        const subBass = averageHz(35, 72);
+        const kickBand = averageHz(52, 145);
+        const bassBody = averageHz(85, 235);
+        const lowMid = averageHz(235, 620);
+        const mid = averageHz(620, 1800);
+        const air = averageHz(2200, 6200);
+
+        // 分開追蹤背景低頻，讓第一根看 kick transient，第二根看 bass groove。
+        bassBaseline += (kickBand - bassBaseline) * 0.010;
+        bassBodyBaseline += (bassBody - bassBodyBaseline) * 0.012;
+
+        const kickRise = Math.max(0, kickBand - previousBass);
+        const bassBodyRise = Math.max(0, bassBody - previousBassBody);
+
+        previousBass = previousBass * 0.68 + kickBand * 0.32;
+        previousBassBody = previousBassBody * 0.78 + bassBody * 0.22;
+
+        const midMask = lowMid * 0.58 + mid * 0.42;
+        const lowDominance = (kickBand + subBass * 0.46 + bassBody * 0.18) / (midMask + 0.090);
+        const bassDominance = (bassBody + subBass * 0.34) / (lowMid + mid * 0.38 + 0.110);
+
+        // 第一根：比嚴格版稍微放寬，避免 kick 太少動；但仍需低頻突然上升。
+        const kickThreshold = Math.max(0.060, bassBaseline * 1.28);
+        const kickTransient = Math.max(0, kickBand - kickThreshold);
+        const kickGateOpen = kickTransient > 0.007 && kickRise > 0.003 && lowDominance > 0.55;
+
+        kickGateHold = kickGateOpen ? 1 : kickGateHold * 0.82;
+
+        const kickTarget = kickGateHold > 0.06
+          ? Math.min(1, kickTransient * 7.0 + kickRise * 4.8 + subBass * 0.18)
+          : 0;
+
+        kickEnvelope = follow(kickEnvelope, kickTarget, 0.76, 0.095);
+
+        // 第二根：不再讓持續 bass 一直撐高，改看 bass body 的起伏與 groove。
+        const bassThreshold = Math.max(0.075, bassBodyBaseline * 1.18);
+        const bassBodyTransient = Math.max(0, bassBody - bassThreshold);
+        const bassGateOpen = bassBodyTransient > 0.010 && bassBodyRise > 0.0025 && bassDominance > 0.52;
+
+        bassGateHold = bassGateOpen ? 1 : bassGateHold * 0.84;
+
+        const bassGroove = bassGateHold > 0.08
+          ? Math.min(1, bassBodyTransient * 4.4 + bassBodyRise * 3.1 + kickEnvelope * 0.15)
+          : 0;
+
+        bassEnvelope = follow(bassEnvelope, bassGroove, 0.30, 0.052);
+
+        // 第三根：旋律 / 和聲律動，但壓低幅度，避免干擾低頻語意。
+        const midTarget = Math.min(1, Math.max(0, lowMid - 0.045) * 0.72 + mid * 0.04);
+        midEnvelope = follow(midEnvelope, midTarget, 0.17, 0.10);
+
+        // 第四根：只做很小的空氣感。
+        const airTarget = Math.min(1, Math.max(0, air - 0.030) * 0.55);
+        airEnvelope = follow(airEnvelope, airTarget, 0.14, 0.13);
+
+        const values = [
+          kickEnvelope,
+          bassEnvelope,
+          midEnvelope,
+          airEnvelope
+        ];
+
+        const minHeights = [4.5, 5.0, 5, 4];
+        const ranges = [23, 14, 9, 6];
+
+        visualBars.forEach((bar, index) => {
+          const normalized = Math.min(1, Math.max(0, values[index] || 0));
+          const softened = Math.pow(normalized, index === 0 ? 0.52 : 0.80);
+          const height = minHeights[index] + softened * ranges[index];
+
+          bar.style.setProperty("--bar-height", `${height.toFixed(1)}px`);
+          bar.style.setProperty("--bar-glow", softened.toFixed(2));
+        });
+
+        visualizerFrame = requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    function stopVisualizer() {
+      cancelAnimationFrame(visualizerFrame);
+      visualizerFrame = null;
+      setVisualizerIdle();
     }
 
     function setTitleText(text) {
@@ -338,6 +544,7 @@
     function setError() {
       player.classList.add("is-error");
       setPlaying(false);
+      stopVisualizer();
       if (note) setNoteText(`找不到音樂檔：${trackSrc(currentIndex) || "未設定"}`);
     }
 
@@ -389,6 +596,9 @@
 
       if (isCollapsed) {
         closePlaylist();
+        stopVisualizer();
+      } else if (!audio.paused) {
+        startVisualizer();
       }
 
       if (shouldSave) {
@@ -417,8 +627,10 @@
     toggle?.addEventListener("click", async () => {
       try {
         if (audio.paused) {
+          await resumeVisualizer();
           await audio.play();
           setPlaying(true);
+          startVisualizer();
         } else {
           audio.pause();
           setPlaying(false);
@@ -511,18 +723,23 @@
     });
 
     audio.addEventListener("ended", () => {
-      if (tracks.length > 1) {
+      if (tracks.length > 1 && !singleLoop) {
         nextTrack(true);
       } else {
         setPlaying(false);
+        stopVisualizer();
       }
     });
 
-    audio.addEventListener("pause", () => setPlaying(false));
+    audio.addEventListener("pause", () => {
+      setPlaying(false);
+      stopVisualizer();
+    });
 
     audio.addEventListener("play", () => {
       failedSkips = 0;
       setPlaying(true);
+      startVisualizer();
     });
 
     audio.addEventListener("error", () => {
@@ -596,6 +813,7 @@
 
     renderPlaylist();
     applyLoopMode();
+    setVisualizerIdle();
     loadTrack(0, false);
     applySavedCollapse();
     applySavedPosition();
