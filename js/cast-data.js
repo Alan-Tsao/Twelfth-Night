@@ -476,7 +476,24 @@ window.allCasts = [
     role: "公關",
     workDays: [5, 6],
     recommended: "陪聊互動、可愛陪席",
-    extraServices: ["輕 RP", "陪聊"]
+    extraServices: ["輕 RP", "陪聊"],
+    personalMenu: [
+      {
+        title: "❤️｜黑貓撒嬌陪聊 ",
+        desc: "想知道是什麼？點看看就知道喵ෆ",
+        price: "20分鐘20萬"
+      },
+      {
+        title: "⚔️｜黑貓陪打",
+        desc: "雖然不喜歡打打殺殺..但如果有錢賺好像不錯ෆ但不要指望會打多好就是了喵..( 日隨or戰場都行 ! 不要嫌我爛就好了:3 )",
+        price: " 一把30萬"
+      },
+      {
+        title: "🎈｜黑貓陪玩",
+        desc: "快花錢帶我出去玩喵ෆ看要逛街拍照都可以喵！",
+        price: "20分鐘20萬"
+      },
+    ]
   },
   {
     name: "咪幾馬麻",
@@ -497,7 +514,7 @@ window.allCasts = [
     name: "打喵帕尼尼堡",
     image: "images/staff-23.jpg",
     desc: "他的陪伴像夜裡端上的一杯特調，入口是幽默，餘韻是溫柔。適合談心交流、輕中 RP，以及想在酒館氣氛裡享受一點被重視感的客人。",
-    shortDesc: "暫無",
+    shortDesc: "輕/中RP,調酒師,談心交流",
     quote: "今夜，我的酒能襯托你的美。",
     tags: ["輕/中RP","調酒師","談心交流", "酒館氛圍"],
     filterTags: ["chat","rp"],
@@ -511,31 +528,75 @@ window.allCasts = [
   {
     name: "陪陪",
     image: "images/staff-24.jpg",
-    desc: "他的陪伴像夜裡端上的一杯特調，入口是幽默，餘韻是溫柔。適合談心交流、輕中 RP，以及想在酒館氣氛裡享受一點被重視感的客人。",
-    shortDesc: "暫無",
-    quote: "今夜，我的酒能襯托你的美。",
-    tags: ["輕/中RP","談心交流", "酒館氛圍"],
+    desc: "總是以溫柔的距離陪在客人身旁，擅長輕／中 RP、談心交流與曖昧氛圍的鋪陳。無論是深夜裡想找人安放情緒，還是想留下一張帶有故事感的拍立得，她都能以細膩的節奏，陪您走進一場微醺而心動的夜。",
+    shortDesc: "溫柔相談、輕 RP、曖昧攝影。",
+    quote: "溫柔是我的習慣，心動是你的問題。",
+    tags: ["輕RP","談心交流"],
     filterTags: ["chat","rp"],
-    status: "unbookable",
-    statusLabel: "不接受指名",
+    status: "available",
+    statusLabel: "接受指名",
     role: "公關",
     workDays: [5, 6],
     recommended: "輕/中RP、談心交流",
-    extraServices: ["談心交流"]
+    extraServices: ["談心交流"],
+    personalMenu: [
+      {
+        title: "🌙｜相談",
+        desc: "深夜裡無處安放的情緒，歡迎你放在我心裡。",
+        price: "20分鐘 20萬"
+      },
+      {
+        title: "📸｜拍立得",
+        desc: "此時此刻，相遇的證明。",
+        price: " 單人拍立得 3萬、雙人拍立得 5萬"
+      },
+      {
+        title: "🖋️｜拍立得簽繪",
+        desc: "故事會結束，但回憶可以留下來。",
+        price: "拍立得簽繪 15萬"
+      },
+      {
+        title: "🥀｜沉淪之域",
+        desc: "有些靠近不需要理由，只需要一點點失控。貼貼、親吻、擁抱...等",
+        price: "曖昧情境攝影 1張 20萬"
+      },
+      {
+        title: "🔐｜禁忌收藏",
+        desc: "只是拍照而已⋯⋯對吧？你不會當真，我不會沉淪，但⋯⋯今晚，我只為你破例。專屬親筆文案+簽名，解鎖只對你開放的深夜篇章",
+        price: "私密戀人劇照*2  100萬"
+      },
+    ]
   },
   {
     name: "粼粼",
     image: "images/staff-25.jpg",
-    desc: "他的陪伴像夜裡端上的一杯特調，入口是幽默，餘韻是溫柔。適合談心交流、輕中 RP，以及想在酒館氣氛裡享受一點被重視感的客人。",
-    shortDesc: "暫無",
-    quote: "今夜，我的酒能襯托你的美。",
-    tags: ["輕/中RP","談心交流", "酒館氛圍"],
+    desc: "帶著一點浪漫，也帶著一點叛逆。粼粼擅長輕 RP、談心交流與語音陪伴，能用溫柔的女中音陪您度過不想獨自醒著的夜晚。若您想聊天、聽歌，或留下一張有溫度的合照，她都能以自在而細膩的節奏，陪您把今晚變成值得收藏的回憶。",
+    shortDesc: "語音陪聊、輕 RP、浪漫合照。",
+    quote: "浪漫是一種選擇，叛逆是我的本性。",
+    tags: ["輕RP","談心交流",],
     filterTags: ["chat","rp"],
-    status: "unbookable",
-    statusLabel: "不接受指名",
+    status: "available",
+    statusLabel: "接受指名",
     role: "公關",
     workDays: [5, 6],
     recommended: "輕/中RP、談心交流",
-    extraServices: ["談心交流"]
+    extraServices: ["談心交流"],
+    personalMenu: [
+      {
+        title: "🎤｜語音陪聊",
+        desc: "有些夜晚不需要答案，只需要一個還醒著的人。聊癒系女中音，在夢裡等你。如果你想⋯⋯我還能唱歌給你聽🫶🏼",
+        price: "20分鐘 100萬"
+      },
+      {
+        title: "📸｜雙人貼貼合照",
+        desc: "這一刻，有人陪你存在。不只是聲音，連回憶都有形狀。",
+        price: " 純合照 1張 5萬"
+      },
+      {
+        title: "🖋️｜親筆簽名合照",
+        desc: "匆忙的世界裡世界匆匆忙忙，我們替彼此，留了一個位置。名字在，記憶就不會散。",
+        price: "合照加親簽 20萬"
+      },
+    ]
   },
 ];
