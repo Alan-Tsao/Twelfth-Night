@@ -175,7 +175,7 @@ window.allCasts = [
     status: "available",
     statusLabel: "不接受指名",
     role: "公關",
-    workDays: [5, 6],
+    workDays: [6],
     recommended: "談心交流",
     extraServices: ["談心交流"],
     personalMenu: [
