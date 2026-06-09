@@ -246,10 +246,10 @@ window.allCasts = [
   {
     name: "兔紙不吃紙",
     image: "images/staff-11.jpg",
-    desc: "不吃紙，但很會吃掉冷場的氣氛。活潑、親切、反應快，適合想找人聊天、玩鬧、輕鬆互動，或讓包廂氣氛更熱鬧的客人。",
-    shortDesc: "熱場、香檳 CALL、活動主持。",
+    desc: " 點名前請詳閱公開說明書：偶爾製造冷空氣，可使全球暖化速度減緩。活潑、親切、反應快，適合想找人聊天、玩鬧、輕鬆互動，或讓包廂氣氛更熱鬧的客人。",
+    shortDesc: "談心交流、隨性、混沌系。",
     quote: "嗨！要一起玩嗎？玩誰都行。",
-    tags: ["輕 RP", "談心交流"],
+    tags: ["輕 RP", "談心交流", "隨性", "混沌系"],
     filterTags: ["rp", "chat"],
     status: "available",
     statusLabel: "接受指名",
