@@ -371,7 +371,7 @@ window.allCasts = [
     shortDesc: "調酒師、吧檯服務、歡樂氛圍。",
     quote: "今晚的快樂就由我來調製吧。",
     tags: ["調酒師","輕 RP", "吧檯服務", "歡樂氛圍"],
-    filterTags: ["rp","bar","masaji"],
+    filterTags: ["rp","bar"],
     status: "unbookable",
     statusLabel: "不接受指名",
     role: "調酒師",
