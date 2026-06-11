@@ -250,7 +250,7 @@ window.allCasts = [
     shortDesc: "冷笑話、隨性、混沌系。",
     quote: "嗨！要一起玩嗎？玩誰都行。",
     tags: ["輕 RP", "談心交流", "冷笑話", "隨性", "混沌系"],
-    filterTags: ["rp", "chat"],
+    filterTags: ["rp", "chat","champagne"],
     status: "available",
     statusLabel: "接受指名",
     role: "公關",
