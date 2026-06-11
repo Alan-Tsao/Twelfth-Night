@@ -171,7 +171,7 @@ window.allCasts = [
     shortDesc: "情感諮商、清醒談心、忘川擺渡。",
     quote: "我也不是蒙娜麗莎，沒必要對誰都微笑。",
     tags: ["輕 RP","情感諮商", "談心交流", "清醒系"],
-    filterTags: ["rp","chat","personal"],
+    filterTags: ["rp","chat","champagne","personal"],
     status: "available",
     statusLabel: "不接受指名",
     role: "公關",
