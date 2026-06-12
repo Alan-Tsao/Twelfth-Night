@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第十二夜｜菜單酒單</title>
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/motion-effects.css">
+</head>
+
+<body>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">第十二夜</a>
+      <div class="nav-links">
+        <a href="index.html">返回首頁</a>
+        <a href="service.html">服務項目</a>
+        <a href="cast.html">公關介紹</a>
+        <a href="menu.html">菜單酒單</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="menu-main">
+    <section class="menu-hero">
+      <div class="page-hero-panel">
+        <div class="eyebrow">TWELFTH NIGHT MENU BOOK</div>
+        <h1>今夜的菜單與酒單。</h1>
+        <p class="hero-text">
+          翻開第十二夜的 Menu Book，讓酒香、甜點與夢境一同入席。菜單內容可依店內公告更新，實際供應以現場與接待說明為準。
+        </p>
+        <div class="cta-row">
+          <a class="btn primary" href="#menuBook">翻開菜單</a>
+          <a class="btn" href="https://discord.gg/invite/vMp8d3zMV8" target="_blank" rel="noopener">前往 Discord</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu-book-section" id="menuBook">
+      <div class="menu-book-shell">
+        <div class="menu-book-top">
+          <div>
+            <div class="eyebrow">MENU & DRINK LIST</div>
+            <h2>第十二夜菜單本</h2>
+          </div>
+          <div class="menu-book-status" id="menuBookStatus">封面</div>
+        </div>
+
+        <div class="menu-book-stage">
+          <div class="menu-book" id="menuBookApp">
+            <div class="menu-spread is-single active" data-menu-spread="0" data-title="封面">
+              <article class="menu-page menu-cover">
+                <div class="menu-cover-inner">
+                  <div class="menu-book-mark">☾</div>
+                  <h2>MENU</h2>
+                  <p>請翻開今夜的菜單。<br>願每一道香氣，都成為夢境的一頁。</p>
+                </div>
+              </article>
+            </div>
+
+            <div class="menu-spread" data-menu-spread="1" data-title="菜單與酒單">
+              <article class="menu-page left-page">
+                <div class="menu-page-label">FOOD MENU</div>
+                <div class="menu-image-frame">
+                  <img class="menu-image" src="images/menu-food.jpg" alt="第十二夜菜單圖片" data-menu-image />
+                  <div class="menu-image-placeholder">
+                    <div>
+                      <strong>菜單圖片</strong>
+                      <p>請將菜單圖片放到：</p>
+                      <code>images/menu-food.jpg</code>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="menu-page right-page">
+                <div class="menu-page-label">DRINK LIST</div>
+                <div class="menu-image-frame">
+                  <img class="menu-image" src="images/menu-drink.jpg" alt="第十二夜酒單圖片" data-menu-image />
+                  <div class="menu-image-placeholder">
+                    <div>
+                      <strong>酒單圖片</strong>
+                      <p>請將酒單圖片放到：</p>
+                      <code>images/menu-drink.jpg</code>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div class="menu-spread is-single" data-menu-spread="2" data-title="封底">
+              <article class="menu-page menu-back">
+                <div class="menu-back-inner">
+                  <div class="menu-book-mark">✦</div>
+                  <h2>GOOD NIGHT</h2>
+                  <p>若有想了解的品項、包廂或店內活動，歡迎至 Discord 詢問接待。</p>
+                  <div class="cta-row" style="justify-content:center">
+                    <a class="btn primary" href="https://discord.gg/invite/vMp8d3zMV8" target="_blank" rel="noopener">前往 Discord</a>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-book-controls">
+          <button type="button" class="btn" id="menuPrevBtn">上一頁</button>
+          <div class="menu-book-dots" id="menuBookDots" aria-label="菜單頁數"></div>
+          <button type="button" class="btn primary" id="menuNextBtn">下一頁</button>
+        </div>
+
+        <div class="menu-note-card compact">
+          <strong>閱讀提示：</strong>點擊菜單或酒單圖片可以放大；放大後可用滑鼠滾輪縮放、拖曳移動，雙擊圖片可重置。
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-note">© 2026 Twelfth Night｜Built by Hana。</div>
+  </main>
+
+
+  <div class="menu-lightbox" id="menuLightbox" aria-hidden="true">
+    <button type="button" class="menu-lightbox-close" data-menu-lightbox-close aria-label="關閉放大圖片">×</button>
+    <div class="menu-lightbox-backdrop" data-menu-lightbox-close></div>
+    <figure class="menu-lightbox-dialog">
+      <img class="menu-lightbox-image" id="menuLightboxImage" alt="" />
+      <figcaption class="menu-lightbox-caption" id="menuLightboxCaption"></figcaption>
+    </figure>
+  </div>
+
+  <script src="js/menu-book.js"></script>
+</body>
+
+</html>
