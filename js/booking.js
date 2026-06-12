@@ -16,7 +16,7 @@ const SERVER_OPTIONS=[
 
 const SERVICE_OPTIONS=[
   {label:"不指定，由接待協助安排",value:""},
-  {label:"陪酒聊天(指名15萬 G)",value:"陪酒聊天(指名15萬 G)"},
+  {label:"陪酒聊天(指名15萬 Gil)",value:"陪酒聊天(指名15萬 Gil)"},
   {label:"按摩 RP(30萬 Gil)",value:"按摩 RP(30萬 Gil)"},
   {label:"其他，請於備註說明",value:"其他，請於備註說明"}
 ];
@@ -311,7 +311,7 @@ function timeToMinutes(timeText){
 
 function privateRoomLabel(){
   const room=v("privateRoom");
-  if(room==="yes")return"包包廂(200萬 Gil)";
+  if(room==="yes")return"需要包廂(200萬 Gil)";
   if(room==="no")return"不用包廂";
   return"尚未選擇";
 }
