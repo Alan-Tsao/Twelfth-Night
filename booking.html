@@ -109,6 +109,13 @@
                             <div class="tn-select" id="serviceTypeSelect" data-target="serviceType"></div>
                             <div class="tn-select-note">不確定時可留空，由接待依當日狀況協助安排。</div>
                         </div>
+                        <div class="field"><label for="privateRoom">是否需要包廂，必選</label><select id="privateRoom" required>
+                                <option value="">請選擇</option>
+                                <option value="no">不用包廂</option>
+                                <option value="yes">包包廂(200萬 Gil)</option>
+                            </select>
+                            <div class="hint">請先選擇是否需要包廂；不用包廂最多 3 節，包包廂固定 6 節。</div>
+                        </div>
                         <div class="field"><label for="sessionCount">預約節數，有指名時必選</label><select id="sessionCount">
                                 <option value="">不指定，由接待協助安排</option>
                                 <option value="1">1 節，20 分鐘</option>
@@ -118,7 +125,7 @@
                                 <option value="5">5 節，100 分鐘</option>
                                 <option value="6">6 節，120 分鐘</option>
                             </select>
-                            <div class="hint" id="timePreview">有指名公關時，建議選擇節數，系統會依時段協助篩選可接待名單。</div>
+                            <div class="hint" id="timePreview">請先選擇是否需要包廂；不用包廂最多 3 節，包包廂固定 6 節。</div>
                         </div>
                     </div>
                     <div class="field full" style="margin-top:20px"><label>希望安排公關，可複選／可不選</label>
@@ -128,7 +135,7 @@
                     </div>
                     <div class="field full" style="margin-top:20px"><label for="notes">其他需求</label><textarea id="notes"
                             placeholder="例：希望偏聊天、想要慶生香檳 CALL、希望多位公關輪流陪席。"></textarea></div>
-                    <div class="error" id="step3Error">請完整填寫日期與開始時間；若有指名公關，請一併選擇預約節數。</div>
+                    <div class="error" id="step3Error">請完整填寫日期、開始時間與是否需要包廂；若有指名公關，請選擇預約節數。不用包廂最多 3 節，包包廂固定 6 節。</div>
                     <div class="button-row"><button type="button" class="btn" data-prev>上一步</button><button
                             type="button" class="btn primary" data-next>確認預約內容</button></div>
                 </div>
@@ -148,7 +155,7 @@
         </section>
         <section id="inquiryMode" class="inquiry-panel mode-hidden">
             <h2>排班詢問</h2>
-            <p class="lead">此頁僅用來詢問指定公關是否有排班，不代表正式預約。若確認可以接待，接待會再引導你填寫正式預約。</p>
+            <p class="lead">此頁僅用來詢問指定公關是否有排班，不代表正式預約。詢問內容填寫完畢還請複製貼至DC，若確認可以接待，接待會再引導你填寫正式預約。</p>
             <div class="form-grid">
                 <div class="field"><label for="inquiryDiscord">Discord ID</label><input id="inquiryDiscord"
                         placeholder="例：dreamcat_0123" /></div>
@@ -218,10 +225,14 @@
                 const select = document.getElementById(selectId);
                 if (!select || select.dataset.customUpgraded === "true") return;
 
-                const options = Array.from(select.options).map((option) => ({
-                    value: option.value,
-                    label: option.textContent.trim()
-                }));
+                function getOptions() {
+                    return Array.from(select.options)
+                        .filter((option) => !option.hidden && !option.disabled)
+                        .map((option) => ({
+                            value: option.value,
+                            label: option.textContent.trim()
+                        }));
+                }
 
                 const root = document.createElement("div");
                 root.className = "tn-select native-upgrade";
@@ -244,6 +255,7 @@
 
                 function render() {
                     const current = select.value;
+                    const options = getOptions();
                     menu.innerHTML = options.map((option) => `
                         <button type="button"
                             class="tn-select-option ${option.value === current ? "active" : ""}"
@@ -287,6 +299,7 @@
             }
 
             upgradeNativeSelect("bookingTime", "請選擇開始時間");
+            upgradeNativeSelect("privateRoom", "請選擇是否需要包廂");
             upgradeNativeSelect("sessionCount", "可不選，由接待協助安排");
             upgradeNativeSelect("inquiryTime", "尚未決定");
 
