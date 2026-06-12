@@ -25,6 +25,12 @@
   // false = 暫時隱藏；true = 有填 recommended 時才顯示。
   const SHOW_RECOMMENDED_SERVICE = false;
 
+  // 是否開啟網頁預約入口。
+  // false = 隱藏公關卡片底部的「今日預約／查詢其他日期／詢問排班」，
+  //         也隱藏個人服務視窗裡的「前往預約／詢問排班」。
+  // true  = 恢復原本預約入口。
+  const BOOKING_ENABLED = false;
+
 
   let scheduleRows = [];
   let scheduleLoaded = false;
@@ -311,6 +317,8 @@
   }
 
   function buttonHtml(cast) {
+    if (!BOOKING_ENABLED) return "";
+
     const todayRow = getTodaySchedule(cast.name);
     const bookingUrl = `booking.html?cast=${encodeURIComponent(cast.name)}`;
     const inquiryUrl = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
@@ -474,18 +482,24 @@
     desc.textContent = cast.staffStatusNote || cast.shortDesc || cast.desc || "可於預約或詢問時與接待確認服務內容。";
     list.innerHTML = cast.personalMenu.map(menuItemHtml).join("");
 
-    if (cast.status === "unbookable" || cast.status === "rest") {
-      bookingLink.textContent = "返回介紹";
-      bookingLink.href = "cast.html";
-      bookingLink.classList.remove("primary");
-    } else if (cast.status === "pending") {
-      bookingLink.textContent = "詢問排班";
-      bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
-      bookingLink.classList.add("primary");
-    } else {
-      bookingLink.textContent = "前往預約";
-      bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}`;
-      bookingLink.classList.add("primary");
+    if (bookingLink) {
+      bookingLink.style.display = BOOKING_ENABLED ? "" : "none";
+    }
+
+    if (BOOKING_ENABLED && bookingLink) {
+      if (cast.status === "unbookable" || cast.status === "rest") {
+        bookingLink.textContent = "返回介紹";
+        bookingLink.href = "cast.html";
+        bookingLink.classList.remove("primary");
+      } else if (cast.status === "pending") {
+        bookingLink.textContent = "詢問排班";
+        bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
+        bookingLink.classList.add("primary");
+      } else {
+        bookingLink.textContent = "前往預約";
+        bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}`;
+        bookingLink.classList.add("primary");
+      }
     }
 
     modal.classList.add("show");
