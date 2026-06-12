@@ -16,12 +16,8 @@ const SERVER_OPTIONS=[
 
 const SERVICE_OPTIONS=[
   {label:"不指定，由接待協助安排",value:""},
-  {label:"一般陪席",value:"一般陪席"},
-  {label:"陪酒聊天",value:"陪酒聊天"},
-  {label:"小遊戲",value:"小遊戲"},
-  {label:"香檳 CALL",value:"香檳 CALL"},
-  {label:"演奏／舞蹈",value:"演奏／舞蹈"},
-  {label:"按摩 RP",value:"按摩 RP"},
+  {label:"陪酒聊天(指名15萬 G)",value:"陪酒聊天(指名15萬 G)"},
+  {label:"按摩 RP(30萬 Gil)",value:"按摩 RP(30萬 Gil)"},
   {label:"其他，請於備註說明",value:"其他，請於備註說明"}
 ];
 
@@ -313,6 +309,59 @@ function timeToMinutes(timeText){
   return h*60+m;
 }
 
+function privateRoomLabel(){
+  const room=v("privateRoom");
+  if(room==="yes")return"包包廂(200萬 Gil)";
+  if(room==="no")return"不用包廂";
+  return"尚未選擇";
+}
+
+function hasPrivateRoom(){
+  return v("privateRoom")==="yes";
+}
+
+function applyPrivateRoomRule(){
+  const session=document.getElementById("sessionCount");
+  if(!session)return;
+
+  const beforeValue=session.value;
+  const room=v("privateRoom");
+  const isRoom=room==="yes";
+
+  Array.from(session.options).forEach(option=>{
+    const value=Number(option.value);
+    const isEmpty=option.value==="";
+
+    option.hidden=false;
+    option.disabled=false;
+
+    if(isRoom){
+      option.hidden=option.value!=="6";
+      option.disabled=option.value!=="6";
+    }else{
+      // 尚未選擇包廂或選擇不用包廂時，都只開放不指定與 1～3 節。
+      if(!isEmpty && value>3){
+        option.hidden=true;
+        option.disabled=true;
+      }
+    }
+  });
+
+  if(isRoom){
+    session.value="6";
+    session.dataset.lockedByPrivateRoom="true";
+  }else{
+    if(Number(session.value)>3 || session.dataset.lockedByPrivateRoom==="true"){
+      session.value="";
+    }
+    delete session.dataset.lockedByPrivateRoom;
+  }
+
+  if(session.value!==beforeValue){
+    session.dispatchEvent(new Event("change",{bubbles:true}));
+  }
+}
+
 function sessionMinutes(){
   const n=Number(v("sessionCount"));
   return Number.isFinite(n) && n>0 ? n*20 : 0;
@@ -445,7 +494,7 @@ function renderCastOptionsFromSheet(date,box,pend,hint){
     if(miss.length){
       hint.textContent=`你從公關頁帶入的「${miss.join("、")}」在此日期或時段未開放直接預約。可改選日期／時段，或在備註中請接待協助確認。`;
     }else if(requestedRange()){
-      hint.textContent="已依班表與你選擇的開始時間、節數篩選可接待公關。若未選節數，將先顯示該時段可預約名單。";
+      hint.textContent=hasPrivateRoom()?"已選擇包包廂，系統會以 6 節完整時段協助篩選可接待公關。":(v("privateRoom")==="no"?"已選擇不用包廂，指名公關最多 3 節。":"請先選擇是否需要包廂；不用包廂最多 3 節，包包廂固定 6 節。");
     }else{
       hint.textContent="已依班表顯示該日期可直接預約的公關。若有指名需求，可再選擇節數協助篩選時段。";
     }
@@ -529,8 +578,17 @@ function valid(s){
   }
 
   if(s===3){
+    applyPrivateRoomRule();
+
     const hasCast=selected().length>0;
-    const ok=["bookingDate","bookingTime"].every(id=>v(id)) && (!hasCast || Boolean(v("sessionCount")));
+    const sessions=Number(v("sessionCount"));
+    const room=hasPrivateRoom();
+
+    let ok=["bookingDate","bookingTime","privateRoom"].every(id=>v(id)) && (!hasCast || Boolean(v("sessionCount")));
+
+    if(room && sessions!==6)ok=false;
+    if(!room && sessions>3)ok=false;
+
     err("step3Error",!ok);
     return ok;
   }
@@ -543,12 +601,15 @@ function summary(){
   const castText=casts.join("、")||"不指定，由接待協助安排";
   const serviceText=v("serviceType")||"不指定，由接待協助安排";
   const sessionText=v("sessionCount")||"不指定，由接待協助安排";
-  const text=`【第十二夜預約申請】\n\n遊戲 ID：${v("playerName")||"未填寫"}\n伺服器：${v("serverName")||"未填寫"}\nDiscord ID：${v("discordId")||"未填寫"}\n預約人數：${v("guestCount")||"未填寫"}\n\n希望安排公關：${castText}\n預約日期：${v("bookingDate")||"未填寫"}\n預約時段：${v("bookingTime")||"未填寫"}\n預約節數：${sessionText}\n服務項目：${serviceText}\n\n其他需求：\n${v("notes")||"無"}\n\n※ 此預約申請送出後，仍需等待接待確認才算預約成立。`;
+  const roomText=privateRoomLabel();
+  const text=`【第十二夜預約申請】\n\n遊戲 ID：${v("playerName")||"未填寫"}\n伺服器：${v("serverName")||"未填寫"}\nDiscord ID：${v("discordId")||"未填寫"}\n預約人數：${v("guestCount")||"未填寫"}\n\n希望安排公關：${castText}\n預約日期：${v("bookingDate")||"未填寫"}\n預約時段：${v("bookingTime")||"未填寫"}\n預約節數：${sessionText}\n是否需要包廂：${roomText}\n服務項目：${serviceText}\n\n其他需求：\n${v("notes")||"無"}\n\n※ 此預約申請送出後，仍需等待接待確認才算預約成立。`;
   document.getElementById("summaryBox").textContent=text;
   return text;
 }
 
 function submitGoogle(){
+  applyPrivateRoomRule();
+
   if(!valid(1)||!valid(2)||!valid(3))return;
 
   const form=document.createElement("form");
@@ -567,7 +628,7 @@ function submitGoogle(){
     [F.sessionCount]:v("sessionCount")||"不指定，由接待協助安排",
     [F.castNames]:selected().join("、")||"不指定，由接待協助安排",
     [F.serviceType]:v("serviceType")||"不指定，由接待協助安排",
-    [F.notes]:v("notes")||"無"
+    [F.notes]:`是否需要包廂：${privateRoomLabel()}\n${v("notes")||"無"}`
   };
 
   Object.entries(data).forEach(([name,val])=>{
@@ -592,6 +653,10 @@ function setupBooking(){
   document.getElementById("bookingDate")?.addEventListener("change",renderCastOptions);
   document.getElementById("bookingTime")?.addEventListener("change",renderCastOptions);
   document.getElementById("sessionCount")?.addEventListener("change",renderCastOptions);
+  document.getElementById("privateRoom")?.addEventListener("change",()=>{
+    applyPrivateRoomRule();
+    renderCastOptions();
+  });
 
   document.querySelectorAll("[data-next]").forEach(b=>b.onclick=()=>{
     if(!valid(step))return;
@@ -615,6 +680,7 @@ function setupBooking(){
     submitGoogle();
   });
 
+  applyPrivateRoomRule();
   renderCastOptions();
   loadSchedule();
   loadStaffStatus();
