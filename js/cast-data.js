@@ -502,7 +502,7 @@ window.allCasts = [
     shortDesc: "談心交流、親切陪聊、搞笑療癒。",
     quote: "鬱金香都沒我的浴巾香。",
     tags: ["輕 RP","談心交流", "親切陪聊", "搞笑療癒"],
-    filterTags: ["rp","chat","masaji"],
+    filterTags: ["rp","chat","masaji","champagne"],
     status: "available",
     statusLabel: "接受指名",
     role: "公關",
