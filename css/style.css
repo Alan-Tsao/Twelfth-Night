@@ -3952,14 +3952,18 @@ body.menu-lightbox-open {
 
 
 /* =========================================================
-   Homepage booking entrance toggle
-   首頁預約入口開關
+   Public booking entrance toggle
+   公開預約入口開關
    使用方式：
-   - body 有 booking-hidden：隱藏首頁所有 booking.html 入口
-   - 移除 body 的 booking-hidden：恢復首頁預約按鈕
+   - body 有 booking-hidden：隱藏 booking.html 入口，顯示 Discord 洽詢
+   - 移除 body 的 booking-hidden：恢復線上預約入口
    ========================================================= */
 body.booking-hidden a[href="booking.html"],
 body.booking-hidden a[href^="booking.html?"],
 body.booking-hidden .booking-entry {
+  display: none !important;
+}
+
+body:not(.booking-hidden) .booking-contact-entry {
   display: none !important;
 }
