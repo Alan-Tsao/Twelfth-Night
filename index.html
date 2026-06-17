@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="第十二夜是以夢境為主題的 FF14 RP 會館，提供陪席聊天、香檳 CALL、小遊戲、演奏、拍照與線上預約服務。每週五、六於艾奧傑亞開門迎接旅人。" />
+    <meta name="description" content="第十二夜是以夢境為主題的 FF14 RP 會館，提供陪席聊天、香檳 CALL、小遊戲、演奏、拍照與店內活動資訊。每週五、六於艾奧傑亞開門迎接旅人。" />
     <meta name="robots" content="index, follow" />
     <meta name="author" content="第十二夜 Twelfth Night" />
     <meta name="theme-color" content="#08070d" />
@@ -15,7 +15,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="第十二夜 Twelfth Night" />
     <meta property="og:title" content="第十二夜｜FF14 RP 夢境會館" />
-    <meta property="og:description" content="以夢境為主題的 FF14 RP 會館，提供陪席聊天、香檳 CALL、小遊戲、演奏、拍照與線上預約服務。" />
+    <meta property="og:description" content="以夢境為主題的 FF14 RP 會館，提供陪席聊天、香檳 CALL、小遊戲、演奏、拍照與店內活動資訊。" />
     <meta property="og:image" content="https://alan-tsao.github.io/Twelfth-Night/images/main-visual.jpg?v=2" />
     <meta property="og:image:secure_url" content="https://alan-tsao.github.io/Twelfth-Night/images/main-visual.jpg?v=2" />
     <meta property="og:image:type" content="image/jpeg" />
@@ -26,7 +26,7 @@
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="第十二夜｜FF14 RP 夢境會館" />
-    <meta name="twitter:description" content="今晚，請沉入一場溫柔的夢。第十二夜提供陪席聊天、香檳 CALL、小遊戲、演奏與線上預約。" />
+    <meta name="twitter:description" content="今晚，請沉入一場溫柔的夢。第十二夜提供陪席聊天、香檳 CALL、小遊戲、演奏與店內活動資訊。" />
     <meta name="twitter:image" content="https://alan-tsao.github.io/Twelfth-Night/images/main-visual.jpg?v=2" />
     <meta name="twitter:image:alt" content="第十二夜 FF14 RP 夢境會館店內照片" />
 
@@ -37,7 +37,7 @@
       "name": "第十二夜 Twelfth Night",
       "alternateName": "第十二夜",
       "inLanguage": "zh-Hant-TW",
-      "description": "第十二夜是以夢境為主題的 FF14 RP 會館，提供陪席聊天、香檳 CALL、小遊戲、演奏、拍照與線上預約服務。",
+      "description": "第十二夜是以夢境為主題的 FF14 RP 會館，提供陪席聊天、香檳 CALL、小遊戲、演奏、拍照與店內活動資訊。",
       "url": "https://alan-tsao.github.io/Twelfth-Night/",
       "image": "https://alan-tsao.github.io/Twelfth-Night/images/main-visual.jpg",
       "publisher": {
@@ -47,7 +47,7 @@
       }
     }
     </script>
-    <title>第十二夜｜FF14 RP 夢境會館・線上預約｜Twelfth Night</title>
+    <title>第十二夜｜FF14 RP 夢境會館｜Twelfth Night</title>
     <link rel="icon" href="images/favicon-32.png" type="image/png">
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/motion-effects.css">
@@ -55,7 +55,8 @@
     <link rel="stylesheet" href="css/hero-visual-effects.css">
 </head>
 
-<body>
+<body class="booking-hidden">
+    <!-- 預約入口開關：booking-hidden = 隱藏；要恢復首頁預約按鈕時，移除 body 上的 booking-hidden class 即可。 -->
     <nav class="site-nav">
         <div class="nav-inner"><a class="brand" href="index.html">第十二夜</a>
             <div class="nav-links"><a href="#about">關於</a><a href="#announcements">公告</a><a href="service.html">服務項目</a><a href="cast.html">公關介紹</a><a
@@ -68,7 +69,7 @@
                 <div class="eyebrow">FFXIV ROLEPLAY LOUNGE</div>
                 <h1>今晚，<br />請沉入一場溫柔的夢。</h1>
                 <p class="hero-text">這裡是以夢境為主題的 FF14 RP 會館。杯影、燈火、低語與微光，都只為替每一位來訪者留下一段柔軟而安靜的夜晚。</p>
-                <div class="cta-row"><a class="btn primary" href="booking.html">立即預約</a><a class="btn"
+                <div class="cta-row"><a class="btn primary booking-entry" href="booking.html">立即預約</a><a class="btn"
                         href="cast.html">查看公關介紹</a><a class="btn" href="service.html">查看服務項目</a></div>
             </div>
             <button class="visual hero-visual-trigger" type="button"
@@ -103,7 +104,7 @@
             <div class="panel info-list">
                 <div class="info-item"><strong>店鋪地址</strong>迦樓羅／海都／1區／2號</div>
                 <div class="info-item"><strong>營業時間</strong>每週五、六 22:00–24:00</div>
-                <div class="info-item"><strong>聯絡方式</strong>Discord／Threads／線上預約</div>
+                <div class="info-item"><strong>聯絡方式</strong>Discord／Threads</div>
             </div>
             <div class="panel">
                 <p>第十二夜不是單純的酒吧，也不是匆匆來去的休息處。我們是一間以夢境為主題的 FF14 RP 會館，希望每一位客人都能在這裡被好好迎接、被溫柔傾聽，在現實與艾奧傑亞的縫隙之間，留下一小段只屬於自己的夢。</p>
@@ -167,8 +168,8 @@
         <div class="reserve-grid">
             <div class="panel">
                 <h3 style="margin-top:0;color:var(--gold);font-size:26px">留下今晚的邀約</h3>
-                <p>若您已想好今晚想見的人、想停留的時段，或想體驗的服務，請透過線上預約留下邀約。接待會依內容確認安排，並於 Discord 回覆您。</p>
-                <div class="cta-row"><a class="btn primary" href="booking.html">填寫線上預約</a><a class="btn"
+                <p>若您已想好今晚想見的人、想停留的時段，或想體驗的服務，請透過 Discord 與接待留下邀約。接待會依內容確認安排，並於 Discord 回覆您。</p>
+                <div class="cta-row"><a class="btn primary booking-entry" href="booking.html">填寫線上預約</a><a class="btn"
                         href="cast.html">先看公關介紹</a></div>
             </div>
             <div class="panel">
