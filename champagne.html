@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="第十二夜香檳王殿堂展示本月香檳塔與香檳紀錄，以並列排名呈現今夜最耀眼的夢境貴賓。" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="第十二夜 Twelfth Night" />
+  <meta name="theme-color" content="#08070d" />
+  <link rel="canonical" href="https://alan-tsao.github.io/Twelfth-Night/champagne.html" />
+
+  <meta property="og:locale" content="zh_TW" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="第十二夜 Twelfth Night" />
+  <meta property="og:title" content="第十二夜｜香檳王殿堂" />
+  <meta property="og:description" content="查看第十二夜香檳王殿堂，本月香檳塔與香檳紀錄將化為夢境裡的榮耀名冊。" />
+  <meta property="og:image" content="https://alan-tsao.github.io/Twelfth-Night/images/main-visual.jpg?v=2" />
+  <meta property="og:image:secure_url" content="https://alan-tsao.github.io/Twelfth-Night/images/main-visual.jpg?v=2" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:alt" content="第十二夜 FF14 RP 夢境會館香檳王殿堂" />
+  <meta property="og:url" content="https://alan-tsao.github.io/Twelfth-Night/champagne.html" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="第十二夜｜香檳王殿堂" />
+  <meta name="twitter:description" content="本月香檳塔與香檳紀錄，化為第十二夜夢境裡的榮耀名冊。" />
+  <meta name="twitter:image" content="https://alan-tsao.github.io/Twelfth-Night/images/main-visual.jpg?v=2" />
+  <meta name="twitter:image:alt" content="第十二夜 FF14 RP 夢境會館香檳王殿堂" />
+  <title>第十二夜｜香檳王殿堂</title>
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/motion-effects.css">
+</head>
+<body>
+  <nav class="site-nav"><div class="nav-inner"><a class="brand" href="index.html">第十二夜</a><div class="nav-links"><a href="index.html">返回首頁</a><a href="service.html">服務項目</a><a href="cast.html">公關介紹</a><a href="menu.html">菜單酒單</a><a href="champagne.html">香檳王</a></div></div></nav>
+  <main class="champagne-main">
+    <section class="champagne-hero"><div class="page-hero-panel"><div class="eyebrow">CHAMPAGNE KING</div><h1>香檳王殿堂</h1><p class="hero-text">閃耀的瞬間，屬於今夜最耀眼的貴賓。此頁將依店內公告統計香檳塔與香檳紀錄，並以並列排名方式呈現相同貢獻紀錄。</p><div class="cta-row"><a class="btn primary" href="#champagneRanking">查看本月排行</a><a class="btn" href="https://discord.gg/invite/vMp8d3zMV8" target="_blank" rel="noopener">前往 Discord</a></div></div></section>
+    <section class="champagne-dashboard" id="champagneRanking"><div class="champagne-shell">
+      <div class="champagne-top"><div><div class="eyebrow">HALL OF DREAMS</div><h2 id="champagneTitle">本月香檳王</h2></div><div class="champagne-period-select"><label for="champagnePeriodSelect">月份切換</label><select id="champagnePeriodSelect" aria-label="選擇香檳排行榜月份"><option value="">資料讀取中</option></select></div></div>
+      <div class="champagne-featured"><article class="champagne-king-card" id="champagneKingCard"><div class="king-medal">♛</div><h3 class="king-name">資料讀取中</h3><div class="king-record">請稍候</div><div class="king-note">若 Google Sheet 尚未設定，會先顯示範例資料。</div></article><aside class="champagne-summary-card"><div class="eyebrow">MONTHLY SUMMARY</div><div class="champagne-stat-grid"><div class="champagne-stat"><strong id="champagneTotalTower">0</strong><span>香檳塔總數</span></div><div class="champagne-stat"><strong id="champagneTotalBottle">0</strong><span>香檳總數</span></div><div class="champagne-stat"><strong id="champagneGuestCount">0</strong><span>登榜貴賓</span></div><div class="champagne-stat"><strong id="champagneTieCount">0</strong><span>並列組數</span></div></div></aside></div>
+      <div class="champagne-content-grid"><article class="champagne-ranking-card"><div class="champagne-card-title"><h3>排行榜</h3><div class="champagne-updated" id="champagneUpdated">—</div></div><div class="champagne-ranking-list" id="champagneRankingList"><div class="champagne-empty">排行榜資料讀取中。</div></div></article><aside class="champagne-history-card"><div class="champagne-card-title"><h3>歷史殿堂</h3></div><div class="champagne-history-list" id="champagneHistoryList"><div class="champagne-empty">歷史資料讀取中。</div></div></aside></div>
+      <div class="champagne-note-card"><strong>排名規則：</strong>優先比較香檳塔數，香檳塔相同再比較香檳數；完全相同者合併為並列名次。實際紀錄以店內公告與 Google Sheet 為準。</div>
+    </div></section>
+    <div class="footer-note">© 2026 Twelfth Night｜Built by Hana。</div>
+  </main>
+  <script src="js/champagne-ranking.js"></script>
+</body>
+</html>
