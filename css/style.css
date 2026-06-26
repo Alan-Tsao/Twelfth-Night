@@ -3016,6 +3016,171 @@ body.modal-open {
 
 
 /* =========================================================
+   Service page guest experience polish
+   讓服務頁更像高級會館的服務名冊，方便客人快速理解今晚適合的安排。
+   ========================================================= */
+.service-page .page-hero-panel {
+  overflow: hidden;
+}
+
+.service-page .page-hero-panel::before {
+  content: "";
+  position: absolute;
+  right: clamp(20px, 5vw, 70px);
+  bottom: -52px;
+  width: clamp(150px, 24vw, 300px);
+  height: clamp(150px, 24vw, 300px);
+  pointer-events: none;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 201, 129, .13);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(232, 201, 129, .12), transparent 46%),
+    rgba(255, 255, 255, .025);
+}
+
+.service-guest-path {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.service-guest-path > div {
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid rgba(232, 201, 129, .16);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(232, 201, 129, .075), rgba(255, 255, 255, .035));
+}
+
+.service-guest-path span {
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(232, 201, 129, .82);
+  font-size: 12px;
+  letter-spacing: .16em;
+}
+
+.service-guest-path strong {
+  display: block;
+  color: var(--text);
+  font-size: 18px;
+  letter-spacing: .08em;
+}
+
+.service-guest-path p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.service-page .service-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.service-page .service-list .card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border-color: rgba(255, 255, 255, .12);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(232, 201, 129, .085), transparent 34%),
+    rgba(255, 255, 255, .065);
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease,
+    background .22s ease;
+}
+
+.service-page .service-list .card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(135deg, rgba(232, 201, 129, .14), transparent 34%),
+    radial-gradient(circle at 86% 10%, rgba(242, 167, 198, .12), transparent 34%);
+  transition: opacity .22s ease;
+}
+
+.service-page .service-list .card:hover,
+.service-page .service-list .card:focus-within {
+  transform: translateY(-4px);
+  border-color: rgba(232, 201, 129, .34);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, .32),
+    0 0 0 1px rgba(232, 201, 129, .08) inset;
+}
+
+.service-page .service-list .card:hover::before,
+.service-page .service-list .card:focus-within::before {
+  opacity: 1;
+}
+
+.service-page .service-list .card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.service-page .service-list .card h3 {
+  font-size: 23px;
+  letter-spacing: .08em;
+}
+
+.service-page .service-list .card p {
+  color: var(--muted);
+}
+
+.service-page .service-list .price {
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 13px;
+  border: 1px solid rgba(242, 167, 198, .24);
+  border-radius: 999px;
+  background: rgba(242, 167, 198, .08);
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.service-page .service-list .meta {
+  margin-top: auto;
+}
+
+.service-page #personal .panel {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(232, 201, 129, .10), transparent 34%),
+    rgba(255, 255, 255, .065);
+}
+
+@media (max-width: 980px) {
+  .service-guest-path,
+  .service-page .service-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .service-guest-path,
+  .service-page .service-list {
+    grid-template-columns: 1fr;
+  }
+
+  .service-guest-path > div {
+    padding: 15px 16px;
+  }
+}
+
+
+/* =========================================================
    Menu Book Page
    菜單 / 酒單翻頁頁面
    圖片路徑：
@@ -3080,7 +3245,11 @@ body.modal-open {
 }
 
 .menu-book-status {
-  color: var(--muted);
+  padding: 5px 12px;
+  border: 1px solid rgba(232, 201, 129, .18);
+  border-radius: 999px;
+  color: var(--gold);
+  background: rgba(232, 201, 129, .07);
   font-size: 14px;
   letter-spacing: 0.08em;
 }
@@ -3107,7 +3276,6 @@ body.modal-open {
 
 .menu-spread.active {
   display: grid;
-  animation: menuSpreadIn 0.46s cubic-bezier(.2, .8, .2, 1) both;
 }
 
 .menu-spread.is-single {
@@ -3280,6 +3448,19 @@ body.modal-open {
   object-fit: contain;
   border-radius: 18px;
   box-shadow: 0 18px 54px rgba(0, 0, 0, 0.32);
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    filter .22s ease;
+}
+
+.menu-image:hover,
+.menu-image:focus-visible {
+  transform: translateY(-2px) scale(1.01);
+  filter: brightness(1.04);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.40),
+    0 0 0 1px rgba(232, 201, 129, .18);
 }
 
 .menu-image.is-missing {
@@ -3327,10 +3508,15 @@ body.modal-open {
   position: relative;
   z-index: 1;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 14px;
   flex-wrap: wrap;
   margin-top: 24px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 999px;
+  background: rgba(8, 7, 13, .22);
 }
 
 .menu-book-controls .btn {
@@ -3341,19 +3527,36 @@ body.modal-open {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding: 0 8px;
 }
 
 .menu-book-dot {
-  width: 10px;
-  height: 10px;
+  appearance: none;
+  width: 12px;
+  height: 12px;
   border-radius: 999px;
   border: 1px solid rgba(232, 201, 129, 0.36);
   background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    width .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease;
 }
 
 .menu-book-dot.active {
-  width: 24px;
+  width: 30px;
+  border-color: rgba(232, 201, 129, .62);
   background: linear-gradient(90deg, rgba(232, 201, 129, 0.95), rgba(242, 167, 198, 0.86));
+  box-shadow: 0 0 18px rgba(232, 201, 129, .16);
+}
+
+.menu-book-dot:hover,
+.menu-book-dot:focus-visible {
+  border-color: rgba(232, 201, 129, .62);
+  background: rgba(232, 201, 129, .20);
 }
 
 .menu-note-card {
@@ -3472,7 +3675,10 @@ body.modal-open {
 .menu-lightbox-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(3, 3, 8, 0.82);
+  background:
+    radial-gradient(circle at 22% 0%, rgba(232, 201, 129, .12), transparent 34%),
+    radial-gradient(circle at 82% 16%, rgba(242, 167, 198, .10), transparent 34%),
+    rgba(3, 3, 8, 0.86);
   backdrop-filter: blur(16px);
 }
 
@@ -3496,7 +3702,9 @@ body.modal-open {
   border-radius: 20px;
   border: 1px solid rgba(232, 201, 129, 0.30);
   background: rgba(8, 7, 13, 0.84);
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.70);
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.70),
+    0 0 0 10px rgba(255, 255, 255, .025);
 }
 
 .menu-lightbox-caption {
@@ -3952,6 +4160,167 @@ body.menu-lightbox-open {
 
 
 /* =========================================================
+   Cast card interaction polish
+   強化公關名冊卡片的點擊感，維持首頁入口安靜簡潔。
+   ========================================================= */
+.cast-card-profile .cta-row .btn {
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease,
+    color .18s ease;
+}
+
+.btn:focus-visible,
+.filter-btn:focus-visible {
+  outline: 2px solid rgba(232, 201, 129, .72);
+  outline-offset: 3px;
+}
+
+.cast-card-profile {
+  position: relative;
+  isolation: isolate;
+  border-color: rgba(255, 255, 255, .12);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(232, 201, 129, .08), transparent 34%),
+    rgba(255, 255, 255, .07);
+  transition:
+    transform .24s ease,
+    border-color .24s ease,
+    box-shadow .24s ease,
+    background .24s ease;
+}
+
+.cast-card-profile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 22% 0%, rgba(232, 201, 129, .18), transparent 34%),
+    linear-gradient(180deg, rgba(242, 167, 198, .08), transparent 42%);
+  opacity: 0;
+  transition: opacity .24s ease;
+}
+
+.cast-card-profile > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cast-card-profile:hover,
+.cast-card-profile:focus-within {
+  transform: translateY(-6px);
+  border-color: rgba(232, 201, 129, .42);
+  box-shadow:
+    0 28px 82px rgba(0, 0, 0, .36),
+    0 0 0 1px rgba(232, 201, 129, .10) inset;
+}
+
+.cast-card-profile:hover::before,
+.cast-card-profile:focus-within::before {
+  opacity: 1;
+}
+
+.cast-card-profile .cast-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(8, 7, 13, 0) 52%, rgba(8, 7, 13, .56) 100%),
+    radial-gradient(circle at 18% 12%, rgba(232, 201, 129, .12), transparent 36%);
+  opacity: .72;
+  transition: opacity .24s ease;
+}
+
+.cast-card-profile:hover .cast-img::after,
+.cast-card-profile:focus-within .cast-img::after {
+  opacity: .42;
+}
+
+.cast-card-profile .cast-photo {
+  transition:
+    transform .32s ease,
+    filter .32s ease;
+}
+
+.cast-card-profile:hover .cast-photo,
+.cast-card-profile:focus-within .cast-photo {
+  transform: scale(1.035);
+  filter: brightness(1.06) saturate(1.04);
+}
+
+.cast-card-profile .cast-body {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, 0));
+}
+
+.cast-card-profile .today-line,
+.cast-card-profile .tag,
+.cast-card-profile .status {
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    color .2s ease;
+}
+
+.cast-card-profile:hover .today-line,
+.cast-card-profile:focus-within .today-line {
+  border-color: rgba(232, 201, 129, .48);
+  background: rgba(232, 201, 129, .12);
+}
+
+.cast-card-profile .cta-row {
+  gap: 10px;
+}
+
+.cast-card-profile .cta-row .btn {
+  min-height: 42px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, .075);
+}
+
+.cast-card-profile .cta-row .btn:hover,
+.cast-card-profile .cta-row .btn:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(232, 201, 129, .48);
+  background: rgba(232, 201, 129, .11);
+}
+
+.cast-card-profile .personal-menu-btn {
+  border-color: rgba(242, 167, 198, .28);
+  background: rgba(242, 167, 198, .075);
+}
+
+.cast-card-profile .personal-menu-btn:hover,
+.cast-card-profile .personal-menu-btn:focus-visible {
+  border-color: rgba(242, 167, 198, .54);
+  background: rgba(242, 167, 198, .13);
+  color: #ffd8e8;
+}
+
+@media (hover: none) {
+  .cast-card-profile:hover {
+    transform: none;
+  }
+
+  .cast-card-profile:hover .cast-photo {
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .cast-card-profile .cta-row .btn {
+    flex: 1 1 auto;
+  }
+}
+
+/* =========================================================
    Public booking entrance toggle
    公開預約入口開關
    使用方式：
@@ -3966,4 +4335,49 @@ body.booking-hidden .booking-entry {
 
 body:not(.booking-hidden) .booking-contact-entry {
   display: none !important;
+}
+
+/* =========================================================
+   Performance comfort patch
+   降低動畫、毛玻璃與大陰影在低動態偏好 / 手機窄版的負擔
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .lofi-bars span,
+  .lofi-title span,
+  .lofi-note .lofi-note-marquee,
+  .menu-spread,
+  .menu-book.is-flipping-next .menu-spread.active,
+  .menu-book.is-flipping-prev .menu-spread.active,
+  .menu-lightbox-image,
+  .rank-crown-svg {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .menu-book.is-flipping-next .menu-spread.active,
+  .menu-book.is-flipping-prev .menu-spread.active {
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .lofi-player,
+  .lofi-playlist-panel,
+  .menu-book-shell,
+  .menu-lightbox-dialog,
+  .champagne-shell,
+  .champagne-king-card,
+  .champagne-summary-card,
+  .champagne-ranking-card,
+  .champagne-history-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.28);
+  }
+
+  .site-nav {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
