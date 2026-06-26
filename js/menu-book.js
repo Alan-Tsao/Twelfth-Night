@@ -14,17 +14,23 @@
     if (!dots) return;
 
     dots.innerHTML = spreads
-      .map((_, i) => `<span class="menu-book-dot ${i === index ? "active" : ""}" aria-hidden="true"></span>`)
+      .map((spread, i) => {
+        const title = spread.dataset.title || `第 ${i + 1} 頁`;
+        return `<button type="button" class="menu-book-dot ${i === index ? "active" : ""}" data-menu-dot="${i}" aria-label="前往${title}" aria-current="${i === index ? "page" : "false"}"></button>`;
+      })
       .join("");
   }
 
-  function show(nextIndex, direction = "next") {
+  function show(nextIndex, direction = "next", animate = true) {
     const max = spreads.length - 1;
     index = Math.max(0, Math.min(max, nextIndex));
 
     book.classList.remove("is-flipping-next", "is-flipping-prev");
-    void book.offsetWidth;
-    book.classList.add(direction === "prev" ? "is-flipping-prev" : "is-flipping-next");
+
+    if (animate) {
+      void book.offsetWidth;
+      book.classList.add(direction === "prev" ? "is-flipping-prev" : "is-flipping-next");
+    }
 
     spreads.forEach((spread, i) => {
       spread.classList.toggle("active", i === index);
@@ -36,13 +42,24 @@
 
     renderDots();
 
-    window.setTimeout(() => {
-      book.classList.remove("is-flipping-next", "is-flipping-prev");
-    }, 560);
+    if (animate) {
+      window.setTimeout(() => {
+        book.classList.remove("is-flipping-next", "is-flipping-prev");
+      }, 560);
+    }
   }
 
   prevBtn?.addEventListener("click", () => show(index - 1, "prev"));
   nextBtn?.addEventListener("click", () => show(index + 1, "next"));
+  dots?.addEventListener("click", (event) => {
+    const dot = event.target.closest("[data-menu-dot]");
+    if (!dot) return;
+
+    const nextIndex = Number(dot.dataset.menuDot);
+    if (!Number.isFinite(nextIndex) || nextIndex === index) return;
+
+    show(nextIndex, nextIndex < index ? "prev" : "next");
+  });
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
@@ -206,5 +223,5 @@
     }
   });
 
-  show(0);
+  show(0, "next", false);
 })();

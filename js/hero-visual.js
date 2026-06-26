@@ -51,6 +51,7 @@
       img.src = src;
       img.alt = `${imageAlt} ${index + 1}`;
       img.loading = index === 0 ? "eager" : "lazy";
+      img.decoding = "async";
 
       img.addEventListener("error", function () {
         removeBrokenImage(src);
@@ -151,7 +152,7 @@
     modal.innerHTML = `
       <div class="hero-visual-dialog">
         <button class="hero-visual-close" type="button" aria-label="關閉大圖">×</button>
-        <img class="hero-visual-modal-img" src="${escapeAttr(images[currentIndex] || images[0] || "images/main-visual.jpg")}" alt="${escapeAttr(imageAlt)}">
+        <img class="hero-visual-modal-img" src="${escapeAttr(images[currentIndex] || images[0] || "images/main-visual.jpg")}" decoding="async" alt="${escapeAttr(imageAlt)}">
         <div class="hero-visual-modal-caption">
           <strong>第十二夜｜店內主視覺</strong>
           <span>點擊背景、按 ESC 或右上角 × 可關閉。</span>

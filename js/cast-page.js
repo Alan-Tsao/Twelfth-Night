@@ -65,49 +65,6 @@
     return String(value || "").trim().toLowerCase();
   }
 
-  function parseCsv(text) {
-    const rows = [];
-    let row = [];
-    let cell = "";
-    let quote = false;
-
-    for (let i = 0; i < text.length; i += 1) {
-      const ch = text[i];
-      const next = text[i + 1];
-
-      if (ch === '"') {
-        if (quote && next === '"') {
-          cell += '"';
-          i += 1;
-        } else {
-          quote = !quote;
-        }
-        continue;
-      }
-
-      if (ch === "," && !quote) {
-        row.push(cell);
-        cell = "";
-        continue;
-      }
-
-      if ((ch === "\n" || ch === "\r") && !quote) {
-        if (ch === "\r" && next === "\n") i += 1;
-        row.push(cell);
-        if (row.some((item) => String(item).trim() !== "")) rows.push(row);
-        row = [];
-        cell = "";
-        continue;
-      }
-
-      cell += ch;
-    }
-
-    row.push(cell);
-    if (row.some((item) => String(item).trim() !== "")) rows.push(row);
-    return rows;
-  }
-
   function normalizeScheduleRow(row) {
     const date = String(row.date || "").trim();
     const cast = String(row.cast || "").trim();
@@ -178,23 +135,15 @@
     }
 
     try {
-      const response = await fetch(STAFF_STATUS_CSV_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!window.TNSheet) throw new Error("TNSheet 尚未載入");
 
-      const text = await response.text();
-      const table = parseCsv(text);
-
-      if (table.length < 2) throw new Error("CSV 沒有資料列");
-
-      const headers = table[0].map(normalizeKey);
-      const rawRows = table.slice(1).map((cols) => {
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = cols[index] || "";
-        });
-        return obj;
+      const rawRows = await window.TNSheet.fetchCsvRows(STAFF_STATUS_CSV_URL, {
+        cacheKey: "staff-status",
+        ttlMs: 5 * 60 * 1000,
+        normalizeHeader: normalizeKey
       });
 
+      if (!rawRows.length) throw new Error("CSV 沒有資料列");
       const rows = rawRows.map(normalizeStaffStatusRow).filter(Boolean);
       staffStatusMap = new Map(rows.map((row) => [row.cast, row]));
       staffStatusLoaded = true;
@@ -214,23 +163,15 @@
     }
 
     try {
-      const response = await fetch(SCHEDULE_CSV_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!window.TNSheet) throw new Error("TNSheet 尚未載入");
 
-      const text = await response.text();
-      const table = parseCsv(text);
-
-      if (table.length < 2) throw new Error("CSV 沒有資料列");
-
-      const headers = table[0].map(normalizeKey);
-      const rawRows = table.slice(1).map((cols) => {
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = cols[index] || "";
-        });
-        return obj;
+      const rawRows = await window.TNSheet.fetchCsvRows(SCHEDULE_CSV_URL, {
+        cacheKey: "schedule",
+        ttlMs: 5 * 60 * 1000,
+        normalizeHeader: normalizeKey
       });
 
+      if (!rawRows.length) throw new Error("CSV 沒有資料列");
       scheduleRows = rawRows.map(normalizeScheduleRow).filter(Boolean);
       scheduleLoaded = true;
       scheduleError = false;
@@ -425,7 +366,7 @@
           <button type="button" class="personal-menu-close" data-personal-menu-close aria-label="關閉個人服務視窗">×</button>
 
           <div class="personal-menu-photo-wrap">
-            <img class="personal-menu-photo" id="personalMenuPhoto" alt="" />
+            <img class="personal-menu-photo" id="personalMenuPhoto" width="900" height="1600" decoding="async" alt="" />
           </div>
 
           <div class="personal-menu-content">
@@ -576,7 +517,10 @@
                 class="cast-photo"
                 src="${escapeHtml(img)}"
                 alt="${escapeHtml(cast.name)} 的公關照片"
+                width="900"
+                height="1600"
                 loading="lazy"
+                decoding="async"
               />
               <div class="cast-photo-fallback">
                 <span>${escapeHtml(cast.name)}</span>
