@@ -165,43 +165,6 @@ window.allCasts = [
     ]
   },
   {
-    name: "月澄雪兔",
-    image: "images/staff-07.jpg",
-    desc: "月澄雪兔像忘川邊的擺渡人，不替您決定去向，只在您遲遲無法前行時，遞上一支槳。適合情感諮商、談心交流，以及想從混亂關係中慢慢清醒的客人。",
-    shortDesc: "情感諮商、清醒談心、忘川擺渡。",
-    quote: "我也不是蒙娜麗莎，沒必要對誰都微笑。",
-    tags: ["輕 RP","情感諮商", "談心交流", "清醒系"],
-    filterTags: ["rp","chat","champagne","personal"],
-    status: "available",
-    statusLabel: "不接受指名",
-    role: "公關",
-    workDays: [6],
-    recommended: "談心交流",
-    extraServices: ["談心交流"],
-    personalMenu: [
-      {
-        title: "🛶｜忘川擺渡人  (情感諮商)",
-        desc: "關於此服務：1.您是否還在原地駐足？是否還在為情所困？是否還深陷泥沼無法自拔......？讓雪兔來拉您一把，送您一程。2.服務期間，所提供的看法、建議、方法僅供參考，唯有您自身能做出抉擇，最終結果，唯有渡河之人方能承擔。",
-        price: "20分鐘 30萬"
-      },
-    ]
-  },
-  {
-    name: "賽伊",
-    image: "images/staff-08.jpg",
-    desc: "夜色會讓人誤以為那是浪漫，而賽伊擅長在這份曖昧之中，陪您慢慢分辨心情。適合輕 RP、談心交流，以及喜歡成熟氛圍陪伴的客人。",
-    shortDesc: "成熟陪聊、輕 RP、談心交流。",
-    quote: "夜色會讓人誤以為那是浪漫。",
-    tags: ["輕RP", "成熟陪聊", "談心交流"],
-    filterTags: ["rp","chat"],
-    status: "available",
-    statusLabel: "接受指名",
-    role: "公關",
-    workDays: [5, 6],
-    recommended: "輕 RP、談心交流",
-    extraServices: []
-  },
-  {
     name: "露娜弗蕾亞",
     image: "images/staff-09.jpg",
     desc: "她調的不是酒，是撫慰靈魂的解藥。露娜弗蕾亞以調酒師的身份守在吧檯後，為每位來客調製屬於今晚的味道。",
@@ -377,36 +340,6 @@ window.allCasts = [
     ]
   },
   {
-    name: "Mmaru",
-    image: "images/staff-17.jpg",
-    desc: "今晚的快樂，就由 Mmaru 來調製。以調酒師的身份守在吧檯後，為每位來客添上一點微醺、一點熱鬧，也添上一點屬於第十二夜的夢境味道。",
-    shortDesc: "調酒師、吧檯服務、歡樂氛圍。",
-    quote: "今晚的快樂就由我來調製吧。",
-    tags: ["調酒師","輕 RP", "吧檯服務", "歡樂氛圍"],
-    filterTags: ["rp","bar"],
-    status: "unbookable",
-    statusLabel: "不接受指名",
-    role: "調酒師",
-    workDays: [5, 6],
-    recommended: "調酒、吧檯服務",
-    extraServices: ["調酒"]
-  },
-  {
-    name: "酒館玲阿桃",
-    image: "images/staff-18.jpg",
-    desc: "帶著酒館般的溫度與一點讓人暈船的柔軟，擅長陪您聊天、聽您說話，也能在夜色裡給您剛剛好的依靠。適合想放鬆、談心，或想被溫柔對待的客人。",
-    shortDesc: "談心交流、情緒陪伴、輕 RP。",
-    quote: "十二夜的今晚，因為你的蒞臨而完美。",
-    tags: ["輕 RP","暈船擔當", "談心交流"],
-    filterTags: ["rp", "chat"],
-    status: "available",
-    statusLabel: "接受指名",
-    role: "公關",
-    workDays: [5, 6],
-    recommended: "談心交流、情緒價值",
-    extraServices: ["情緒價值", "談心交流"]
-  },
-  {
     name: "長腿木木",
     image: "images/staff-19.jpg",
     desc: "每一套搭配，都是另一種靈魂；每一次談心，也都是靠近自己的方式。長腿木木擅長服裝推薦、感情諮商與輕鬆陪伴，適合想整理造型，也想整理心情的客人。",
@@ -576,38 +509,6 @@ window.allCasts = [
         title: "🔐｜禁忌收藏",
         desc: "只是拍照而已⋯⋯對吧？你不會當真，我不會沉淪，但⋯⋯今晚，我只為你破例。專屬親筆文案+簽名，解鎖只對你開放的深夜篇章",
         price: " 私密戀人劇照*2 + 親筆文案  100萬"
-      },
-    ]
-  },
-  {
-    name: "粼粼",
-    image: "images/staff-25.jpg",
-    desc: "帶著一點浪漫，也帶著一點叛逆。粼粼擅長輕 RP、談心交流與語音陪伴，能用溫柔的女中音陪您度過不想獨自醒著的夜晚。若您想聊天、聽歌，或留下一張有溫度的合照，她都能以自在而細膩的節奏，陪您把今晚變成值得收藏的回憶。",
-    shortDesc: "語音陪聊、輕 RP、浪漫合照。",
-    quote: "浪漫是一種選擇，叛逆是我的本性。",
-    tags: ["輕RP","談心交流",],
-    filterTags: ["chat","rp","personal"],
-    status: "available",
-    statusLabel: "接受指名",
-    role: "公關",
-    workDays: [5, 6],
-    recommended: "輕/中RP、談心交流",
-    extraServices: ["談心交流"],
-    personalMenu: [
-      {
-        title: "🎤｜語音陪聊",
-        desc: "有些夜晚不需要答案，只需要一個還醒著的人。聊癒系女中音，在夢裡等你。如果你想⋯⋯我還能唱歌給你聽🫶🏼",
-        price: "20分鐘 100萬"
-      },
-      {
-        title: "📸｜雙人貼貼合照",
-        desc: "這一刻，有人陪你存在。不只是聲音，連回憶都有形狀。",
-        price: " 純合照 1張 5萬"
-      },
-      {
-        title: "🖋️｜親筆簽名合照",
-        desc: "匆忙的世界裡世界匆匆忙忙，我們替彼此，留了一個位置。名字在，記憶就不會散。",
-        price: "合照加親簽 20萬"
       },
     ]
   },
