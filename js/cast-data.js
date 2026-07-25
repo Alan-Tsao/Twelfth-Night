@@ -340,38 +340,6 @@ window.allCasts = [
     ]
   },
   {
-    name: "長腿木木",
-    image: "images/staff-19.jpg",
-    desc: "每一套搭配，都是另一種靈魂；每一次談心，也都是靠近自己的方式。長腿木木擅長服裝推薦、感情諮商與輕鬆陪伴，適合想整理造型，也想整理心情的客人。",
-    shortDesc: "服裝推薦、感情諮商、陪釣放鬆。",
-    quote: "今晚來點甜的。",
-    tags: ["服裝店員","輕 RP", "服裝穿搭", "談心交流"],
-    filterTags: ["rp","ootd", "chat", "fishing","personal"],
-    status: "available",
-    statusLabel: "接受指名",
-    role: "服裝店員",
-    workDays: [5, 6],
-    recommended: "談心交流、服裝搭配",
-    extraServices: ["服裝搭配", "感情諮商"],
-    personalMenu: [
-      {
-        title: "♥️｜感情諮商 ",
-        desc: "在燈光與酒杯之間，聽見內心的答案。",
-        price: "10萬/10分鐘"
-      },
-      {
-        title: "👗｜服裝推薦",
-        desc: "每一套搭配，都是另一種靈魂。配到滿意!",
-        price: "一套 30萬"
-      },
-      {
-        title: "🎣｜釣魚教學/陪釣",
-        desc: "願者上鉤，陪伴是你的動力。",
-        price: "30萬/30分鐘"
-      }
-    ]
-  },
-  {
     name: "怜奈",
     image: "images/staff-20.jpg",
     desc: "願你有一個甜美的夢境。怜奈擅長用柔和的話語與安靜的陪伴，讓疲憊的心情慢慢放鬆，適合想談心、陪坐，或享受溫柔氛圍的客人。",
