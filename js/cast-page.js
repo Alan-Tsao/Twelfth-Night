@@ -21,6 +21,35 @@
   const SPECIAL_SERVICE_FILTERS = ["ootd", "music", "dung", "bar", "fishing"];
   const CARD_VISIBLE_TAG_COUNT = 3;
 
+  // 公關介紹頁職位排序。
+  // 管理職固定優先：店長 > 經理 > 秘書。
+  // 其他職位不硬分高低，維持 cast-data.js 原本順序。
+  const ROLE_PRIORITY = {
+    "店長": 0,
+    "經理": 1,
+    "秘書": 2
+  };
+
+  function getRolePriority(role) {
+    const key = String(role || "").trim();
+    return Object.prototype.hasOwnProperty.call(ROLE_PRIORITY, key)
+      ? ROLE_PRIORITY[key]
+      : 100;
+  }
+
+  function getSortedCasts() {
+    return (window.allCasts || [])
+      .map((rawCast, originalIndex) => ({
+        cast: applyStaffStatus(rawCast),
+        originalIndex
+      }))
+      .sort((a, b) => {
+        const roleDiff = getRolePriority(a.cast?.role) - getRolePriority(b.cast?.role);
+        return roleDiff !== 0 ? roleDiff : a.originalIndex - b.originalIndex;
+      })
+      .map((item) => item.cast);
+  }
+
   // 是否在公關卡片底部顯示「推薦服務」。
   // false = 暫時隱藏；true = 有填 recommended 時才顯示。
   const SHOW_RECOMMENDED_SERVICE = false;
@@ -295,6 +324,12 @@
     return String(rawPath).replace(/^\.\//, "").replace(/^\//, "");
   }
 
+  function personalImagePath(cast) {
+    const rawPath = cast.personalImage || cast.image || cast.photo || "";
+    if (!rawPath) return "";
+    return String(rawPath).replace(/^\.\//, "").replace(/^\//, "");
+  }
+
   function extraServicesText(cast) {
     if (!Array.isArray(cast.extraServices) || !cast.extraServices.length) return "";
     return cast.extraServices.join("、");
@@ -410,10 +445,18 @@
     const list = modal.querySelector("#personalMenuList");
     const bookingLink = modal.querySelector("#personalMenuBookingLink");
 
-    const img = imagePath(cast);
+    const img = personalImagePath(cast);
+    const fallbackImg = imagePath(cast);
     photo.src = img;
-    photo.alt = `${cast.name} 的公關照片`;
+    photo.alt = `${cast.name} 的個人服務照片`;
     photo.onerror = () => {
+      // 若 personalImage 路徑錯誤或尚未上傳，自動退回公關頁主照片。
+      if (img && fallbackImg && img !== fallbackImg && photo.src !== new URL(fallbackImg, document.baseURI).href) {
+        photo.src = fallbackImg;
+        photo.alt = `${cast.name} 的公關照片`;
+        return;
+      }
+
       photo.removeAttribute("src");
       photo.alt = `${cast.name} 的照片尚未載入`;
     };
@@ -484,9 +527,8 @@
     const grid = document.getElementById("castGrid");
     if (!grid) return;
 
-    grid.innerHTML = (window.allCasts || [])
-      .map((rawCast) => {
-        const cast = applyStaffStatus(rawCast);
+    grid.innerHTML = getSortedCasts()
+      .map((cast) => {
         const keywordText = [
           cast.name,
           cast.quote,

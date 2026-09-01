@@ -1,3 +1,8 @@
+// 個人服務視窗可選配獨立照片：
+// personalImage: "images/staff-xx-1.jpg"
+// 若未設定 personalImage，個人服務視窗會自動沿用 image。
+// 例：image: "images/staff-03.jpg", personalImage: "images/staff-03-1.jpg"
+
 window.FEATURE_CONFIG = { mode: "daily", count: 3 };
 
 window.allCasts = [
@@ -34,6 +39,7 @@ window.allCasts = [
   {
     name: "傑傑諾利",
     image: "images/staff-03.jpg",
+    personalImage: "images/staff-03-1.jpg",
     desc: "擅長以細膩而不急不徐的節奏陪您度過夜晚。無論是談話、留影，或是一段只獻給您的歌，都願為這場相遇留下值得珍藏的回憶。",
     shortDesc: "溫柔陪席、拍立得、獻唱錄音。",
     quote: "今晚的月色真美呢。",
@@ -41,7 +47,7 @@ window.allCasts = [
     filterTags: ["chat","rp","champagne","bar","masaji","personal"],
     status: "available",
     statusLabel: "接受指名",
-    role: "攝影師",
+    role: "經理",
     workDays: [5,6],
     recommended: "",
     extraServices: ["拍立得", "唱歌錄音"],
@@ -296,28 +302,6 @@ window.allCasts = [
     ]
   },
   {
-    name: "夜店點牛奶",
-    image: "images/staff-15.jpg",
-    desc: "像深夜裡一杯溫柔的牛奶，安靜卻能讓人慢慢放下疲憊。擅長談心交流與輕 RP 陪伴，適合想找個人安靜聊天、整理心情，或在夜色中稍微休息一下的客人。",
-    shortDesc: "談心交流、輕 RP、夢境同行。",
-    quote: "願此處的夜色能撫平你片刻的疲憊。",
-    tags: ["輕 RP", "談心交流"],
-    filterTags: ["chat", "rp","champagne","personal"],
-    status: "available",
-    statusLabel: "接受指名",
-    role: "公關",
-    workDays: [5, 6],
-    recommended: "談心交流",
-    extraServices: [],
-    personalMenu: [
-      {
-        title: "🌐｜夢中夢",
-        desc: "不想只停留在此刻的夢境嗎？那就讓我陪您沉入更深一層的世界。可外出同行至 6.0 初期地圖，陪您日隨、閒聊、散步、拍照，或只是一起在夜色裡慢慢走一段路。※ 拍照與 PVP 非專精項目，歡迎先與本人確認後再體驗。",
-        price: "30分鐘 25萬"
-      },
-    ]
-  },
-  {
     name: "山茶花",
     image: "images/staff-16.jpg",
     desc: "像一朵靜靜盛開在夜裡的山茶花，溫柔卻有自己的審美。擅長服裝穿搭、氣質調整與談心陪伴，讓每一套衣裝都成為今晚的另一種心情。",
@@ -383,7 +367,7 @@ window.allCasts = [
   },
   {
     name: "參參",
-    image: "images/staff-21.png",
+    image: "images/staff-21.jpg",
     desc: "帶著貓系撒嬌感的陪聊公關，擅長用輕鬆可愛的節奏陪客人聊天、互動與放鬆。喜歡被稱讚，也很容易因為客人的小費與關心而充滿幹勁；適合想要可愛陪伴、輕鬆談話與一點俏皮感的客人。",
     shortDesc: "貓系陪聊、可愛撒嬌、小費動力。",
     quote: "客人給的小費，是我的動力喵。",
@@ -391,7 +375,7 @@ window.allCasts = [
     filterTags: ["rp","chat", "cute","personal"],
     status: "available",
     statusLabel: "接受指名",
-    role: "公關",
+    role: "秘書",
     workDays: [5, 6],
     recommended: "陪聊互動、可愛陪席",
     extraServices: ["輕 RP", "陪聊"],
@@ -502,7 +486,7 @@ window.allCasts = [
   },
   {
     name: "偌佈津楓",
-    image: "images/staff-27.png",
+    image: "images/staff-27.jpg",
     desc: "如同靜靜流淌的河水，偌佈津楓不急著追問你的來處，也不催促你決定前行的方向。他擅長以沉穩而溫柔的方式陪伴，傾聽旅途中未曾說出口的心情。無論今夜想談談命運、分享故事，或只是尋找一位能並肩而坐的人，他都願與你同舟，陪你度過這段柔和的夜色。",
     shortDesc: "輕 RP。",
     quote: "命運若是河流，願我們同舟而行。",
@@ -517,7 +501,7 @@ window.allCasts = [
   },
   {
     name: "夏遠星",
-    image: "images/staff-28.png",
+    image: "images/staff-28.jpg",
     desc: "如同夜空中安靜守候的星光，夏遠星不刻意製造熱鬧，卻總能在恰好的時候接住你的話語。無論是分享旅途中的心情、聊聊近日的故事，或只想找個人陪你度過一段平靜時光，他都會以自然從容的步調，讓今夜不再只是匆匆經過。",
     shortDesc: "輕 RP。",
     quote: "最好的夜晚，不只是熱鬧，而是有人願意陪伴。",
@@ -539,7 +523,7 @@ window.allCasts = [
   },
   {
     name: "時達艾詡",
-    image: "images/staff-29.png",
+    image: "images/staff-29.jpg",
     desc: "時達艾詡擅長以溫雅而從容的方式迎接每一次相遇，不刻意追逐熱鬧，也不讓片刻沉默變得疏遠。他會細心聆聽旅人帶來的故事，陪你談笑、分享心情，讓原本偶然經過的夜晚，慢慢成為值得珍藏的回憶。願今夜留下的溫度，成為你日後再次駐足的理由。",
     shortDesc: "輕 RP。",
     quote: "願今晚的相遇，成為您再次駐足的理由。",
