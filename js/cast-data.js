@@ -111,7 +111,7 @@ window.allCasts = [
     filterTags: ["rp", "chat", "cute", "champagne", "game", "music","personal"],
     status: "pending",
     statusLabel: "排班確認中",
-    role: "公關",
+    role: "秘書",
     workDays: [5],
     recommended: "聊天談心、小遊戲、香檳 CALL",
     extraServices: ["香檳 CALL", "小遊戲", "上車舞", "演奏", "小故事"],
