@@ -102,6 +102,38 @@ window.allCasts = [
     ]
   },
   {
+    name: "參參",
+    image: "images/staff-21.jpg",
+    desc: "帶著貓系撒嬌感的陪聊公關，擅長用輕鬆可愛的節奏陪客人聊天、互動與放鬆。喜歡被稱讚，也很容易因為客人的小費與關心而充滿幹勁；適合想要可愛陪伴、輕鬆談話與一點俏皮感的客人。",
+    shortDesc: "貓系陪聊、可愛撒嬌、小費動力。",
+    quote: "客人給的小費，是我的動力喵。",
+    tags: ["輕 RP","貓系", "可愛", "陪聊", "撒嬌", "輕鬆互動"],
+    filterTags: ["rp","chat", "cute","personal"],
+    status: "available",
+    statusLabel: "接受指名",
+    role: "秘書",
+    workDays: [5, 6],
+    recommended: "陪聊互動、可愛陪席",
+    extraServices: ["輕 RP", "陪聊"],
+    personalMenu: [
+      {
+        title: "❤️｜黑貓撒嬌陪聊 ",
+        desc: "想知道是什麼？點看看就知道喵ෆ",
+        price: "20分鐘20萬"
+      },
+      {
+        title: "⚔️｜黑貓陪打",
+        desc: "雖然不喜歡打打殺殺..但如果有錢賺好像不錯ෆ但不要指望會打多好就是了喵..( 日隨or戰場都行 ! 不要嫌我爛就好了:3 )",
+        price: " 一把30萬"
+      },
+      {
+        title: "🎈｜黑貓陪玩",
+        desc: "快花錢帶我出去玩喵ෆ看要逛街拍照都可以喵！",
+        price: "20分鐘20萬"
+      },
+    ]
+  },
+  {
     name: "花形",
     image: "images/staff-05.jpg",
     desc: "夢境裡的貓魅公關，平時溫柔安靜，語尾偶爾會悄悄落下一聲喵。擅長陪客人慢慢聊天、玩小遊戲，也能在香檳 CALL、演奏與上車舞中替夜晚點亮氣氛。適合想被細膩陪伴，也想偶爾熱鬧一下的客人。",
@@ -366,38 +398,6 @@ window.allCasts = [
     ]
   },
   {
-    name: "參參",
-    image: "images/staff-21.jpg",
-    desc: "帶著貓系撒嬌感的陪聊公關，擅長用輕鬆可愛的節奏陪客人聊天、互動與放鬆。喜歡被稱讚，也很容易因為客人的小費與關心而充滿幹勁；適合想要可愛陪伴、輕鬆談話與一點俏皮感的客人。",
-    shortDesc: "貓系陪聊、可愛撒嬌、小費動力。",
-    quote: "客人給的小費，是我的動力喵。",
-    tags: ["輕 RP","貓系", "可愛", "陪聊", "撒嬌", "輕鬆互動"],
-    filterTags: ["rp","chat", "cute","personal"],
-    status: "available",
-    statusLabel: "接受指名",
-    role: "秘書",
-    workDays: [5, 6],
-    recommended: "陪聊互動、可愛陪席",
-    extraServices: ["輕 RP", "陪聊"],
-    personalMenu: [
-      {
-        title: "❤️｜黑貓撒嬌陪聊 ",
-        desc: "想知道是什麼？點看看就知道喵ෆ",
-        price: "20分鐘20萬"
-      },
-      {
-        title: "⚔️｜黑貓陪打",
-        desc: "雖然不喜歡打打殺殺..但如果有錢賺好像不錯ෆ但不要指望會打多好就是了喵..( 日隨or戰場都行 ! 不要嫌我爛就好了:3 )",
-        price: " 一把30萬"
-      },
-      {
-        title: "🎈｜黑貓陪玩",
-        desc: "快花錢帶我出去玩喵ෆ看要逛街拍照都可以喵！",
-        price: "20分鐘20萬"
-      },
-    ]
-  },
-  {
     name: "咪幾馬麻",
     image: "images/staff-22.jpg",
     desc: "她的陪伴像剛洗好的浴巾，柔軟、溫暖，還帶著一點讓人忍不住笑出來的香氣。適合談心交流、輕鬆陪聊，以及想在第十二夜找點安心感的客人。",
@@ -532,6 +532,21 @@ window.allCasts = [
     status: "available",
     statusLabel: "接受指名",
     role: "公關",
+    workDays: [5, 6],
+    recommended: "輕RP、談心交流",
+    extraServices: ["談心交流"],
+  },
+  {
+    name: "泠雪櫻",
+    image: "images/staff-30.jpg",
+    desc: "如同細小的雪花陪伴你身旁，泠雪櫻會在夢境等待你的到來。擅長靜靜地陪伴你談心、輕鬆陪聊、輕RP，以及在你需要時地給你一杯特調。",
+    shortDesc: "輕 RP。",
+    quote: "請好好享受今晚的夢境，放鬆自在沉浸夢境當中。",
+    tags: ["輕RP","談心交流",],
+    filterTags: ["chat","rp","personal"],
+    status: "available",
+    statusLabel: "接受指名",
+    role: "調酒師",
     workDays: [5, 6],
     recommended: "輕RP、談心交流",
     extraServices: ["談心交流"],
