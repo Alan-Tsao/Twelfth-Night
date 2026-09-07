@@ -538,7 +538,7 @@ window.allCasts = [
   },
   {
     name: "泠雪櫻",
-    image: "images/staff-30.png",
+    image: "images/staff-30.jpg",
     desc: "如同細小的雪花陪伴你身旁，泠雪櫻會在夢境等待你的到來。擅長靜靜地陪伴你談心、輕鬆陪聊、輕RP，以及在你需要時地給你一杯特調。",
     shortDesc: "輕 RP。",
     quote: "請好好享受今晚的夢境，放鬆自在沉浸夢境當中。",
