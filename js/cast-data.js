@@ -185,7 +185,7 @@ window.allCasts = [
     image: "images/staff-06.jpg",
     desc: "今晚醉人的不一定是酒，也可能是一段剛剛好的談話。系塔擅長用沉穩又帶點曖昧的節奏陪伴客人，適合想聊天、放鬆，或尋找夜色氛圍的人。",
     shortDesc: "成熟陪聊、談心交流、微醺氛圍。",
-    quote: "不喝酒，因為今晚要醉的人是你。",
+    quote: "今晚就沉醉在我的歌聲中吧?",
     tags: ["輕 RP","談心交流", "成熟陪聊", "微醺氛圍"],
     filterTags: ["rp","chat","champagne","personal"],
     status: "available",
