@@ -7,7 +7,7 @@ window.FEATURE_CONFIG = { mode: "daily", count: 3 };
 
 window.allCasts = [
   {
-    name: "圖圖",
+    name: "貪圖",
     image: "images/staff-01.jpg",
     desc: "第十二夜的店長，掌管夢境入口與今夜的燈火。擅長以溫柔而帶有儀式感的節奏，引導客人沉入會館氛圍；雖不接受一般指名，仍會在特別的夜晚，以香檳 CALL 與輕 RP 為夢境添上一筆華麗的光。",
     shortDesc: "夢境店長、香檳 CALL、輕 RP。",
@@ -23,7 +23,7 @@ window.allCasts = [
   },
   {
     name: "咕嚕小貓",
-    image: "images/staff-02.jpg",
+    image: "images/staff-02.png",
     desc: "像午夜裡露出尾巴的小惡魔，咕嚕小貓帶著一點調皮、一點誘惑，也帶著讓人放鬆下來的陪伴感。適合輕中 RP、陪聊互動，以及喜歡曖昧夜色氛圍的客人。",
     shortDesc: "輕/中 RP、陪聊互動、小惡魔氛圍。",
     quote: "午夜的惡魔，把手放在我身上吧。",
@@ -53,14 +53,19 @@ window.allCasts = [
     extraServices: ["拍立得", "唱歌錄音"],
         personalMenu: [
       {
-        title: "🔲｜拍立得 ",
+        title: "🔲｜簽繪",
         desc: "為精彩的回憶...留下點印記吧？",
-        price: "無簽 3萬G、有簽 8萬G"
+        price: "15 萬G"
       },
       {
         title: "🎙️｜唱歌 (錄音)",
         desc: "這首曲子，只獻給你。",
-        price: "副歌一段 70萬"
+        price: "副歌 100萬、整首 200萬"
+      },
+      {
+        title: "🎙️｜唱歌 (Live)",
+        desc: "一起炒熱氣氛吧！",
+        price: "一首 20萬 (限指名期間)"
       },
     ]
   },
@@ -103,7 +108,8 @@ window.allCasts = [
   },
   {
     name: "參參",
-    image: "images/staff-21.jpg",
+    image: "images/staff-21.png",
+    personalImage: "images/staff-21-1.png",
     desc: "帶著貓系撒嬌感的陪聊公關，擅長用輕鬆可愛的節奏陪客人聊天、互動與放鬆。喜歡被稱讚，也很容易因為客人的小費與關心而充滿幹勁；適合想要可愛陪伴、輕鬆談話與一點俏皮感的客人。",
     shortDesc: "貓系陪聊、可愛撒嬌、小費動力。",
     quote: "摁? 我才沒有在滑手機 ! 我是在記錄事情 !",
@@ -135,7 +141,8 @@ window.allCasts = [
   },
   {
     name: "花形",
-    image: "images/staff-05.jpg",
+    image: "images/staff-05.png",
+    personalImage: "images/staff-05-1.png",
     desc: "夢境裡的貓魅公關，平時溫柔安靜，語尾偶爾會悄悄落下一聲喵。擅長陪客人慢慢聊天、玩小遊戲，也能在香檳 CALL、演奏與上車舞中替夜晚點亮氣氛。適合想被細膩陪伴，也想偶爾熱鬧一下的客人。",
     shortDesc: "安靜陪伴、小遊戲、香檳 CALL。",
     quote: "不必急著說話，今晚的燈會替您慢慢沉澱。",
@@ -204,7 +211,7 @@ window.allCasts = [
   },
   {
     name: "露娜弗蕾亞",
-    image: "images/staff-09.jpg",
+    image: "images/staff-09.png",
     desc: "她調的不是酒，是撫慰靈魂的解藥。露娜弗蕾亞以調酒師的身份守在吧檯後，為每位來客調製屬於今晚的味道。",
     shortDesc: "調酒、吧檯服務、靈魂療癒。",
     quote: "我調的不是酒，是撫慰靈魂的解藥。",
@@ -246,7 +253,7 @@ window.allCasts = [
   },
   {
     name: "兔紙不吃紙",
-    image: "images/staff-11.jpg",
+    image: "images/staff-11.png",
     desc: " 點名前請詳閱公開說明書：偶爾製造冷空氣，可使全球暖化速度減緩。活潑、親切、反應快，適合想找人聊天、玩鬧、輕鬆互動，或讓包廂氣氛更熱鬧的客人。",
     shortDesc: "冷笑話、隨性、混沌系。",
     quote: "嗨！要一起玩嗎？玩誰都行。",
@@ -335,7 +342,7 @@ window.allCasts = [
   },
   {
     name: "山茶花",
-    image: "images/staff-16.jpg",
+    image: "images/staff-16.png",
     desc: "像一朵靜靜盛開在夜裡的山茶花，溫柔卻有自己的審美。擅長服裝穿搭、氣質調整與談心陪伴，讓每一套衣裝都成為今晚的另一種心情。",
     shortDesc: "穿搭、談心、活動主持。",
     quote: "你是我的月神嗎。",
@@ -362,7 +369,7 @@ window.allCasts = [
   },
   {
     name: "怜奈",
-    image: "images/staff-20.jpg",
+    image: "images/staff-20.png",
     desc: "願你有一個甜美的夢境。怜奈擅長用柔和的話語與安靜的陪伴，讓疲憊的心情慢慢放鬆，適合想談心、陪坐，或享受溫柔氛圍的客人。",
     shortDesc: "溫柔陪聊、談心交流、夢境陪伴。",
     quote: "願你有一個甜美的夢境。",
@@ -399,7 +406,7 @@ window.allCasts = [
   },
   {
     name: "咪幾馬麻",
-    image: "images/staff-22.jpg",
+    image: "images/staff-22.png",
     desc: "她的陪伴像剛洗好的浴巾，柔軟、溫暖，還帶著一點讓人忍不住笑出來的香氣。適合談心交流、輕鬆陪聊，以及想在第十二夜找點安心感的客人。",
     shortDesc: "談心交流、親切陪聊、搞笑療癒。",
     quote: "鬱金香都沒我的浴巾香。",
@@ -429,7 +436,7 @@ window.allCasts = [
   },
   {
     name: "陪陪",
-    image: "images/staff-24.jpg",
+    image: "images/staff-24.png",
     desc: "總是以溫柔的距離陪在客人身旁，擅長談心交流與曖昧氛圍的鋪陳。無論是深夜裡想找人安放情緒，還是想留下一張帶有故事感的拍立得，她都能以細膩的節奏，陪您走進一場微醺而心動的夜。",
     shortDesc: "溫柔相談、輕 RP、曖昧攝影。",
     quote: "溫柔是我的習慣，心動是你的問題。",
@@ -538,7 +545,7 @@ window.allCasts = [
   },
   {
     name: "泠雪櫻",
-    image: "images/staff-30.jpg",
+    image: "images/staff-30.png",
     desc: "如同細小的雪花陪伴你身旁，泠雪櫻會在夢境等待你的到來。擅長靜靜地陪伴你談心、輕鬆陪聊、輕RP，以及在你需要時地給你一杯特調。",
     shortDesc: "輕 RP。",
     quote: "請好好享受今晚的夢境，放鬆自在沉浸夢境當中。",
@@ -568,7 +575,7 @@ window.allCasts = [
   },
   {
     name: "希珞",
-    image: "images/staff-32.jpg",
+    image: "images/staff-32.png",
     desc: "有些相遇像夜空中的煙火，短暫，卻足以讓銘記於心。希珞擅長以輕柔自然的方式陪伴來訪者，無論是談心、閒聊，或是在夢境裡慢慢認識彼此，她都願珍惜今夜停留的每一刻。若夢終究會醒，至少在醒來以前，讓這段時光成為值得回想的風景。",
     shortDesc: "輕 RP。",
     quote: "夢就像煙火一樣轉瞬即逝，你願意選擇我作為今晚一起做美夢的人嗎？",
@@ -583,7 +590,7 @@ window.allCasts = [
   },
   {
     name: "琳伊",
-    image: "images/staff-33.jpg",
+    image: "images/staff-33.png",
     desc: "在她的身邊，你可以暫時放下疲憊，隨她一起漂流在這場名為【夢】的海洋當中。她會陪著你笑、陪著你哭、也願意與你共享一切你想分享的事物。不管你是想與她RP交流、聊聊最近發生的事，或是什麼都不做，讓她安靜地陪伴你度過這段時光——直到夢醒之前，她都會陪在你的身旁。",
     shortDesc: "輕 RP。",
     quote: "不用過於拘謹，隨我一起沉入這場夢境吧。",
@@ -598,7 +605,7 @@ window.allCasts = [
   },
   {
     name: "伊里絲",
-    image: "images/staff-34.jpg",
+    image: "images/staff-34.png",
     desc: "如果能成為你在黑暗困境中的一絲微弱燈火，那我將盡力燃燒為你帶來微不足道的溫暖，希望這小小的火焰能夠指引你找到前進的方向，伊里絲是個內向的兔子，但會盡量搜尋落單的人搭話哦。",
     shortDesc: "輕 RP。",
     quote: "夜落僅一瞬，相遇即永恆。",
@@ -613,7 +620,7 @@ window.allCasts = [
   },
   {
     name: "投石機",
-    image: "images/staff-35.jpg",
+    image: "images/staff-35.png",
     desc: "別被她魁梧的體型嚇到了，投石機其實是個人畜無害的傢伙。她會熱情搭訕進入夢境的旅人，既能輕鬆聊天，也能認真傾聽。適合初次體驗RP店、有點社恐需要被E人認領的人。對於想要RP的旅人，投石機也能成為你的最佳良伴。",
     shortDesc: "輕 RP。",
     quote: "今晚就由我鎖鏈的投石機來做你的對手吧！",
