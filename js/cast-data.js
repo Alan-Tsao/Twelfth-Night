@@ -39,7 +39,7 @@ window.allCasts = [
   {
     name: "傑傑諾利",
     image: "images/staff-03.jpg",
-    personalImage: "images/staff-03-1.jpg",
+    personalImage: "images/staff-03.jpg",
     desc: "擅長以細膩而不急不徐的節奏陪您度過夜晚。無論是談話、留影，或是一段只獻給您的歌，都願為這場相遇留下值得珍藏的回憶。",
     shortDesc: "溫柔陪席、拍立得、獻唱錄音。",
     quote: "今晚的月色真美呢。",
