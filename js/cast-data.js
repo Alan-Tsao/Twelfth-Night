@@ -437,6 +437,7 @@ window.allCasts = [
   {
     name: "陪陪",
     image: "images/staff-24.png",
+    personalImage: "images/staff-24-1.png",
     desc: "總是以溫柔的距離陪在客人身旁，擅長談心交流與曖昧氛圍的鋪陳。無論是深夜裡想找人安放情緒，還是想留下一張帶有故事感的拍立得，她都能以細膩的節奏，陪您走進一場微醺而心動的夜。",
     shortDesc: "溫柔相談、輕 RP、曖昧攝影。",
     quote: "溫柔是我的習慣，心動是你的問題。",
