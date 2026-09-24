@@ -39,7 +39,7 @@ window.allCasts = [
   {
     name: "傑傑諾利",
     image: "images/staff-03.jpg",
-    personalImage: "images/staff-03.jpg",
+    personalImage: "images/staff-03-1.png",
     desc: "擅長以細膩而不急不徐的節奏陪您度過夜晚。無論是談話、留影，或是一段只獻給您的歌，都願為這場相遇留下值得珍藏的回憶。",
     shortDesc: "溫柔陪席、拍立得、獻唱錄音。",
     quote: "今晚的月色真美呢。",
@@ -72,6 +72,7 @@ window.allCasts = [
   {
     name: "阿希Axi",
     image: "images/staff-04.jpg",
+    personalImage: "images/staff-04-1.png",
     desc: "阿希 Axi 隨時都可能在喝酒……但他喝完酒後就是個陪聊與互動的天才，能在談笑和豪飲中替夜晚召來一點不可思議的歡愉。甚至在喝醉酒後，還會現場表演「假裝通靈」。若您想聽故事，或親眼見識〈海都麻醉師〉的獨特氣場，他會用帶點胡鬧且充滿個人氣息的節奏，陪您進入一場不太正經、卻絕對難忘的美夢。 ",
     shortDesc: "陪聊、通靈、特殊互動。",
     quote: "今晚獻給你，希望你能從中得到少許歡愉",
@@ -190,6 +191,7 @@ window.allCasts = [
   {
     name: "系塔",
     image: "images/staff-06.jpg",
+    personalImage: "images/staff-06-1.png",
     desc: "今晚醉人的不一定是酒，也可能是一段剛剛好的談話。系塔擅長用沉穩又帶點曖昧的節奏陪伴客人，適合想聊天、放鬆，或尋找夜色氛圍的人。",
     shortDesc: "成熟陪聊、談心交流、微醺氛圍。",
     quote: "今晚就沉醉在我的歌聲中吧?",
@@ -227,6 +229,7 @@ window.allCasts = [
   {
     name: "柔夜",
     image: "images/staff-10.jpg",
+    personalImage: "images/staff-10-1.png",
     desc: "她像夜裡輕輕落下的柔光，不急著靠近，卻讓人慢慢安心。擅長談心交流、輕 RP 與溫柔陪伴，願陪您在盛會中留下一場好夢。",
     shortDesc: "溫柔陪聊、輕 RP、談心交流。",
     quote: "希望您在盛會獲得一個美好的夢境。",
@@ -284,6 +287,7 @@ window.allCasts = [
   {
     name: "權順榮",
     image: "images/staff-13.jpg",
+    personalImage: "images/staff-13-1.png",
     desc: "認真時總是虎視眈眈，對喜歡的事充滿熱情、極度執著、也追求完美，熟了之後，卻比想像中來得更反差可愛。他可以陪你上山下海，也能和你聊天撒嬌。權順榮擅長把夜晚變成一場，觀眾僅有你一人的單獨公演。你，準備好揭開華麗簾幕了嗎？ ",
     shortDesc: "深沉迷宮、死宮、天宮。",
     quote: "大韓民國最後一隻老虎。",
@@ -316,6 +320,7 @@ window.allCasts = [
   {
     name: "夏末微涼",
     image: "images/staff-14.jpg",
+    personalImage: "images/staff-14-1.png",
     desc: "願今晚與夢一般香甜。夏末微涼擅長用溫柔的節奏陪伴客人，無論是談心、輕 RP，或只是安靜坐一會兒，都能讓夜色變得柔和。",
     shortDesc: "溫柔陪聊、輕 RP、談心交流。",
     quote: "願今晚與夢一般香甜",
@@ -343,6 +348,7 @@ window.allCasts = [
   {
     name: "山茶花",
     image: "images/staff-16.png",
+    personalImage: "images/staff-16-1.png",
     desc: "像一朵靜靜盛開在夜裡的山茶花，溫柔卻有自己的審美。擅長服裝穿搭、氣質調整與談心陪伴，讓每一套衣裝都成為今晚的另一種心情。",
     shortDesc: "穿搭、談心、活動主持。",
     quote: "你是我的月神嗎。",
@@ -370,6 +376,7 @@ window.allCasts = [
   {
     name: "怜奈",
     image: "images/staff-20.png",
+    personalImage: "images/staff-20-1.png",
     desc: "願你有一個甜美的夢境。怜奈擅長用柔和的話語與安靜的陪伴，讓疲憊的心情慢慢放鬆，適合想談心、陪坐，或享受溫柔氛圍的客人。",
     shortDesc: "溫柔陪聊、談心交流、夢境陪伴。",
     quote: "願你有一個甜美的夢境。",
@@ -510,6 +517,7 @@ window.allCasts = [
   {
     name: "夏遠星",
     image: "images/staff-28.jpg",
+    personalImage: "images/staff-28-1.png",
     desc: "夏遠星是 INTP-A，安靜的外表下藏著滿滿的好奇心。天馬行空的假設、生活小故事、朋友的有趣事蹟，什麼都能聊。腦洞一開，通常會從這題聊到宇宙，明明只是聊晚餐，卻能聊到「人類不用吃飯會怎樣」。",
     shortDesc: "輕 RP。",
     quote: "最好的夜晚，就是聊到忘記時間。",

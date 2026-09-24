@@ -16,6 +16,21 @@
   // bookableStatus 給系統判斷；statusLabel 給網頁顯示。
   const STAFF_STATUS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKYIls0ZbPLmj4e43Hpp82EDPS8FpOQvbG3N-LaNP5XgLVdV55ZMHclNwb_SgfdTI9XzkL19OFB2zP/pub?gid=1310958925&single=true&output=csv";
 
+  // 前台篩選按鈕「特殊服務」會涵蓋這些較少數、較細分的服務標籤。
+  // 不需要改 cast-data.js，保留各公關原本的 filterTags 即可。
+  const SPECIAL_SERVICE_FILTERS = ["ootd", "music", "dung", "bar", "fishing"];
+  const CARD_VISIBLE_TAG_COUNT = 3;
+
+  // 是否在公關卡片底部顯示「推薦服務」。
+  // false = 暫時隱藏；true = 有填 recommended 時才顯示。
+  const SHOW_RECOMMENDED_SERVICE = false;
+
+  // 是否開啟網頁預約入口。
+  // false = 隱藏公關卡片底部的「今日預約／查詢其他日期／詢問排班」，
+  //         也隱藏個人服務視窗裡的「前往預約／詢問排班」。
+  // true  = 恢復原本預約入口。
+  const BOOKING_ENABLED = false;
+
 
   let scheduleRows = [];
   let scheduleLoaded = false;
@@ -48,49 +63,6 @@
 
   function normalizeKey(value) {
     return String(value || "").trim().toLowerCase();
-  }
-
-  function parseCsv(text) {
-    const rows = [];
-    let row = [];
-    let cell = "";
-    let quote = false;
-
-    for (let i = 0; i < text.length; i += 1) {
-      const ch = text[i];
-      const next = text[i + 1];
-
-      if (ch === '"') {
-        if (quote && next === '"') {
-          cell += '"';
-          i += 1;
-        } else {
-          quote = !quote;
-        }
-        continue;
-      }
-
-      if (ch === "," && !quote) {
-        row.push(cell);
-        cell = "";
-        continue;
-      }
-
-      if ((ch === "\n" || ch === "\r") && !quote) {
-        if (ch === "\r" && next === "\n") i += 1;
-        row.push(cell);
-        if (row.some((item) => String(item).trim() !== "")) rows.push(row);
-        row = [];
-        cell = "";
-        continue;
-      }
-
-      cell += ch;
-    }
-
-    row.push(cell);
-    if (row.some((item) => String(item).trim() !== "")) rows.push(row);
-    return rows;
   }
 
   function normalizeScheduleRow(row) {
@@ -163,23 +135,15 @@
     }
 
     try {
-      const response = await fetch(STAFF_STATUS_CSV_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!window.TNSheet) throw new Error("TNSheet 尚未載入");
 
-      const text = await response.text();
-      const table = parseCsv(text);
-
-      if (table.length < 2) throw new Error("CSV 沒有資料列");
-
-      const headers = table[0].map(normalizeKey);
-      const rawRows = table.slice(1).map((cols) => {
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = cols[index] || "";
-        });
-        return obj;
+      const rawRows = await window.TNSheet.fetchCsvRows(STAFF_STATUS_CSV_URL, {
+        cacheKey: "staff-status",
+        ttlMs: 5 * 60 * 1000,
+        normalizeHeader: normalizeKey
       });
 
+      if (!rawRows.length) throw new Error("CSV 沒有資料列");
       const rows = rawRows.map(normalizeStaffStatusRow).filter(Boolean);
       staffStatusMap = new Map(rows.map((row) => [row.cast, row]));
       staffStatusLoaded = true;
@@ -199,23 +163,15 @@
     }
 
     try {
-      const response = await fetch(SCHEDULE_CSV_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!window.TNSheet) throw new Error("TNSheet 尚未載入");
 
-      const text = await response.text();
-      const table = parseCsv(text);
-
-      if (table.length < 2) throw new Error("CSV 沒有資料列");
-
-      const headers = table[0].map(normalizeKey);
-      const rawRows = table.slice(1).map((cols) => {
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = cols[index] || "";
-        });
-        return obj;
+      const rawRows = await window.TNSheet.fetchCsvRows(SCHEDULE_CSV_URL, {
+        cacheKey: "schedule",
+        ttlMs: 5 * 60 * 1000,
+        normalizeHeader: normalizeKey
       });
 
+      if (!rawRows.length) throw new Error("CSV 沒有資料列");
       scheduleRows = rawRows.map(normalizeScheduleRow).filter(Boolean);
       scheduleLoaded = true;
       scheduleError = false;
@@ -302,6 +258,8 @@
   }
 
   function buttonHtml(cast) {
+    if (!BOOKING_ENABLED) return "";
+
     const todayRow = getTodaySchedule(cast.name);
     const bookingUrl = `booking.html?cast=${encodeURIComponent(cast.name)}`;
     const inquiryUrl = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
@@ -337,6 +295,12 @@
     return String(rawPath).replace(/^\.\//, "").replace(/^\//, "");
   }
 
+  function personalImagePath(cast) {
+    const rawPath = cast.personalImage || cast.image || cast.photo || "";
+    if (!rawPath) return "";
+    return String(rawPath).replace(/^\.\//, "").replace(/^\//, "");
+  }
+
   function extraServicesText(cast) {
     if (!Array.isArray(cast.extraServices) || !cast.extraServices.length) return "";
     return cast.extraServices.join("、");
@@ -349,6 +313,37 @@
   function personalMenuButtonHtml(cast) {
     if (!hasPersonalMenu(cast)) return "";
     return `<button type="button" class="btn personal-menu-btn" data-personal-menu="${escapeHtml(cast.name)}">個人服務</button>`;
+  }
+
+  function tagRowHtml(cast) {
+    const tags = Array.isArray(cast.tags) ? cast.tags.filter(Boolean) : [];
+    if (!tags.length) return "";
+
+    const visibleTags = tags.slice(0, CARD_VISIBLE_TAG_COUNT);
+    const hiddenTags = tags.slice(CARD_VISIBLE_TAG_COUNT);
+
+    const visibleHtml = visibleTags
+      .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
+      .join("");
+
+    if (!hiddenTags.length) return visibleHtml;
+
+    const hiddenHtml = hiddenTags
+      .map((tag) => `<span class="tag tag-hidden">${escapeHtml(tag)}</span>`)
+      .join("");
+
+    return `
+      ${visibleHtml}
+      ${hiddenHtml}
+      <button type="button"
+        class="tag tag-more"
+        data-tag-toggle
+        data-more-label="+${hiddenTags.length}"
+        data-less-label="收合"
+        aria-expanded="false">
+        +${hiddenTags.length}
+      </button>
+    `;
   }
 
   function menuItemHtml(item) {
@@ -377,7 +372,7 @@
           <button type="button" class="personal-menu-close" data-personal-menu-close aria-label="關閉個人服務視窗">×</button>
 
           <div class="personal-menu-photo-wrap">
-            <img class="personal-menu-photo" id="personalMenuPhoto" alt="" />
+            <img class="personal-menu-photo" id="personalMenuPhoto" width="900" height="1600" decoding="async" alt="" />
           </div>
 
           <div class="personal-menu-content">
@@ -387,7 +382,6 @@
             <p class="personal-menu-desc" id="personalMenuDesc"></p>
             <div class="personal-menu-list" id="personalMenuList"></div>
             <div class="personal-menu-actions">
-              <button type="button" class="btn" data-personal-menu-close>關閉</button>
               <a class="btn primary" id="personalMenuBookingLink" href="booking.html">前往預約</a>
             </div>
           </div>
@@ -422,10 +416,18 @@
     const list = modal.querySelector("#personalMenuList");
     const bookingLink = modal.querySelector("#personalMenuBookingLink");
 
-    const img = imagePath(cast);
+    const img = personalImagePath(cast);
+    const fallbackImg = imagePath(cast);
     photo.src = img;
-    photo.alt = `${cast.name} 的公關照片`;
+    photo.alt = `${cast.name} 的個人服務照片`;
     photo.onerror = () => {
+      // 若 personalImage 路徑錯誤或尚未上傳，自動退回公關頁主照片。
+      if (img && fallbackImg && img !== fallbackImg && photo.src !== new URL(fallbackImg, document.baseURI).href) {
+        photo.src = fallbackImg;
+        photo.alt = `${cast.name} 的公關照片`;
+        return;
+      }
+
       photo.removeAttribute("src");
       photo.alt = `${cast.name} 的照片尚未載入`;
     };
@@ -435,18 +437,24 @@
     desc.textContent = cast.staffStatusNote || cast.shortDesc || cast.desc || "可於預約或詢問時與接待確認服務內容。";
     list.innerHTML = cast.personalMenu.map(menuItemHtml).join("");
 
-    if (cast.status === "unbookable" || cast.status === "rest") {
-      bookingLink.textContent = "返回介紹";
-      bookingLink.href = "cast.html";
-      bookingLink.classList.remove("primary");
-    } else if (cast.status === "pending") {
-      bookingLink.textContent = "詢問排班";
-      bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
-      bookingLink.classList.add("primary");
-    } else {
-      bookingLink.textContent = "前往預約";
-      bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}`;
-      bookingLink.classList.add("primary");
+    if (bookingLink) {
+      bookingLink.style.display = BOOKING_ENABLED ? "" : "none";
+    }
+
+    if (BOOKING_ENABLED && bookingLink) {
+      if (cast.status === "unbookable" || cast.status === "rest") {
+        bookingLink.textContent = "返回介紹";
+        bookingLink.href = "cast.html";
+        bookingLink.classList.remove("primary");
+      } else if (cast.status === "pending") {
+        bookingLink.textContent = "詢問排班";
+        bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}&mode=inquiry`;
+        bookingLink.classList.add("primary");
+      } else {
+        bookingLink.textContent = "前往預約";
+        bookingLink.href = `booking.html?cast=${encodeURIComponent(cast.name)}`;
+        bookingLink.classList.add("primary");
+      }
     }
 
     modal.classList.add("show");
@@ -458,6 +466,16 @@
     ensurePersonalMenuModal();
 
     document.addEventListener("click", (event) => {
+      const tagToggle = event.target.closest("[data-tag-toggle]");
+      if (tagToggle) {
+        event.preventDefault();
+        const tagRow = tagToggle.closest(".tag-row");
+        const expanded = tagRow?.classList.toggle("expanded");
+        tagToggle.setAttribute("aria-expanded", String(Boolean(expanded)));
+        tagToggle.textContent = expanded ? tagToggle.dataset.lessLabel : tagToggle.dataset.moreLabel;
+        return;
+      }
+
       const openButton = event.target.closest("[data-personal-menu]");
       if (openButton) {
         event.preventDefault();
@@ -498,9 +516,7 @@
         ].join(" ");
 
         const img = imagePath(cast);
-        const tagsHtml = (cast.tags || [])
-          .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
-          .join("");
+        const tagsHtml = tagRowHtml(cast);
 
         return `
           <article class="card cast-card-profile"
@@ -515,7 +531,10 @@
                 class="cast-photo"
                 src="${escapeHtml(img)}"
                 alt="${escapeHtml(cast.name)} 的公關照片"
+                width="900"
+                height="1600"
                 loading="lazy"
+                decoding="async"
               />
               <div class="cast-photo-fallback">
                 <span>${escapeHtml(cast.name)}</span>
@@ -537,9 +556,8 @@
 
               <div class="meta">
                 <div><strong>常駐時段：</strong>${escapeHtml(days(cast.workDays))}</div>
-                ${cast.role ? `<div><strong>身份：</strong>${escapeHtml(cast.role)}</div>` : ""}
-                <div><strong>推薦服務：</strong>${escapeHtml(cast.recommended || "未設定")}</div>
-                ${extraServicesText(cast) ? `<div><strong>個人加購：</strong>${escapeHtml(extraServicesText(cast))}</div>` : ""}
+                ${cast.role ? `<div><strong>身份：</strong>${escapeHtml(cast.role)}</div>` : ""} 
+                ${SHOW_RECOMMENDED_SERVICE && cast.recommended ? `<div><strong>推薦服務：</strong>${escapeHtml(cast.recommended)}</div>` : ""}
               </div>
 
               <div class="cta-row" data-cast-actions>${buttonHtml(cast)}${personalMenuButtonHtml(cast)}</div>
@@ -597,9 +615,15 @@
     let count = 0;
 
     document.querySelectorAll(".cast-card-profile").forEach((card) => {
+      const tagText = normalize(card.dataset.tags);
+      const matchesSpecialService =
+        filterValue === "special" &&
+        SPECIAL_SERVICE_FILTERS.some((tag) => tagText.split(/\s+/).includes(tag));
+
       const matchesFilter =
         filterValue === "all" ||
-        normalize(card.dataset.tags).includes(filterValue) ||
+        matchesSpecialService ||
+        tagText.split(/\s+/).includes(filterValue) ||
         normalize(card.dataset.status) === filterValue ||
         normalize(card.dataset.today) === filterValue;
 

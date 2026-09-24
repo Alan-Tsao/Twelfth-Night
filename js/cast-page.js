@@ -401,6 +401,7 @@
           <button type="button" class="personal-menu-close" data-personal-menu-close aria-label="關閉個人服務視窗">×</button>
 
           <div class="personal-menu-photo-wrap">
+            <img class="personal-menu-photo-bg" id="personalMenuPhotoBg" decoding="async" alt="" aria-hidden="true" />
             <img class="personal-menu-photo" id="personalMenuPhoto" width="900" height="1600" decoding="async" alt="" />
           </div>
 
@@ -439,6 +440,7 @@
 
     const modal = ensurePersonalMenuModal();
     const photo = modal.querySelector("#personalMenuPhoto");
+    const photoBg = modal.querySelector("#personalMenuPhotoBg");
     const title = modal.querySelector("#personalMenuTitle");
     const subtitle = modal.querySelector("#personalMenuSubtitle");
     const desc = modal.querySelector("#personalMenuDesc");
@@ -447,19 +449,38 @@
 
     const img = personalImagePath(cast);
     const fallbackImg = imagePath(cast);
-    photo.src = img;
+
+    const setPersonalMenuImages = (path) => {
+      if (path) {
+        photo.src = path;
+        if (photoBg) photoBg.src = path;
+      } else {
+        photo.removeAttribute("src");
+        if (photoBg) photoBg.removeAttribute("src");
+      }
+    };
+
+    setPersonalMenuImages(img);
     photo.alt = `${cast.name} 的個人服務照片`;
+
     photo.onerror = () => {
-      // 若 personalImage 路徑錯誤或尚未上傳，自動退回公關頁主照片。
+      // 若 personalImage 路徑錯誤或尚未上傳，前景與模糊背景一起退回公關頁主照片。
       if (img && fallbackImg && img !== fallbackImg && photo.src !== new URL(fallbackImg, document.baseURI).href) {
-        photo.src = fallbackImg;
+        setPersonalMenuImages(fallbackImg);
         photo.alt = `${cast.name} 的公關照片`;
         return;
       }
 
-      photo.removeAttribute("src");
+      setPersonalMenuImages("");
       photo.alt = `${cast.name} 的照片尚未載入`;
     };
+
+    if (photoBg) {
+      photoBg.onerror = () => {
+        // 背景圖失敗不影響前景人物；直接隱藏背景層。
+        photoBg.removeAttribute("src");
+      };
+    }
 
     title.textContent = `${cast.name}｜個人服務`;
     subtitle.textContent = [cast.statusLabel, cast.role].filter(Boolean).join("｜");
