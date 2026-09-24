@@ -14,6 +14,10 @@
   align-self: stretch;
 }
 
+.personal-menu-photo-bg {
+  display: none;
+}
+
 .personal-menu-photo {
   height: 100%;
   min-height: 0;
@@ -48,25 +52,85 @@
 }
 
 @media (max-width: 760px) {
+  /*
+    手機版改成「上方照片 + 下方獨立捲動內容」。
+    照片使用 contain，不再以 cover 強制裁切人物。
+    image 與 personalImage 都會進入同一個 .personal-menu-photo，
+    因此會套用完全相同的 RWD 規則。
+  */
   .personal-menu-dialog {
-    height: auto;
-    max-height: 90vh;
+    height: min(94dvh, 900px);
+    max-height: calc(100dvh - 16px);
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .personal-menu-photo-wrap {
-    height: auto;
+    height: clamp(190px, 30dvh, 260px);
+    min-height: 0;
+    overflow: hidden;
+    align-self: auto;
+    position: relative;
+    isolation: isolate;
+    background: #0f0d16;
+  }
+
+  .personal-menu-photo-bg {
+    display: block;
+    position: absolute;
+    inset: -20px;
+    z-index: 0;
+    width: calc(100% + 40px);
+    height: calc(100% + 40px);
+    object-fit: cover;
+    object-position: center;
+    filter: blur(18px) saturate(0.92) brightness(0.62);
+    transform: scale(1.06);
+    opacity: 0.92;
+    pointer-events: none;
+  }
+
+  .personal-menu-photo-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(circle at 22% 42%, rgba(242, 167, 198, 0.12), transparent 40%),
+      radial-gradient(circle at 78% 38%, rgba(155, 135, 245, 0.12), transparent 42%),
+      linear-gradient(180deg, rgba(8, 7, 13, 0.05), rgba(8, 7, 13, 0.22));
+    pointer-events: none;
   }
 
   .personal-menu-photo {
-    min-height: 220px;
-    max-height: 300px;
-    height: 30vh;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    position: relative;
+    z-index: 2;
+    object-fit: contain;
+    object-position: center top;
+    background: transparent;
   }
 
   .personal-menu-content {
+    min-height: 0;
     height: auto;
-    max-height: calc(90vh - 220px);
+    max-height: none;
     overflow-y: auto;
-    padding-right: 24px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 22px 18px calc(26px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 760px) and (max-height: 560px) {
+  .personal-menu-dialog {
+    height: calc(100dvh - 8px);
+    max-height: calc(100dvh - 8px);
+  }
+
+  .personal-menu-photo-wrap {
+    height: 140px;
   }
 }
