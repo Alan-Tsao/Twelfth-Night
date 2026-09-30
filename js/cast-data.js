@@ -516,7 +516,7 @@ window.allCasts = [
   },
   {
     name: "夏遠星",
-    image: "images/staff-28.jpg",
+    image: "images/staff-28.png",
     personalImage: "images/staff-28-1.png",
     desc: "夏遠星是 INTP-A，安靜的外表下藏著滿滿的好奇心。天馬行空的假設、生活小故事、朋友的有趣事蹟，什麼都能聊。腦洞一開，通常會從這題聊到宇宙，明明只是聊晚餐，卻能聊到「人類不用吃飯會怎樣」。",
     shortDesc: "輕 RP。",
