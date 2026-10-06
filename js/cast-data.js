@@ -7,21 +7,6 @@ window.FEATURE_CONFIG = { mode: "daily", count: 3 };
 
 window.allCasts = [
   {
-    name: "貪圖",
-    image: "images/staff-01.jpg",
-    desc: "第十二夜的店長，掌管夢境入口與今夜的燈火。擅長以溫柔而帶有儀式感的節奏，引導客人沉入會館氛圍；雖不接受一般指名，仍會在特別的夜晚，以香檳 CALL 與輕 RP 為夢境添上一筆華麗的光。",
-    shortDesc: "夢境店長、香檳 CALL、輕 RP。",
-    quote: "我與你的距離，只有一場夢。",
-    tags: ["店長","輕 RP","香檳CALL"],
-    filterTags: ["chat", "rp", "champagne","bar"],
-    status: "unbookable",
-    statusLabel: "不接受指名",
-    role: "店長",
-    workDays: [5, 6],
-    recommended: "",
-    extraServices: [],
-  },
-  {
     name: "咕嚕小貓",
     image: "images/staff-02.png",
     desc: "像午夜裡露出尾巴的小惡魔，咕嚕小貓帶著一點調皮、一點誘惑，也帶著讓人放鬆下來的陪伴感。適合輕中 RP、陪聊互動，以及喜歡曖昧夜色氛圍的客人。",
