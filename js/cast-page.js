@@ -406,10 +406,11 @@
           </div>
 
           <div class="personal-menu-content">
-            <div class="eyebrow">PERSONAL SERVICE</div>
-            <h2 id="personalMenuTitle">個人服務</h2>
+                        <h2 id="personalMenuTitle">個人服務</h2>
             <div class="personal-menu-subtitle" id="personalMenuSubtitle"></div>
+            <p class="personal-menu-quote" id="personalMenuQuote" hidden></p>
             <p class="personal-menu-desc" id="personalMenuDesc"></p>
+            <div class="personal-menu-meta" id="personalMenuMeta"></div>
             <div class="personal-menu-list" id="personalMenuList"></div>
             <div class="personal-menu-actions">
               <a class="btn primary" id="personalMenuBookingLink" href="booking.html">前往預約</a>
@@ -436,7 +437,7 @@
     const baseCast = (window.allCasts || []).find((item) => String(item.name || "").trim() === String(castName || "").trim());
     const cast = applyStaffStatus(baseCast);
 
-    if (!cast || !hasPersonalMenu(cast)) return;
+    if (!cast) return;
 
     const modal = ensurePersonalMenuModal();
     const photo = modal.querySelector("#personalMenuPhoto");
@@ -482,10 +483,27 @@
       };
     }
 
-    title.textContent = `${cast.name}｜個人服務`;
+    title.textContent = cast.name;
     subtitle.textContent = [cast.statusLabel, cast.role].filter(Boolean).join("｜");
-    desc.textContent = cast.staffStatusNote || cast.shortDesc || cast.desc || "可於預約或詢問時與接待確認服務內容。";
-    list.innerHTML = cast.personalMenu.map(menuItemHtml).join("");
+    desc.textContent = cast.desc || cast.shortDesc || "可於預約或詢問時與接待確認服務內容。";
+
+    const quoteEl = modal.querySelector("#personalMenuQuote");
+    if (quoteEl) {
+      quoteEl.textContent = cast.quote ? `「${cast.quote}」` : "";
+      quoteEl.hidden = !cast.quote;
+    }
+    list.innerHTML = hasPersonalMenu(cast)
+      ? `<h3 class="personal-menu-list-title">個人服務</h3>` + cast.personalMenu.map(menuItemHtml).join("")
+      : "";
+
+    const meta = modal.querySelector("#personalMenuMeta");
+    if (meta) {
+      const tagList = Array.isArray(cast.tags) ? cast.tags.filter(Boolean) : [];
+      meta.innerHTML =
+        (cast.staffStatusNote ? `<div><strong>備註</strong>${escapeHtml(cast.staffStatusNote)}</div>` : "") +
+        `<div><strong>常駐時段</strong>${escapeHtml(days(cast.workDays))}</div>` +
+        (tagList.length ? `<div class="tag-row">${tagList.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>` : "");
+    }
 
     if (bookingLink) {
       bookingLink.style.display = BOOKING_ENABLED ? "" : "none";
@@ -533,6 +551,13 @@
         return;
       }
 
+      const profileCard = event.target.closest(".cast-card-profile");
+      if (profileCard && !event.target.closest("a")) {
+        event.preventDefault();
+        openPersonalMenu(profileCard.dataset.castName);
+        return;
+      }
+
       if (event.target.matches("[data-personal-menu-close]") || event.target.id === "personalMenuModal") {
         event.preventDefault();
         closePersonalMenu();
@@ -541,6 +566,10 @@
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closePersonalMenu();
+      if ((event.key === "Enter" || event.key === " ") && event.target.classList?.contains("cast-card-profile")) {
+        event.preventDefault();
+        openPersonalMenu(event.target.dataset.castName);
+      }
     });
   }
 
@@ -548,7 +577,7 @@
     const grid = document.getElementById("castGrid");
     if (!grid) return;
 
-    grid.innerHTML = getSortedCasts()
+    grid.innerHTML = `<h2 class="cast-group-title" data-group="on" hidden>今晚出勤 <small></small></h2><h2 class="cast-group-title" data-group="off" hidden>其他公關 <small></small></h2>` + getSortedCasts()
       .map((cast) => {
         const keywordText = [
           cast.name,
@@ -568,10 +597,12 @@
         const tagsHtml = tagRowHtml(cast);
 
         return `
-          <article class="card cast-card-profile"
+          <article class="card cast-card-profile" tabindex="0" role="button"
+            aria-label="${escapeHtml(cast.name)} 的介紹"
             data-cast-name="${escapeHtml(cast.name)}"
             data-status="${escapeHtml(cast.status)}"
             data-tags="${escapeHtml((cast.filterTags || []).join(" "))}"
+            data-has-personal="${hasPersonalMenu(cast) ? "1" : ""}"
             data-today=""
             data-keywords="${escapeHtml(keywordText)}">
 
@@ -594,20 +625,12 @@
             <div class="cast-body">
               <div class="cast-name-row">
                 <h2>${escapeHtml(cast.name)}</h2>
-                <span class="status ${statusClass(cast)}">${escapeHtml(cast.statusLabel)}</span>
+                ${cast.role ? `<span class="cast-role">${escapeHtml(cast.role)}</span>` : ""}
+                  <span class="status ${statusClass(cast)}">${escapeHtml(cast.statusLabel)}</span>
               </div>
 
               <div class="today-line" data-today-line>${escapeHtml(todayTextFromSchedule(cast.name))}</div>
-              <p>「${escapeHtml(cast.quote || "")}」</p>
-              <p class="featured-note">${escapeHtml(cast.desc || "")}</p>
-
-              <div class="tag-row">${tagsHtml}</div>
-
-              <div class="meta">
-                <div><strong>常駐時段：</strong>${escapeHtml(days(cast.workDays))}</div>
-                ${cast.role ? `<div><strong>身份：</strong>${escapeHtml(cast.role)}</div>` : ""} 
-                ${SHOW_RECOMMENDED_SERVICE && cast.recommended ? `<div><strong>推薦服務：</strong>${escapeHtml(cast.recommended)}</div>` : ""}
-              </div>
+              <p class="cast-quote">「${escapeHtml(cast.quote || "")}」</p>
 
               <div class="cta-row" data-cast-actions>${buttonHtml(cast)}${personalMenuButtonHtml(cast)}</div>
             </div>
@@ -658,38 +681,48 @@
   }
 
   function filter() {
-    const activeButton = document.querySelector(".filter-btn.active");
-    const filterValue = activeButton?.dataset.filter || "all";
+    const active = Array.from(document.querySelectorAll(".filter-btn[aria-pressed='true']")).map((b) => b.dataset.filter);
     const keyword = normalize(document.getElementById("castSearch")?.value || "");
-    let count = 0;
+    let onCount = 0;
+    let offCount = 0;
 
     document.querySelectorAll(".cast-card-profile").forEach((card) => {
-      const tagText = normalize(card.dataset.tags);
-      const matchesSpecialService =
-        filterValue === "special" &&
-        SPECIAL_SERVICE_FILTERS.some((tag) => tagText.split(/\s+/).includes(tag));
-
-      const matchesFilter =
-        filterValue === "all" ||
-        matchesSpecialService ||
-        tagText.split(/\s+/).includes(filterValue) ||
-        normalize(card.dataset.status) === filterValue ||
-        normalize(card.dataset.today) === filterValue;
-
+      const tags = normalize(card.dataset.tags).split(/\s+/);
+      const matchesFilter = active.every((f) => {
+        if (f === "available") return normalize(card.dataset.status) === "available";
+        if (f === "personal") return card.dataset.hasPersonal === "1";
+        return tags.includes(f);
+      });
       const matchesKeyword = keyword === "" || normalize(card.dataset.keywords).includes(keyword);
-      const shouldShow = matchesFilter && matchesKeyword;
+      const show = matchesFilter && matchesKeyword;
 
-      card.style.display = shouldShow ? "block" : "none";
-      if (shouldShow) count += 1;
+      card.style.display = show ? "" : "none";
+      if (show) {
+        if (card.dataset.today === "today") onCount += 1;
+        else offCount += 1;
+      }
     });
 
-    document.getElementById("emptyState")?.classList.toggle("show", count === 0);
+    const onTitle = document.querySelector('.cast-group-title[data-group="on"]');
+    const offTitle = document.querySelector('.cast-group-title[data-group="off"]');
+    if (onTitle) {
+      onTitle.hidden = onCount === 0;
+      onTitle.querySelector("small").textContent = `${onCount} 位`;
+    }
+    if (offTitle) {
+      offTitle.hidden = offCount === 0;
+      offTitle.firstChild.textContent = onCount === 0 ? "公關名單 " : "其他公關 ";
+      offTitle.querySelector("small").textContent = `${offCount} 位`;
+    }
+
+    document.getElementById("emptyState")?.classList.toggle("show", onCount + offCount === 0);
   }
 
   document.querySelectorAll(".filter-btn").forEach((button) => {
     button.addEventListener("click", () => {
-      document.querySelectorAll(".filter-btn").forEach((item) => item.classList.remove("active"));
-      button.classList.add("active");
+      const pressed = button.getAttribute("aria-pressed") !== "true";
+      button.setAttribute("aria-pressed", String(pressed));
+      button.classList.toggle("active", pressed);
       filter();
     });
   });
