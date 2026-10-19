@@ -632,7 +632,7 @@ window.allCasts = [
     image: "images/staff-36.png",
     desc: "",
     shortDesc: "輕 RP。",
-    quote: "請好好享受今晚的夢境，放鬆自在沉浸夢境當中。",
+    quote: "",
     tags: ["輕RP","談心交流",],
     filterTags: ["chat","rp","personal"],
     status: "available",
